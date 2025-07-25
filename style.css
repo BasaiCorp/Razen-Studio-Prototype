@@ -130,6 +130,8 @@ main {
     background-color: transparent;
     caret-color: var(--text-primary);
     z-index: 1;
+    white-space: pre;
+    overflow: auto;
 }
 
 #highlighting {
@@ -143,9 +145,9 @@ main {
     font-family: 'JetBrains Mono', monospace;
     font-size: 14px;
     line-height: 1.5;
-    overflow: hidden;
-    white-space: pre-wrap;
-    word-wrap: break-word;
+    overflow: auto;
+    white-space: pre;
+    word-wrap: normal;
     z-index: 0;
 }
 
