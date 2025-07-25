@@ -3,14 +3,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const codeEditor = document.getElementById('code-editor');
     const lineNumbers = document.getElementById('line-numbers');
+    const highlighting = document.getElementById('highlighting');
+    const highlightingContent = document.getElementById('highlighting-content');
     const copyBtn = document.getElementById('copy-btn');
     const themeToggle = document.getElementById('theme-toggle');
     const cursorPosition = document.getElementById('cursor-position');
     const autocompleteSuggestions = document.getElementById('autocomplete-suggestions');
+    const tabBtn = document.getElementById('tab-btn');
+    const undoBtn = document.getElementById('undo-btn');
+    const redoBtn = document.getElementById('redo-btn');
+    const bracketBtn = document.getElementById('bracket-btn');
+    const searchBtn = document.getElementById('search-btn');
     
     // State
     let currentTheme = 'dark';
     let autocompleteData = [];
+    let undoStack = [];
+    let redoStack = [];
     
     // Load keywords and autocomplete data
     loadLanguageData();
@@ -20,13 +29,19 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCursorPosition();
     
     // Event Listeners
-    codeEditor.addEventListener('input', () => {
+    codeEditor.addEventListener('input', (e) => {
+        if (e.inputType !== 'historyUndo' && e.inputType !== 'historyRedo') {
+            undoStack.push(codeEditor.value);
+            redoStack = [];
+        }
         updateLineNumbers();
         highlightSyntax();
     });
     
     codeEditor.addEventListener('scroll', () => {
         lineNumbers.scrollTop = codeEditor.scrollTop;
+        highlighting.scrollTop = codeEditor.scrollTop;
+        highlighting.scrollLeft = codeEditor.scrollLeft;
     });
     
     codeEditor.addEventListener('keydown', handleKeyDown);
@@ -39,6 +54,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     copyBtn.addEventListener('click', copyCode);
     themeToggle.addEventListener('click', toggleTheme);
+    tabBtn.addEventListener('click', () => handleKeyDown({ key: 'Tab', preventDefault: () => {} }));
+    undoBtn.addEventListener('click', undo);
+    redoBtn.addEventListener('click', redo);
+    bracketBtn.addEventListener('click', insertBrackets);
+    searchBtn.addEventListener('click', search);
     
     // Autocomplete navigation
     document.addEventListener('keydown', (e) => {
@@ -81,13 +101,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function highlightSyntax() {
-        // This is a simplified syntax highlighter
-        // In a real implementation, you would parse the code and apply classes
-        // For now, we'll just simulate it with a timeout to show the concept
-        setTimeout(() => {
-            // This would normally be done with a proper tokenizer
-            // For demo purposes, we'll just show that it's working
-        }, 0);
+        const code = codeEditor.value;
+        highlightingContent.innerHTML = code.replace(/&/g, "&amp;").replace(/</g, "&lt;") + '\n';
+        Prism.highlightElement(highlightingContent);
     }
     
     function copyCode() {
@@ -274,5 +290,52 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         document.body.removeChild(div);
         return coordinates;
+    }
+
+    function undo() {
+        if (undoStack.length > 1) {
+            redoStack.push(undoStack.pop());
+            codeEditor.value = undoStack[undoStack.length - 1];
+            updateLineNumbers();
+            highlightSyntax();
+        }
+    }
+
+    function redo() {
+        if (redoStack.length > 0) {
+            undoStack.push(redoStack.pop());
+            codeEditor.value = undoStack[undoStack.length - 1];
+            updateLineNumbers();
+            highlightSyntax();
+        }
+    }
+
+    function insertBrackets() {
+        const start = codeEditor.selectionStart;
+        const end = codeEditor.selectionEnd;
+        const text = codeEditor.value;
+        const selectedText = text.substring(start, end);
+        const newText = text.substring(0, start) + '{' + selectedText + '}' + text.substring(end);
+        codeEditor.value = newText;
+        codeEditor.selectionStart = start + 1;
+        codeEditor.selectionEnd = end + 1;
+        updateLineNumbers();
+        highlightSyntax();
+        codeEditor.focus();
+    }
+
+    function search() {
+        const searchTerm = prompt('Enter search term:');
+        if (searchTerm) {
+            const text = codeEditor.value;
+            const index = text.indexOf(searchTerm);
+            if (index !== -1) {
+                codeEditor.selectionStart = index;
+                codeEditor.selectionEnd = index + searchTerm.length;
+                codeEditor.focus();
+            } else {
+                alert('Term not found');
+            }
+        }
     }
 });

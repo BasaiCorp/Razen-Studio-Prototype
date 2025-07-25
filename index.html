@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Razen Studio</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="prism.css">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Work+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -22,10 +23,18 @@
             <div class="editor-container">
                 <div class="line-numbers" id="line-numbers">1</div>
                 <textarea id="code-editor" spellcheck="false" placeholder="Start coding in Razen Lang..."></textarea>
+                <pre id="highlighting" aria-hidden="true"><code class="language-js" id="highlighting-content"></code></pre>
                 <div class="autocomplete-suggestions" id="autocomplete-suggestions"></div>
             </div>
         </main>
         
+        <div class="toolbar">
+            <button id="tab-btn" class="btn"><i class="fas fa-indent"></i> Tab</button>
+            <button id="undo-btn" class="btn"><i class="fas fa-undo"></i> Undo</button>
+            <button id="redo-btn" class="btn"><i class="fas fa-redo"></i> Redo</button>
+            <button id="bracket-btn" class="btn"><i class="fas fa-code"></i> {}</button>
+            <button id="search-btn" class="btn"><i class="fas fa-search"></i> Search</button>
+        </div>
         <footer>
             <div class="status-bar">
                 <span id="cursor-position">Line 1, Column 1</span>
@@ -34,6 +43,7 @@
         </footer>
     </div>
 
+    <script src="prism.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
