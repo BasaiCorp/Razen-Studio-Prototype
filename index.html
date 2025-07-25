@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Razen Studio</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Work+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-code"></i> Razen Studio</h1>
+            <div class="controls">
+                <button id="copy-btn" class="btn"><i class="fas fa-copy"></i> Copy</button>
+                <button id="theme-toggle" class="btn"><i class="fas fa-moon"></i> Dark</button>
+            </div>
+        </header>
+        
+        <main>
+            <div class="editor-container">
+                <div class="line-numbers" id="line-numbers">1</div>
+                <textarea id="code-editor" spellcheck="false" placeholder="Start coding in Razen Lang..."></textarea>
+                <div class="autocomplete-suggestions" id="autocomplete-suggestions"></div>
+            </div>
+        </main>
+        
+        <footer>
+            <div class="status-bar">
+                <span id="cursor-position">Line 1, Column 1</span>
+                <span id="language-indicator">Razen Lang</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

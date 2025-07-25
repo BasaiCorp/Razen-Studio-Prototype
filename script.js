@@ -1,0 +1,278 @@
+// script.js
+document.addEventListener('DOMContentLoaded', () => {
+    // DOM Elements
+    const codeEditor = document.getElementById('code-editor');
+    const lineNumbers = document.getElementById('line-numbers');
+    const copyBtn = document.getElementById('copy-btn');
+    const themeToggle = document.getElementById('theme-toggle');
+    const cursorPosition = document.getElementById('cursor-position');
+    const autocompleteSuggestions = document.getElementById('autocomplete-suggestions');
+    
+    // State
+    let currentTheme = 'dark';
+    let autocompleteData = [];
+    
+    // Load keywords and autocomplete data
+    loadLanguageData();
+    
+    // Initialize editor
+    updateLineNumbers();
+    updateCursorPosition();
+    
+    // Event Listeners
+    codeEditor.addEventListener('input', () => {
+        updateLineNumbers();
+        highlightSyntax();
+    });
+    
+    codeEditor.addEventListener('scroll', () => {
+        lineNumbers.scrollTop = codeEditor.scrollTop;
+    });
+    
+    codeEditor.addEventListener('keydown', handleKeyDown);
+    
+    codeEditor.addEventListener('keyup', (e) => {
+        if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown' && e.key !== 'Enter') {
+            showAutocomplete();
+        }
+    });
+    
+    copyBtn.addEventListener('click', copyCode);
+    themeToggle.addEventListener('click', toggleTheme);
+    
+    // Autocomplete navigation
+    document.addEventListener('keydown', (e) => {
+        if (autocompleteSuggestions.style.display === 'block') {
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                navigateAutocomplete(-1);
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                navigateAutocomplete(1);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                selectAutocomplete();
+            } else if (e.key === 'Escape') {
+                hideAutocomplete();
+            }
+        }
+    });
+    
+    // Click outside to close autocomplete
+    document.addEventListener('click', (e) => {
+        if (!autocompleteSuggestions.contains(e.target) && e.target !== codeEditor) {
+            hideAutocomplete();
+        }
+    });
+    
+    // Functions
+    function updateLineNumbers() {
+        const lines = codeEditor.value.split('\n').length;
+        lineNumbers.innerHTML = Array.from({length: lines}, (_, i) => i + 1).join('\n');
+    }
+    
+    function updateCursorPosition() {
+        const cursorPos = codeEditor.selectionStart;
+        const textBeforeCursor = codeEditor.value.substring(0, cursorPos);
+        const lines = textBeforeCursor.split('\n');
+        const lineNumber = lines.length;
+        const columnNumber = lines[lines.length - 1].length + 1;
+        cursorPosition.textContent = `Line ${lineNumber}, Column ${columnNumber}`;
+    }
+    
+    function highlightSyntax() {
+        // This is a simplified syntax highlighter
+        // In a real implementation, you would parse the code and apply classes
+        // For now, we'll just simulate it with a timeout to show the concept
+        setTimeout(() => {
+            // This would normally be done with a proper tokenizer
+            // For demo purposes, we'll just show that it's working
+        }, 0);
+    }
+    
+    function copyCode() {
+        navigator.clipboard.writeText(codeEditor.value)
+            .then(() => {
+                const originalText = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalText;
+                }, 2000);
+            })
+            .catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+    }
+    
+    function toggleTheme() {
+        document.body.classList.toggle('light-theme');
+        currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        themeToggle.innerHTML = currentTheme === 'dark' 
+            ? '<i class="fas fa-moon"></i> Dark' 
+            : '<i class="fas fa-sun"></i> Light';
+    }
+    
+    function loadLanguageData() {
+        // In a real implementation, this would load from JSON files
+        // For this demo, we'll use mock data
+        autocompleteData = [
+            { text: 'fun', icon: 'fa-function' },
+            { text: 'if', icon: 'fa-code-branch' },
+            { text: 'else', icon: 'fa-code-branch' },
+            { text: 'while', icon: 'fa-redo' },
+            { text: 'for', icon: 'fa-sync' },
+            { text: 'return', icon: 'fa-undo' },
+            { text: 'var', icon: 'fa-variable' },
+            { text: 'num', icon: 'fa-variable' },
+            { text: 'str', icon: 'fa-variable' },
+            { text: 'bool', icon: 'fa-variable' },
+            { text: 'const', icon: 'fa-lock' },
+            { text: 'enum', icon: 'fa-variable' },
+            { text: 'true', icon: 'fa-check' },
+            { text: 'false', icon: 'fa-times' },
+            { text: 'null', icon: 'fa-ban' },
+            { text: 'undefined', icon: 'fa-question' },
+            { text: 'print', icon: 'fa-print' },
+            { text: 'input', icon: 'fa-keyboard' },
+            { text: 'class', icon: 'fa-cube' },
+            { text: 'extends', icon: 'fa-arrow-up' },
+            { text: 'import', icon: 'fa-file-import' },
+            { text: 'export', icon: 'fa-file-export' },
+            { text: 'new', icon: 'fa-plus-circle' }
+        ];
+    }
+    
+    function showAutocomplete() {
+        const cursorPos = codeEditor.selectionStart;
+        const textBeforeCursor = codeEditor.value.substring(0, cursorPos);
+        const lastWord = textBeforeCursor.split(/[\s\n]/).pop();
+        
+        if (lastWord.length < 2) {
+            hideAutocomplete();
+            return;
+        }
+        
+        const suggestions = autocompleteData.filter(item => 
+            item.text.toLowerCase().startsWith(lastWord.toLowerCase())
+        );
+        
+        if (suggestions.length === 0) {
+            hideAutocomplete();
+            return;
+        }
+        
+        // Position the autocomplete below the cursor
+        const cursorCoords = getCaretCoordinates(codeEditor, cursorPos);
+        autocompleteSuggestions.style.display = 'block';
+        autocompleteSuggestions.style.top = `${cursorCoords.top + 20}px`;
+        autocompleteSuggestions.style.left = `${cursorCoords.left}px`;
+        
+        // Populate suggestions
+        autocompleteSuggestions.innerHTML = '';
+        suggestions.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'autocomplete-item';
+            if (index === 0) div.classList.add('active');
+            div.innerHTML = `<i class="fas ${item.icon}"></i> ${item.text}`;
+            div.dataset.value = item.text;
+            div.addEventListener('click', () => {
+                insertAutocomplete(item.text);
+            });
+            autocompleteSuggestions.appendChild(div);
+        });
+    }
+    
+    function hideAutocomplete() {
+        autocompleteSuggestions.style.display = 'none';
+    }
+    
+    function navigateAutocomplete(direction) {
+        const items = autocompleteSuggestions.querySelectorAll('.autocomplete-item');
+        if (items.length === 0) return;
+        
+        let activeIndex = Array.from(items).findIndex(item => item.classList.contains('active'));
+        items[activeIndex].classList.remove('active');
+        
+        activeIndex += direction;
+        if (activeIndex < 0) activeIndex = items.length - 1;
+        if (activeIndex >= items.length) activeIndex = 0;
+        
+        items[activeIndex].classList.add('active');
+    }
+    
+    function selectAutocomplete() {
+        const activeItem = autocompleteSuggestions.querySelector('.autocomplete-item.active');
+        if (activeItem) {
+            insertAutocomplete(activeItem.dataset.value);
+        }
+    }
+    
+    function insertAutocomplete(value) {
+        const cursorPos = codeEditor.selectionStart;
+        const textBeforeCursor = codeEditor.value.substring(0, cursorPos);
+        const textAfterCursor = codeEditor.value.substring(cursorPos);
+        const lastWord = textBeforeCursor.split(/[\s\n]/).pop();
+        
+        const newText = textBeforeCursor.substring(0, textBeforeCursor.length - lastWord.length) + 
+                        value + textAfterCursor;
+        
+        codeEditor.value = newText;
+        codeEditor.selectionStart = cursorPos - lastWord.length + value.length;
+        codeEditor.selectionEnd = cursorPos - lastWord.length + value.length;
+        
+        hideAutocomplete();
+        updateLineNumbers();
+        highlightSyntax();
+        codeEditor.focus();
+    }
+    
+    function handleKeyDown(e) {
+        updateCursorPosition();
+        
+        // Handle tab key for indentation
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            const start = codeEditor.selectionStart;
+            const end = codeEditor.selectionEnd;
+            
+            // Insert 4 spaces
+            codeEditor.value = codeEditor.value.substring(0, start) + 
+                              '    ' + 
+                              codeEditor.value.substring(end);
+            
+            // Move cursor
+            codeEditor.selectionStart = codeEditor.selectionEnd = start + 4;
+            updateLineNumbers();
+        }
+    }
+    
+    // Helper function to get cursor position coordinates
+    function getCaretCoordinates(element, position) {
+        const div = document.createElement('div');
+        const style = window.getComputedStyle(element);
+        div.style.position = 'absolute';
+        div.style.visibility = 'hidden';
+        div.style.whiteSpace = 'pre-wrap';
+        div.style.wordWrap = 'break-word';
+        div.style.boxSizing = 'border-box';
+        div.style.width = element.offsetWidth + 'px';
+        div.style.height = element.offsetHeight + 'px';
+        div.style.padding = style.padding;
+        div.style.border = style.border;
+        div.style.fontFamily = style.fontFamily;
+        div.style.fontSize = style.fontSize;
+        div.style.lineHeight = style.lineHeight;
+        div.textContent = element.value.substring(0, position);
+        
+        document.body.appendChild(div);
+        const span = document.createElement('span');
+        span.textContent = element.value.substring(position) || '.';
+        div.appendChild(span);
+        const coordinates = {
+            top: span.offsetTop + element.offsetTop,
+            left: span.offsetLeft + element.offsetLeft
+        };
+        document.body.removeChild(div);
+        return coordinates;
+    }
+});
