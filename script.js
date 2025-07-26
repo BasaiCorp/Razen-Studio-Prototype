@@ -102,8 +102,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function highlightSyntax() {
         const code = codeEditor.value;
-        highlightingContent.textContent = code + '\n';
-        Prism.highlightElement(highlightingContent);
+        const highlightedCode = Prism.highlight(code, Prism.languages.razen, 'razen');
+        highlightingContent.innerHTML = highlightedCode + '\n';
     }
     
     function copyCode() {
