@@ -149,6 +149,7 @@ main {
     white-space: pre;
     word-wrap: normal;
     z-index: 0;
+    background-color: var(--bg-primary);
 }
 
 #highlighting-content {
