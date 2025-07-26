@@ -102,8 +102,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function highlightSyntax() {
         const code = codeEditor.value;
-        highlightingContent.innerHTML = code.replace(/&/g, "&amp;").replace(/</g, "&lt;") + '\n';
-        Prism.highlightElement(highlightingContent);
+        const highlightedCode = Prism.highlight(code, Prism.languages.razen, 'razen');
+        highlightingContent.innerHTML = highlightedCode + '\n';
     }
     
     function copyCode() {
@@ -128,34 +128,20 @@ document.addEventListener('DOMContentLoaded', () => {
             : '<i class="fas fa-sun"></i> Light';
     }
     
-    function loadLanguageData() {
-        // In a real implementation, this would load from JSON files
-        // For this demo, we'll use mock data
-        autocompleteData = [
-            { text: 'fun', icon: 'fa-function' },
-            { text: 'if', icon: 'fa-code-branch' },
-            { text: 'else', icon: 'fa-code-branch' },
-            { text: 'while', icon: 'fa-redo' },
-            { text: 'for', icon: 'fa-sync' },
-            { text: 'return', icon: 'fa-undo' },
-            { text: 'var', icon: 'fa-variable' },
-            { text: 'num', icon: 'fa-variable' },
-            { text: 'str', icon: 'fa-variable' },
-            { text: 'bool', icon: 'fa-variable' },
-            { text: 'const', icon: 'fa-lock' },
-            { text: 'enum', icon: 'fa-variable' },
-            { text: 'true', icon: 'fa-check' },
-            { text: 'false', icon: 'fa-times' },
-            { text: 'null', icon: 'fa-ban' },
-            { text: 'undefined', icon: 'fa-question' },
-            { text: 'print', icon: 'fa-print' },
-            { text: 'input', icon: 'fa-keyboard' },
-            { text: 'class', icon: 'fa-cube' },
-            { text: 'extends', icon: 'fa-arrow-up' },
-            { text: 'import', icon: 'fa-file-import' },
-            { text: 'export', icon: 'fa-file-export' },
-            { text: 'new', icon: 'fa-plus-circle' }
-        ];
+    async function loadLanguageData() {
+        try {
+            const response = await fetch('autocomplete.json');
+            const data = await response.json();
+            autocompleteData = [
+                ...data.keywords.map(kw => ({ text: kw, icon: 'fa-key' })),
+                ...data.functions.map(fn => ({ text: fn, icon: 'fa-function' })),
+                ...data.types.map(t => ({ text: t, icon: 'fa-cube' })),
+                ...data.operators.map(op => ({ text: op, icon: 'fa-calculator' })),
+                ...data.punctuation.map(p => ({ text: p, icon: 'fa-pencil-alt' }))
+            ];
+        } catch (error) {
+            console.error('Error loading language data:', error);
+        }
     }
     
     function showAutocomplete() {
@@ -244,6 +230,31 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function handleKeyDown(e) {
         updateCursorPosition();
+
+        const bracketMap = {
+            '(': ')',
+            '[': ']',
+            '{': '}',
+            '"': '"',
+            "'": "'"
+        };
+
+        if (bracketMap[e.key]) {
+            e.preventDefault();
+            const start = codeEditor.selectionStart;
+            const end = codeEditor.selectionEnd;
+            const selectedText = codeEditor.value.substring(start, end);
+            const closingBracket = bracketMap[e.key];
+
+            codeEditor.value = codeEditor.value.substring(0, start) +
+                              e.key + selectedText + closingBracket +
+                              codeEditor.value.substring(end);
+
+            codeEditor.selectionStart = start + 1;
+            codeEditor.selectionEnd = end + 1;
+            updateLineNumbers();
+            highlightSyntax();
+        }
         
         // Handle tab key for indentation
         if (e.key === 'Tab') {
