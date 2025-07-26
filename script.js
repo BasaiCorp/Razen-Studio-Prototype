@@ -14,12 +14,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const redoBtn = document.getElementById('redo-btn');
     const bracketBtn = document.getElementById('bracket-btn');
     const searchBtn = document.getElementById('search-btn');
+    const fileTabs = document.getElementById('file-tabs');
+    const addFileBtn = document.getElementById('add-file-btn');
+    const confirmationPopup = document.getElementById('confirmation-popup');
+    const confirmCloseBtn = document.getElementById('confirm-close-btn');
+    const cancelCloseBtn = document.getElementById('cancel-close-btn');
     
     // State
     let currentTheme = 'dark';
     let autocompleteData = [];
     let undoStack = [];
     let redoStack = [];
+    let files = [];
+    let activeFileId = null;
+    let fileToClose = null;
     
     // Load keywords and autocomplete data
     loadLanguageData();
@@ -59,6 +67,18 @@ document.addEventListener('DOMContentLoaded', () => {
     redoBtn.addEventListener('click', redo);
     bracketBtn.addEventListener('click', insertBrackets);
     searchBtn.addEventListener('click', search);
+    addFileBtn.addEventListener('click', () => createFile());
+    confirmCloseBtn.addEventListener('click', () => {
+        if (fileToClose) {
+            closeFile(fileToClose);
+            fileToClose = null;
+        }
+        confirmationPopup.style.display = 'none';
+    });
+    cancelCloseBtn.addEventListener('click', () => {
+        fileToClose = null;
+        confirmationPopup.style.display = 'none';
+    });
     
     // Autocomplete navigation
     document.addEventListener('keydown', (e) => {
@@ -349,4 +369,94 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
+
+    function createFile() {
+        if (files.length >= 10) {
+            alert('You can only have a maximum of 10 files open.');
+            return;
+        }
+
+        const newFile = {
+            id: Date.now(),
+            name: `untitled-${files.length + 1}`,
+            content: ''
+        };
+
+        files.push(newFile);
+        activeFileId = newFile.id;
+        updateFileTabs();
+        switchFile(newFile.id);
+    }
+
+    function switchFile(fileId) {
+        if (activeFileId) {
+            const currentFile = files.find(f => f.id === activeFileId);
+            if (currentFile) {
+                currentFile.content = codeEditor.value;
+            }
+        }
+
+        activeFileId = fileId;
+        const newFile = files.find(f => f.id === fileId);
+        codeEditor.value = newFile.content;
+        updateLineNumbers();
+        highlightSyntax();
+        updateFileTabs();
+    }
+
+    function closeFile(fileId) {
+        const index = files.findIndex(f => f.id === fileId);
+        if (index === -1) return;
+
+        files.splice(index, 1);
+
+        if (activeFileId === fileId) {
+            if (files.length > 0) {
+                const newActiveIndex = Math.max(0, index - 1);
+                activeFileId = files[newActiveIndex].id;
+                switchFile(activeFileId);
+            } else {
+                activeFileId = null;
+                codeEditor.value = '';
+                updateLineNumbers();
+                highlightSyntax();
+            }
+        }
+
+        updateFileTabs();
+    }
+
+    function updateFileTabs() {
+        fileTabs.innerHTML = '';
+        files.forEach(file => {
+            const tab = document.createElement('div');
+            tab.className = `file-tab ${file.id === activeFileId ? 'active' : ''}`;
+            tab.dataset.fileId = file.id;
+            tab.addEventListener('click', () => switchFile(file.id));
+
+            const nameInput = document.createElement('input');
+            nameInput.className = 'file-tab-name';
+            nameInput.value = file.name;
+            nameInput.addEventListener('change', (e) => {
+                file.name = e.target.value;
+            });
+
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'close-tab-btn';
+            closeBtn.innerHTML = '&times;';
+            closeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                fileToClose = file.id;
+                confirmationPopup.style.display = 'flex';
+            });
+
+            tab.appendChild(nameInput);
+            tab.appendChild(closeBtn);
+            fileTabs.appendChild(tab);
+        });
+
+        fileTabs.appendChild(addFileBtn);
+    }
+
+    createFile();
 });
