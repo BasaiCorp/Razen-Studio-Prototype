@@ -121,7 +121,7 @@ main {
     border: none;
     resize: none;
     padding: 1rem;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', monospace !important;
     font-size: 14px;
     line-height: 1.5;
     outline: none;
@@ -142,7 +142,7 @@ main {
     height: 100%;
     margin: 0;
     padding: 1rem;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', monospace !important;
     font-size: 14px;
     line-height: 1.5;
     overflow: auto;
