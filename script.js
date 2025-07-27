@@ -164,11 +164,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function toggleTheme() {
-        document.body.classList.toggle('light-theme');
-        currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        themeToggle.innerHTML = currentTheme === 'dark' 
-            ? '<i class="fas fa-moon"></i> Dark' 
-            : '<i class="fas fa-sun"></i> Light';
+        const isLightTheme = document.body.classList.toggle('light-theme');
+        const newTheme = isLightTheme ? 'light-theme' : 'dark-theme';
+        localStorage.setItem('theme', newTheme);
+
+        // Update button text and icon based on the new theme
+        if (themeToggle) {
+            themeToggle.innerHTML = isLightTheme
+                ? '<i class="fas fa-sun"></i> Light'
+                : '<i class="fas fa-moon"></i> Dark';
+        }
     }
     
     async function loadLanguageData() {
