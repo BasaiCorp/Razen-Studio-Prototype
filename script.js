@@ -23,6 +23,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const popupMessage = document.getElementById('popup-message');
     const popupConfirm = document.getElementById('popup-confirm');
     const popupCancel = document.getElementById('popup-cancel');
+    const filenamePopup = document.getElementById('filename-popup');
+    const filenameInput = document.getElementById('filename-input');
+    const filenameConfirm = document.getElementById('filename-confirm');
+    const filenameCancel = document.getElementById('filename-cancel');
 
     // State
     let currentTheme = 'dark';
@@ -43,10 +47,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event Listeners
     sidebarToggle.addEventListener('click', () => {
         sidebar.classList.toggle('open');
-        document.querySelector('.main-content').classList.toggle('sidebar-open');
     });
 
-    newFileBtn.addEventListener('click', createNewFile);
+    newFileBtn.addEventListener('click', () => {
+        showFilenamePopup();
+    });
 
     codeEditor.addEventListener('input', (e) => {
         if (e.inputType !== 'historyUndo' && e.inputType !== 'historyRedo') {
@@ -372,13 +377,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function showFilenamePopup() {
+        filenamePopup.style.display = 'flex';
+        filenameInput.focus();
+    }
+
+    function hideFilenamePopup() {
+        filenamePopup.style.display = 'none';
+        filenameInput.value = '';
+    }
+
     function createNewFile() {
         if (Object.keys(files).length >= 10) {
             alert("Maximum number of files reached.");
             return;
         }
 
-        let fileName = prompt("Enter filename:");
+        let fileName = filenameInput.value;
         if (!fileName) {
             return;
         }
@@ -390,7 +405,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         renderFileList();
         setActiveFile(fileId);
+        hideFilenamePopup();
     }
+
+    filenameConfirm.addEventListener('click', createNewFile);
+    filenameCancel.addEventListener('click', hideFilenamePopup);
 
     function renderFileList() {
         fileList.innerHTML = '';

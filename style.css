@@ -62,9 +62,6 @@ body {
     transition: margin-left 0.3s ease;
 }
 
-.main-content.sidebar-open {
-    margin-left: 250px;
-}
 
 header {
     background-color: var(--bg-secondary);
@@ -319,6 +316,16 @@ footer {
     display: flex;
     gap: 1rem;
     justify-content: center;
+}
+
+.input-field {
+    width: 100%;
+    padding: 0.5rem;
+    margin-top: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
 }
 
 .status-bar {
