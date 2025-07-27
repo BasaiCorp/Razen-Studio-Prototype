@@ -1,0 +1,69 @@
+{
+  "keywords": [
+    "fun",
+    "if",
+    "else",
+    "while",
+    "for",
+    "return",
+    "var",
+    "num",
+    "str",
+    "bool",
+    "show",
+    "read",
+    "const",
+    "true",
+    "false",
+    "null",
+    "undefined",
+    "class",
+    "extends",
+    "import",
+    "export",
+    "new",
+    "this",
+    "super"
+  ],
+  "functions": [
+    "show",
+    "read"
+  ],
+  "types": [
+    "num",
+    "int",
+    "float",
+    "str",
+    "bool",
+    "array",
+    "object"
+  ],
+  "operators": [
+    "+",
+    "-",
+    "*",
+    "/",
+    "%",
+    "=",
+    "==",
+    "!=",
+    "<",
+    ">",
+    "<=",
+    ">=",
+    "&&",
+    "||",
+    "!"
+  ],
+  "punctuation": [
+    "(",
+    ")",
+    "{",
+    "}",
+    "[",
+    "]",
+    ";",
+    ",",
+    "."
+  ]
+}

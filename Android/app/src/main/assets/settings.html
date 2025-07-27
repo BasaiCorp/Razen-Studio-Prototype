@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Razen Studio</title>
+    <link rel="stylesheet" href="style.css"> <!-- Main styles -->
+    <link rel="stylesheet" href="settings.css"> <!-- Settings specific overrides -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Work+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar - Same structure as index.html -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3>Settings</h3> <!-- Changed title -->
+                <button id="sidebar-close-btn" class="btn"><i class="fas fa-times"></i></button>
+            </div>
+            <!-- Settings Navigation moved to Sidebar -->
+            <nav class="settings-sidebar-nav">
+                <button class="settings-nav-btn active" data-target="github"><i class="fab fa-github"></i> GitHub</button>
+                <button class="settings-nav-btn" data-target="version"><i class="fas fa-code-branch"></i> Version</button>
+                <button class="settings-nav-btn" data-target="changelogs"><i class="fas fa-history"></i> Changelogs</button>
+                <button class="settings-nav-btn" data-target="license"><i class="fas fa-file-alt"></i> License</button>
+                <button class="settings-nav-btn" data-target="about"><i class="fas fa-info-circle"></i> About</button>
+            </nav>
+
+            <!-- Version Info Section - Same as index.html -->
+            <div class="sidebar-version">
+                <div class="sv">
+                    <p class="version-text">Beta v1.0.3</p>
+                    <p class="update-text">Sidebar Update!</p>
+                </div>
+                <!-- Settings Button - Links back to Editor -->
+                <a href="index.html" class="btn settings-btn-sidebar" title="Editor">
+                    <i class="fas fa-home"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content Area - Same structure as index.html -->
+        <div class="main-content">
+            <header>
+                <div class="header-left">
+                    <button id="sidebar-toggle" class="btn s-btn"><i class="fas fa-bars"></i></button>
+                    <h1><i class="fas fa-cog"></i> Settings</h1> <!-- Changed title -->
+                </div>
+            </header>
+
+            <main>
+                <!-- Settings Content Area -->
+                <div class="settings-content" id="settings-content">
+                    <!-- Default content or load dynamically -->
+                    <!-- Content will be loaded here by settings.js -->
+                </div>
+            </main>
+
+            <!-- Toolbar and Footer - Same structure as index.html -->
+            <div class="toolbar">
+                <!-- Intentionally left empty or for future settings actions -->
+            </div>
+            <footer>
+                <div class="status-bar">
+                    <span id="cursor-position">Settings</span>
+                    <span id="language-indicator">Razen Studio</span>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Settings Data Template (Hidden) -->
+    <div id="settings-data" style="display: none;">
+        <div id="github-content">
+            <h2>GitHub</h2>
+            <p>Repository: <a href="https://github.com/BasaiCorp/Razen-Studio" target="_blank">github.com/BasaiCorp/Razen-Studio</a></p>
+            <p>Issues: <a href="https://github.com/BasaiCorp/razen-studio/issues" target="_blank">Report an Issue</a></p>
+            <p>Releases: <a href="https://github.com/BasaiCorp/razen-studio/releases" target="_blank">View Releases</a></p>
+        </div>
+
+        <div id="version-content">
+            <h2>Version</h2>
+            <p>Current Version: <strong>Beta v1.0.3</strong></p>
+            <p>Status: <span class="status-beta">Beta</span></p>
+        </div>
+
+        <div id="changelogs-content">
+            <h2>Changelogs</h2>
+            <ul>
+                <li><strong>v1.0.3</strong> -- Initial Beta Release</li>
+                <li>Implemented core editor features</li>
+                <li>Added file management</li>
+                <li>Integrated basic syntax highlighting</li>
+            </ul>
+        </div>
+
+        <div id="license-content">
+            <h2>License</h2>
+            <p>This project is licensed under the MIT License.</p>
+            <pre><code>MIT License
+
+Copyright (c) 2025 Prathmesh Barot & Basai Corporation 
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+            </code></pre>
+        </div>
+
+        <div id="about-content">
+            <h2>About Razen Studio</h2>
+            <p>Razen Studio is a modern code editor built for the Razen Lang programming language.</p>
+            <p>Developed with passion by Prathmesh  (Prathmesh Barot).</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Apply theme based on system preference or saved setting
+        (function () {
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            let themeToApply = 'light-theme';
+            if (savedTheme) {
+                themeToApply = savedTheme;
+            } else if (systemPrefersDark) {
+                themeToApply = 'dark-theme';
+            }
+            document.body.classList.add(themeToApply);
+        })();
+    </script>
+    <!-- Include script.js for sidebar toggle functionality -->
+    <script src="script.js"></script>
+    <script src="settings.js"></script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+{
+  "keywords": [
+    {
+      "word": "fun",
+      "color": "#89b4fa"
+    },
+    {
+      "word": "if",
+      "color": "#cba6f7"
+    },
+    {
+      "word": "else",
+      "color": "#cba6f7"
+    },
+    {
+      "word": "while",
+      "color": "#f9e2af"
+    },
+    {
+      "word": "for",
+      "color": "#f9e2af"
+    },
+    {
+      "word": "return",
+      "color": "#a6e3a1"
+    },
+    {
+      "word": "var",
+      "color": "#eba0ac"
+    },
+    {
+      "word": "let",
+      "color": "#eba0ac"
+    },
+    {
+      "word": "const",
+      "color": "#eba0ac"
+    },
+    {
+      "word": "true",
+      "color": "#a6e3a1"
+    },
+    {
+      "word": "false",
+      "color": "#a6e3a1"
+    },
+    {
+      "word": "null",
+      "color": "#7f849c"
+    },
+    {
+      "word": "undefined",
+      "color": "#7f849c"
+    },
+    {
+      "word": "class",
+      "color": "#fab387"
+    },
+    {
+      "word": "extends",
+      "color": "#fab387"
+    },
+    {
+      "word": "import",
+      "color": "#89dceb"
+    },
+    {
+      "word": "export",
+      "color": "#89dceb"
+    }
+  ],
+  "tokens": [
+    {
+      "type": "string",
+      "color": "#a6e3a1"
+    },
+    {
+      "type": "number",
+      "color": "#fab387"
+    },
+    {
+      "type": "comment",
+      "color": "#6c7086"
+    },
+    {
+      "type": "operator",
+      "color": "#89b4fa"
+    },
+    {
+      "type": "bracket",
+      "color": "#f5c2e7"
+    }
+  ]
+}
