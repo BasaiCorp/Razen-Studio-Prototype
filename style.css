@@ -296,3 +296,262 @@ body.light-theme #code-editor {
         width: 40px;
     }
 }
+
+/* Razen Language Syntax Highlighting */
+.token.comment {
+    color: #608b4e;
+    font-style: italic;
+}
+
+.token.string {
+    color: #ce9178;
+}
+
+.token.number {
+    color: #b5cea8;
+}
+
+.token.boolean {
+    color: #569cd6;
+    font-weight: bold;
+}
+
+.token.declaration {
+    color: #c586c0;
+    font-weight: bold;
+}
+
+.token.control-flow {
+    color: #c586c0;
+    font-weight: bold;
+}
+
+.token.data-structure {
+    color: #4ec9b0;
+}
+
+.token.io {
+    color: #d7ba7d;
+    font-weight: bold;
+}
+
+.token.async {
+    color: #d16969;
+    font-weight: bold;
+}
+
+.token.module {
+    color: #4ec9b0;
+    font-weight: bold;
+}
+
+.token.logical {
+    color: #569cd6;
+    font-weight: bold;
+}
+
+.token.operator {
+    color: #d4d4d4;
+}
+
+.token.punctuation {
+    color: #d4d4d4;
+}
+
+.token.function {
+    color: #dcdcaa;
+}
+
+.token.variable {
+    color: #9cdcfe;
+}
+
+.token.keyword {
+    color: #569cd6;
+    font-weight: bold;
+}
+
+/* Additional Prism styling to match your theme */
+pre[class*="language-"] {
+    background-color: var(--bg-primary) !important;
+    border-radius: 4px;
+    padding: 1rem !important;
+    margin: 0;
+    overflow: auto;
+    height: 100%;
+}
+
+code[class*="language-"] {
+    background: none;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 14px;
+    line-height: 1.5;
+    text-shadow: none;
+    color: var(--text-primary);
+}
+
+/* Selection styling */
+pre[class*="language-"]::selection,
+code[class*="language-"]::selection,
+pre[class*="language-"] ::selection,
+code[class*="language-"] ::selection {
+    background: var(--accent-primary);
+    color: var(--bg-primary);
+}
+
+.token::selection,
+.token ::selection {
+    background: var(--accent-primary);
+    color: var(--bg-primary);
+}
+
+/* Error highlighting */
+.token.error {
+    color: var(--error);
+    background: rgba(243, 139, 168, 0.1);
+}
+
+/* Namespace styling */
+.token.namespace {
+    opacity: 0.7;
+}
+
+/* Important styling */
+.token.important,
+.token.bold {
+    font-weight: bold;
+}
+
+.token.italic {
+    font-style: italic;
+}
+
+/* Light theme adjustments */
+body.light-theme .token.comment {
+    color: #6a737d;
+}
+
+body.light-theme .token.string {
+    color: #032f62;
+}
+
+body.light-theme .token.number {
+    color: #005cc5;
+}
+
+body.light-theme .token.boolean {
+    color: #005cc5;
+}
+
+body.light-theme .token.declaration {
+    color: #d73a49;
+}
+
+body.light-theme .token.control-flow {
+    color: #d73a49;
+}
+
+body.light-theme .token.data-structure {
+    color: #6f42c1;
+}
+
+body.light-theme .token.io {
+    color: #005cc5;
+}
+
+body.light-theme .token.async {
+    color: #e36209;
+}
+
+body.light-theme .token.module {
+    color: #6f42c1;
+}
+
+body.light-theme .token.logical {
+    color: #d73a49;
+}
+
+body.light-theme .token.operator {
+    color: #24292e;
+}
+
+body.light-theme .token.punctuation {
+    color: #24292e;
+}
+
+body.light-theme .token.function {
+    color: #6f42c1;
+}
+
+body.light-theme .token.variable {
+    color: #24292e;
+}
+
+/* Highlighting content specific styling */
+#highlighting-content .token.comment {
+    color: #608b4e;
+    font-style: italic;
+}
+
+#highlighting-content .token.string {
+    color: #ce9178;
+}
+
+#highlighting-content .token.number {
+    color: #b5cea8;
+}
+
+#highlighting-content .token.boolean {
+    color: #569cd6;
+    font-weight: bold;
+}
+
+#highlighting-content .token.declaration {
+    color: #c586c0;
+    font-weight: bold;
+}
+
+#highlighting-content .token.control-flow {
+    color: #c586c0;
+    font-weight: bold;
+}
+
+#highlighting-content .token.data-structure {
+    color: #4ec9b0;
+}
+
+#highlighting-content .token.io {
+    color: #d7ba7d;
+    font-weight: bold;
+}
+
+#highlighting-content .token.async {
+    color: #d16969;
+    font-weight: bold;
+}
+
+#highlighting-content .token.module {
+    color: #4ec9b0;
+    font-weight: bold;
+}
+
+#highlighting-content .token.logical {
+    color: #569cd6;
+    font-weight: bold;
+}
+
+#highlighting-content .token.operator {
+    color: #d4d4d4;
+}
+
+#highlighting-content .token.punctuation {
+    color: #d4d4d4;
+}
+
+#highlighting-content .token.function {
+    color: #dcdcaa;
+}
+
+#highlighting-content .token.variable {
+    color: #9cdcfe;
+}
