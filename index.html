@@ -12,36 +12,69 @@
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1><i class="fas fa-code"></i> Razen Studio</h1>
-            <div class="controls">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3>Files</h3>
+                <button id="sidebar-close-btn" class="btn"><i class="fas fa-times"></i></button>
+            </div>
+            <button id="new-file-btn" class="btn"><i class="fas fa-plus"></i> New File</button>
+            <div id="file-list" class="file-list"></div>
+        </div>
+        <div class="main-content">
+            <header>
+                <div class="header-left">
+                    <button id="sidebar-toggle" class="btn"><i class="fas fa-bars"></i></button>
+                    <h1><i class="fas fa-code"></i> Razen Studio</h1>
+                </div>
+                <div class="active-files" id="active-files"></div>
+            </header>
+
+            <main>
+                <div class="editor-container">
+                    <div class="line-numbers" id="line-numbers">1</div>
+                    <textarea id="code-editor" spellcheck="false" placeholder="Start coding in Razen Lang..."></textarea>
+                    <pre id="highlighting" aria-hidden="true"><code class="language-razen" id="highlighting-content"></code></pre>
+                    <div class="autocomplete-suggestions" id="autocomplete-suggestions"></div>
+                </div>
+            </main>
+
+            <div class="toolbar">
                 <button id="copy-btn" class="btn"><i class="fas fa-copy"></i> Copy</button>
                 <button id="theme-toggle" class="btn"><i class="fas fa-moon"></i> Dark</button>
+                <button id="tab-btn" class="btn"><i class="fas fa-indent"></i> Tab</button>
+                <button id="undo-btn" class="btn"><i class="fas fa-undo"></i> Undo</button>
+                <button id="redo-btn" class="btn"><i class="fas fa-redo"></i> Redo</button>
+                <button id="bracket-btn" class="btn"><i class="fas fa-code"></i> {}</button>
+                <button id="search-btn" class="btn"><i class="fas fa-search"></i> Search</button>
             </div>
-        </header>
-        
-        <main>
-            <div class="editor-container">
-                <div class="line-numbers" id="line-numbers">1</div>
-                <textarea id="code-editor" spellcheck="false" placeholder="Start coding in Razen Lang..."></textarea>
-                <pre id="highlighting" aria-hidden="true"><code class="language-razen" id="highlighting-content"></code></pre>
-                <div class="autocomplete-suggestions" id="autocomplete-suggestions"></div>
-            </div>
-        </main>
-        
-        <div class="toolbar">
-            <button id="tab-btn" class="btn"><i class="fas fa-indent"></i> Tab</button>
-            <button id="undo-btn" class="btn"><i class="fas fa-undo"></i> Undo</button>
-            <button id="redo-btn" class="btn"><i class="fas fa-redo"></i> Redo</button>
-            <button id="bracket-btn" class="btn"><i class="fas fa-code"></i> {}</button>
-            <button id="search-btn" class="btn"><i class="fas fa-search"></i> Search</button>
+            <footer>
+                <div class="status-bar">
+                    <span id="cursor-position">Line 1, Column 1</span>
+                    <span id="language-indicator">Razen Lang</span>
+                </div>
+            </footer>
         </div>
-        <footer>
-            <div class="status-bar">
-                <span id="cursor-position">Line 1, Column 1</span>
-                <span id="language-indicator">Razen Lang</span>
+    </div>
+
+    <div id="custom-popup" class="popup-container" style="display: none;">
+        <div class="popup-content">
+            <p id="popup-message"></p>
+            <div class="popup-buttons">
+                <button id="popup-confirm" class="btn">Confirm</button>
+                <button id="popup-cancel" class="btn">Cancel</button>
             </div>
-        </footer>
+        </div>
+    </div>
+
+    <div id="filename-popup" class="popup-container" style="display: none;">
+        <div class="popup-content">
+            <p>Enter filename:</p>
+            <input type="text" id="filename-input" class="input-field">
+            <div class="popup-buttons">
+                <button id="filename-confirm" class="btn">Create</button>
+                <button id="filename-cancel" class="btn">Cancel</button>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
