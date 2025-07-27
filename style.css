@@ -67,8 +67,13 @@ body {
     flex-direction: column;
     overflow: hidden;
     transition: margin-left 0.3s ease;
+    height: 100vh; /* Ensure it takes full viewport height */
 }
 
+main {
+    flex-grow: 1; /* Allow main to grow and push footer down */
+    overflow-y: auto; /* Allow content to scroll */
+}
 
 header {
     background-color: var(--bg-secondary);

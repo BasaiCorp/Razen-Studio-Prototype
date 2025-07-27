@@ -151,8 +151,12 @@ body.light-theme {
         display: none;
     }
     .settings-nav-btn {
-        justify-content: center; /* Center icons */
         padding: 0.75rem;
     }
 }
 /* --- End of Responsive Adjustments --- */
+
+/* Reduce header padding on settings page */
+.main-content header {
+    padding-bottom: 0.5rem;
+}
