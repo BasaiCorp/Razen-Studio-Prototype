@@ -441,6 +441,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderActiveFiles() {
         activeFilesContainer.innerHTML = '';
+        if (Object.keys(files).length === 0) {
+            activeFilesContainer.classList.add('empty');
+        } else {
+            activeFilesContainer.classList.remove('empty');
+        }
+
         for (const fileId in files) {
             const file = files[fileId];
             const activeFileDiv = document.createElement('div');
