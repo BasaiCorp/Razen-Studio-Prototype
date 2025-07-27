@@ -77,6 +77,11 @@ header {
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid var(--border-color);
+    margin-top: 1rem;
+}
+
+#sidebar-toggle {
+    margin: 0;
 }
 
 .header-left {
