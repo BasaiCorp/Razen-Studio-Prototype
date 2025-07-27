@@ -14,6 +14,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const redoBtn = document.getElementById('redo-btn');
     const bracketBtn = document.getElementById('bracket-btn');
     const searchBtn = document.getElementById('search-btn');
+    const searchPopup = document.getElementById('search-popup');
+    const searchInput = document.getElementById('search-input');
+    const replaceInput = document.getElementById('replace-input');
+    const findNextBtn = document.getElementById('find-next-btn');
+    const replaceBtn = document.getElementById('replace-btn');
+    const replaceAllBtn = document.getElementById('replace-all-btn');
+    const searchCancelBtn = document.getElementById('search-cancel-btn');
     const sidebar = document.getElementById('sidebar');
     const sidebarToggle = document.getElementById('sidebar-toggle');
     const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
@@ -90,7 +97,11 @@ document.addEventListener('DOMContentLoaded', () => {
     undoBtn.addEventListener('click', undo);
     redoBtn.addEventListener('click', redo);
     bracketBtn.addEventListener('click', insertBrackets);
-    searchBtn.addEventListener('click', search);
+    searchBtn.addEventListener('click', showSearchPopup);
+    findNextBtn.addEventListener('click', findNext);
+    replaceBtn.addEventListener('click', replace);
+    replaceAllBtn.addEventListener('click', replaceAll);
+    searchCancelBtn.addEventListener('click', hideSearchPopup);
     
     // Autocomplete navigation
     document.addEventListener('keydown', (e) => {
@@ -367,19 +378,62 @@ document.addEventListener('DOMContentLoaded', () => {
         codeEditor.focus();
     }
 
-    function search() {
-        const searchTerm = prompt('Enter search term:');
-        if (searchTerm) {
-            const text = codeEditor.value;
-            const index = text.indexOf(searchTerm);
-            if (index !== -1) {
-                codeEditor.selectionStart = index;
-                codeEditor.selectionEnd = index + searchTerm.length;
+    function showSearchPopup() {
+        searchPopup.style.display = 'flex';
+        searchInput.focus();
+    }
+
+    function hideSearchPopup() {
+        searchPopup.style.display = 'none';
+    }
+
+    function findNext() {
+        const searchTerm = searchInput.value;
+        const text = codeEditor.value;
+        const fromIndex = codeEditor.selectionEnd;
+        const index = text.indexOf(searchTerm, fromIndex);
+
+        if (index !== -1) {
+            codeEditor.selectionStart = index;
+            codeEditor.selectionEnd = index + searchTerm.length;
+            codeEditor.focus();
+        } else {
+            // Wrap search
+            const wrapIndex = text.indexOf(searchTerm);
+            if (wrapIndex !== -1) {
+                codeEditor.selectionStart = wrapIndex;
+                codeEditor.selectionEnd = wrapIndex + searchTerm.length;
                 codeEditor.focus();
             } else {
                 alert('Term not found');
             }
         }
+    }
+
+    function replace() {
+        const searchTerm = searchInput.value;
+        const replaceTerm = replaceInput.value;
+        const text = codeEditor.value;
+        const start = codeEditor.selectionStart;
+        const end = codeEditor.selectionEnd;
+
+        if (text.substring(start, end) === searchTerm) {
+            codeEditor.value = text.substring(0, start) + replaceTerm + text.substring(end);
+            codeEditor.selectionStart = start;
+            codeEditor.selectionEnd = start + replaceTerm.length;
+            codeEditor.focus();
+            findNext();
+        } else {
+            findNext();
+        }
+    }
+
+    function replaceAll() {
+        const searchTerm = searchInput.value;
+        const replaceTerm = replaceInput.value;
+        const text = codeEditor.value;
+        const newText = text.replace(new RegExp(searchTerm, 'g'), replaceTerm);
+        codeEditor.value = newText;
     }
 
     function showFilenamePopup() {
