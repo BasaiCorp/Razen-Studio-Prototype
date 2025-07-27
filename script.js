@@ -14,25 +14,46 @@ document.addEventListener('DOMContentLoaded', () => {
     const redoBtn = document.getElementById('redo-btn');
     const bracketBtn = document.getElementById('bracket-btn');
     const searchBtn = document.getElementById('search-btn');
-    
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const newFileBtn = document.getElementById('new-file-btn');
+    const fileList = document.getElementById('file-list');
+    const activeFilesContainer = document.getElementById('active-files');
+    const customPopup = document.getElementById('custom-popup');
+    const popupMessage = document.getElementById('popup-message');
+    const popupConfirm = document.getElementById('popup-confirm');
+    const popupCancel = document.getElementById('popup-cancel');
+
     // State
     let currentTheme = 'dark';
     let autocompleteData = [];
     let undoStack = [];
     let redoStack = [];
-    
+    let files = {};
+    let activeFileId = null;
+    let fileCounter = 1;
+
     // Load keywords and autocomplete data
     loadLanguageData();
-    
+
     // Initialize editor
     updateLineNumbers();
     updateCursorPosition();
-    
+
     // Event Listeners
+    sidebarToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('collapsed');
+    });
+
+    newFileBtn.addEventListener('click', createNewFile);
+
     codeEditor.addEventListener('input', (e) => {
         if (e.inputType !== 'historyUndo' && e.inputType !== 'historyRedo') {
             undoStack.push(codeEditor.value);
             redoStack = [];
+        }
+        if (activeFileId) {
+            files[activeFileId].content = codeEditor.value;
         }
         updateLineNumbers();
         highlightSyntax();
@@ -348,5 +369,107 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Term not found');
             }
         }
+    }
+
+    function createNewFile() {
+        if (Object.keys(files).length >= 10) {
+            alert("Maximum number of files reached.");
+            return;
+        }
+
+        const fileId = `file-${fileCounter}`;
+        const fileName = `File ${fileCounter}.razen`;
+        files[fileId] = { id: fileId, name: fileName, content: '' };
+        fileCounter++;
+
+        renderFileList();
+        setActiveFile(fileId);
+    }
+
+    function renderFileList() {
+        fileList.innerHTML = '';
+        for (const fileId in files) {
+            const file = files[fileId];
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.dataset.fileId = file.id;
+            fileItem.textContent = file.name;
+
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'close-btn';
+            closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+            closeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showPopup(`Are you sure you want to close ${file.name}?`, () => closeFile(file.id));
+            });
+
+            fileItem.appendChild(closeBtn);
+            fileItem.addEventListener('click', () => setActiveFile(file.id));
+            fileList.appendChild(fileItem);
+        }
+    }
+
+    function renderActiveFiles() {
+        activeFilesContainer.innerHTML = '';
+        for (const fileId in files) {
+            const file = files[fileId];
+            const activeFileDiv = document.createElement('div');
+            activeFileDiv.className = `active-file ${file.id === activeFileId ? 'active' : ''}`;
+            activeFileDiv.dataset.fileId = file.id;
+            activeFileDiv.textContent = file.name;
+
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'close-btn';
+            closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+            closeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showPopup(`Are you sure you want to close ${file.name}?`, () => closeFile(file.id));
+            });
+
+            activeFileDiv.appendChild(closeBtn);
+            activeFileDiv.addEventListener('click', () => setActiveFile(file.id));
+            activeFilesContainer.appendChild(activeFileDiv);
+        }
+    }
+
+    function setActiveFile(fileId) {
+        if (!files[fileId]) return;
+
+        activeFileId = fileId;
+        codeEditor.value = files[fileId].content;
+        updateLineNumbers();
+        highlightSyntax();
+        renderActiveFiles();
+        codeEditor.focus();
+    }
+
+    function closeFile(fileId) {
+        delete files[fileId];
+        if (activeFileId === fileId) {
+            activeFileId = Object.keys(files)[0] || null;
+            if (activeFileId) {
+                setActiveFile(activeFileId);
+            } else {
+                codeEditor.value = '';
+                updateLineNumbers();
+                highlightSyntax();
+            }
+        }
+        renderFileList();
+        renderActiveFiles();
+    }
+
+    function showPopup(message, onConfirm) {
+        popupMessage.textContent = message;
+        customPopup.style.display = 'flex';
+
+        popupConfirm.onclick = () => {
+            onConfirm();
+            customPopup.style.display = 'none';
+        };
+
+        popupCancel.onclick = () => {
+            customPopup.style.display = 'none';
+        };
     }
 });
