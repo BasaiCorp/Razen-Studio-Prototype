@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Razen Studio</title>
+    <link rel="stylesheet" href="style.css"> <!-- Link to your main stylesheet -->
+    <link rel="stylesheet" href="settings.css"> <!-- Link to the new settings stylesheet -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Work+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="settings-container">
+        <header class="settings-header">
+            <h1><i class="fas fa-cog"></i> Settings</h1>
+            <a href="index.html" class="btn back-btn"><i class="fas fa-arrow-left"></i> Back</a>
+        </header>
+
+        <main class="settings-main">
+            <div class="tabs-container">
+                <button class="tab-btn active" data-tab="github">GitHub</button>
+                <button class="tab-btn" data-tab="version">Version</button>
+                <button class="tab-btn" data-tab="changelogs">Changelogs</button>
+                <button class="tab-btn" data-tab="license">License</button>
+                <button class="tab-btn" data-tab="about">About</button>
+                <!-- Add more tabs as needed -->
+            </div>
+
+            <div class="tab-content active" id="github-tab">
+                <h2>GitHub</h2>
+                <p>Repository: <a href="https://github.com/your-username/razen-studio" target="_blank">github.com/your-username/razen-studio</a></p>
+                <p>Issues: <a href="https://github.com/your-username/razen-studio/issues" target="_blank">Report an Issue</a></p>
+                <p>Releases: <a href="https://github.com/your-username/razen-studio/releases" target="_blank">View Releases</a></p>
+                <!-- Add more GitHub related content -->
+            </div>
+
+            <div class="tab-content" id="version-tab">
+                <h2>Version</h2>
+                <p>Current Version: <strong>Beta v1.0.3</strong></p>
+                <p>Status: <span class="status-beta">Beta</span></p>
+                <!-- Add more version details -->
+            </div>
+
+            <div class="tab-content" id="changelogs-tab">
+                <h2>Changelogs</h2>
+                <ul>
+                    <li><strong>v1.0.3</strong> - Initial Beta Release</li>
+                    <li>- Implemented core editor features</li>
+                    <li>- Added file management</li>
+                    <li>- Integrated basic syntax highlighting</li>
+                    <!-- Add more changelog entries -->
+                </ul>
+            </div>
+
+            <div class="tab-content" id="license-tab">
+                <h2>License</h2>
+                <p>This project is licensed under the MIT License.</p>
+                <pre><code>MIT License
+
+Copyright (c) [Year] [Your Name or Organization]
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+                </code></pre>
+            </div>
+
+            <div class="tab-content" id="about-tab">
+                <h2>About Razen Studio</h2>
+                <p>Razen Studio is a modern code editor built for the Razen Lang programming language.</p>
+                <p>Developed with passion by [Your Name/Organization].</p>
+                <!-- Add more about information -->
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Apply theme based on system preference or saved setting
+        // This script should ideally be in a separate file (e.g., theme.js) and included in both index.html and settings.html
+        (function() {
+             // Check for a saved theme preference in localStorage, otherwise use system preference
+             const savedTheme = localStorage.getItem('theme');
+             const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+             let themeToApply = 'light-theme'; // Default
+             if (savedTheme) {
+                 themeToApply = savedTheme;
+             } else if (systemPrefersDark) {
+                 themeToApply = 'dark-theme';
+             }
+
+             document.body.classList.add(themeToApply);
+         })();
+    </script>
+    <script src="settings.js"></script> <!-- Link to the settings JavaScript -->
+</body>
+</html>

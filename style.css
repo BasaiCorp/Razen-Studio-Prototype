@@ -170,6 +170,13 @@ header h1 {
     transition: all 0.2s ease;
 }
 
+.s-btn {
+    width: 35px;
+    height: 35px;
+    justify-content: center;
+    align-items: center;
+}
+
 .btn:hover {
     background-color: var(--accent-primary);
     color: var(--bg-primary);
@@ -290,6 +297,8 @@ main {
     border-top: 1px solid var(--border-color); /* Adds a subtle separator line */
     font-size: 0.85rem; /* Makes the text slightly smaller */
     color: var(--text-secondary); /* Uses the secondary text color */
+    display: flex;
+    align-items: center;
 }
 
 .version-text {
@@ -304,6 +313,50 @@ main {
     overflow: hidden; /* Hides overflow if text is too long */
     text-overflow: ellipsis; /* Adds '...' if text is clipped */
 }
+
+/* --- Settings Button in Sidebar --- */
+
+/* Target the new class for the sidebar button */
+.settings-btn-sidebar {
+    /* Make it a small square */
+    width: 30px; /* Adjust size as needed */
+    height: 30px;
+    padding: 0; /* Remove default padding */
+    
+    /* Center content */
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center;     /* Center vertically */
+    
+    /* Appearance */
+    border-radius: 4px; /* Match your button style or make it circular (50%) */
+    background-color: var(--bg-tertiary); /* Use theme background */
+    color: var(--text-primary);          /* Use theme text color */
+    border: 1px solid var(--border-color); /* Use theme border color */
+    
+    /* Text/Icon sizing */
+    font-size: 0.9rem; /* Adjust icon size if needed */
+    text-decoration: none; /* Remove default underline from <a> */
+
+    /* Positioning */
+    position: absolute;
+    bottom: 10px; /* Adjust distance from bottom */
+    right: 10px;  /* Adjust distance from right */
+
+    /* Interaction */
+    cursor: pointer; /* Show pointer cursor */
+    transition: all 0.2s ease; /* Smooth transition for hover effects */
+    margin-bottom: 8px;
+}
+
+.settings-btn-sidebar:hover {
+    background-color: var(--accent-primary); /* Theme accent on hover */
+    color: var(--bg-primary);              /* Invert text color on hover */
+    border-color: var(--accent-primary);   /* Invert border on hover */
+}
+
+/* Ensure the parent container can contain the absolutely positioned button */
+
 
 .autocomplete-item:hover,
 .autocomplete-item.active {
