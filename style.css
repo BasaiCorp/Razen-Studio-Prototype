@@ -107,10 +107,11 @@ header h1 {
     padding-bottom: 5px;
     flex-shrink: 1;
     min-width: 0;
+    justify-content: flex-start;
 }
 
 .active-files.empty {
-    padding-bottom: 0;
+    padding: 0;
 }
 
 .active-file {
