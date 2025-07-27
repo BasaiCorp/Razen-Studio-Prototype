@@ -42,7 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event Listeners
     sidebarToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('collapsed');
+        sidebar.classList.toggle('open');
+        document.querySelector('.main-content').classList.toggle('sidebar-open');
     });
 
     newFileBtn.addEventListener('click', createNewFile);
@@ -377,8 +378,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        let fileName = prompt("Enter filename:");
+        if (!fileName) {
+            return;
+        }
+        fileName += ".rzn";
+
         const fileId = `file-${fileCounter}`;
-        const fileName = `File ${fileCounter}.razen`;
         files[fileId] = { id: fileId, name: fileName, content: '' };
         fileCounter++;
 

@@ -36,20 +36,22 @@ body {
 }
 
 .sidebar {
+    position: absolute;
     width: 250px;
+    height: 100%;
     background-color: var(--bg-secondary);
     padding: 1rem;
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    transition: width 0.3s ease;
+    transition: transform 0.3s ease;
+    z-index: 100;
+    transform: translateX(-100%);
 }
 
-.sidebar.collapsed {
-    width: 0;
-    padding: 1rem 0;
-    overflow: hidden;
+.sidebar.open {
+    transform: translateX(0);
 }
 
 .main-content {
@@ -57,6 +59,11 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    transition: margin-left 0.3s ease;
+}
+
+.main-content.sidebar-open {
+    margin-left: 250px;
 }
 
 header {
@@ -89,6 +96,8 @@ header h1 {
     gap: 0.5rem;
     overflow-x: auto;
     padding-bottom: 5px;
+    flex-shrink: 1;
+    min-width: 0;
 }
 
 .active-file {
