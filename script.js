@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const filenameInput = document.getElementById('filename-input');
     const filenameConfirm = document.getElementById('filename-confirm');
     const filenameCancel = document.getElementById('filename-cancel');
+    const languageIndicator = document.getElementById('language-indicator');
 
     // State
     let currentTheme = 'dark';
@@ -144,9 +145,39 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function highlightSyntax() {
-        const code = codeEditor.value;
-        const highlightedCode = Prism.highlight(code, Prism.languages.razen, 'razen');
-        highlightingContent.innerHTML = highlightedCode + '\n';
+        if (!activeFileId) {
+            highlightingContent.innerHTML = '\n';
+            return;
+        }
+
+        const file = files[activeFileId];
+        const code = file.content;
+        const extension = file.name.split('.').pop();
+        let language;
+
+        switch (extension) {
+            case 'js':
+                language = 'javascript';
+                break;
+            case 'py':
+                language = 'python';
+                break;
+            case 'rs':
+                language = 'rust';
+                break;
+            case 'rzn':
+            default:
+                language = 'razen';
+                break;
+        }
+
+        if (Prism.languages[language]) {
+            const highlightedCode = Prism.highlight(code, Prism.languages[language], language);
+            highlightingContent.innerHTML = highlightedCode + '\n';
+        } else {
+            // Fallback for unsupported languages
+            highlightingContent.textContent = code + '\n';
+        }
     }
     
     function copyCode() {
@@ -456,7 +487,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!fileName) {
             return;
         }
-        fileName += ".rzn";
+
+        // Add default extension if not provided
+        if (!fileName.includes('.')) {
+            fileName += ".rzn";
+        }
 
         const fileId = `file-${fileCounter}`;
         files[fileId] = { id: fileId, name: fileName, content: '' };
@@ -530,7 +565,38 @@ document.addEventListener('DOMContentLoaded', () => {
         updateLineNumbers();
         highlightSyntax();
         renderActiveFiles();
+        updateLanguageIndicator();
         codeEditor.focus();
+    }
+
+    function updateLanguageIndicator() {
+        if (!activeFileId) {
+            languageIndicator.textContent = 'Plain Text';
+            return;
+        }
+
+        const file = files[activeFileId];
+        const extension = file.name.split('.').pop();
+        let languageName;
+
+        switch (extension) {
+            case 'js':
+                languageName = 'JavaScript';
+                break;
+            case 'py':
+                languageName = 'Python';
+                break;
+            case 'rs':
+                languageName = 'Rust';
+                break;
+            case 'rzn':
+                languageName = 'Razen Lang';
+                break;
+            default:
+                languageName = 'Plain Text';
+                break;
+        }
+        languageIndicator.textContent = languageName;
     }
 
     function closeFile(fileId) {
