@@ -282,6 +282,29 @@ main {
     font-size: 14px;
 }
 
+/* --- Sidebar Version Info --- */
+
+.sidebar-version {
+    margin-top: auto; /* Pushes the version info to the bottom */
+    padding-top: 1rem; /* Adds some space above the version info */
+    border-top: 1px solid var(--border-color); /* Adds a subtle separator line */
+    font-size: 0.85rem; /* Makes the text slightly smaller */
+    color: var(--text-secondary); /* Uses the secondary text color */
+}
+
+.version-text {
+    font-weight: 500; /* Makes the version number slightly bolder */
+    margin: 0 0 0.2rem 0; /* Adds a small bottom margin */
+}
+
+.update-text {
+    font-style: italic; /* Italicizes the update info */
+    margin: 0; /* Resets default margin */
+    white-space: nowrap; /* Prevents the text from wrapping */
+    overflow: hidden; /* Hides overflow if text is too long */
+    text-overflow: ellipsis; /* Adds '...' if text is clipped */
+}
+
 .autocomplete-item:hover,
 .autocomplete-item.active {
     background-color: var(--autocomplete-hover);
