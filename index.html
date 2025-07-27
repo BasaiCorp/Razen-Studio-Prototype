@@ -94,6 +94,10 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>
+  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  document.body.classList.add(isDark ? 'dark-theme' : 'light-theme');
+</script>
     <script src="razen.js"></script>
     <script src="script.js"></script>
 </body>
