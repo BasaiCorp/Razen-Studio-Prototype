@@ -9,13 +9,13 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (sidebarToggle) {
         sidebarToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('collapsed');
+            sidebar.classList.toggle('open');
         });
     }
     
     if (sidebarCloseBtn) {
         sidebarCloseBtn.addEventListener('click', () => {
-            sidebar.classList.add('collapsed');
+            sidebar.classList.remove('open');
         });
     }
     
@@ -61,8 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 setActiveButton(button);
                 
                 // Optionally close sidebar on mobile after selection
-                if (window.innerWidth <= 768 && sidebar && !sidebar.classList.contains('collapsed')) {
-                    sidebar.classList.add('collapsed');
+                if (window.innerWidth <= 768 && sidebar && sidebar.classList.contains('open')) {
+                    sidebar.classList.remove('open');
                 }
             }
         });
