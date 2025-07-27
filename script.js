@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchBtn = document.getElementById('search-btn');
     const sidebar = document.getElementById('sidebar');
     const sidebarToggle = document.getElementById('sidebar-toggle');
+    const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
     const newFileBtn = document.getElementById('new-file-btn');
     const fileList = document.getElementById('file-list');
     const activeFilesContainer = document.getElementById('active-files');
@@ -47,6 +48,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event Listeners
     sidebarToggle.addEventListener('click', () => {
         sidebar.classList.toggle('open');
+    });
+
+    sidebarCloseBtn.addEventListener('click', () => {
+        sidebar.classList.remove('open');
     });
 
     newFileBtn.addEventListener('click', () => {

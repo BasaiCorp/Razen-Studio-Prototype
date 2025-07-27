@@ -54,6 +54,13 @@ body {
     transform: translateX(0);
 }
 
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
 .main-content {
     flex: 1;
     display: flex;
@@ -309,6 +316,7 @@ footer {
     padding: 2rem;
     border-radius: 8px;
     text-align: center;
+    margin: 1rem;
 }
 
 .popup-buttons {
