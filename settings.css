@@ -154,6 +154,23 @@ body.light-theme {
         padding: 0.75rem;
     }
 }
+
+.header-left {
+    padding-bottom: 10px;
+}
+
+.changelogs-content {
+    padding: 2rem;
+}
+
+.settings-btn-sidebar {
+    margin-bottom: 10px;
+}
+
+.sidebar-version {
+    margin-bottom: -8px;
+}
+
 /* --- End of Responsive Adjustments --- */
 
 /* Reduce header padding on settings page */
