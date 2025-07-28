@@ -425,8 +425,8 @@ body.light-theme #code-editor {
     }
 
     .toolbar .btn {
-        flex-grow: 1;
-        min-width: 100px;
+        flex-grow: 0;
+        min-width: auto;
     }
     
     .status-bar {
