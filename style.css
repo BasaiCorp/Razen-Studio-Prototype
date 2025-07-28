@@ -421,7 +421,6 @@ body.light-theme #code-editor {
     }
 
     .toolbar {
-        flex-wrap: wrap;
         padding: 0.5rem;
     }
 
