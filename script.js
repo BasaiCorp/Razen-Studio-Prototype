@@ -216,20 +216,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function detectLanguageFromExtension(fileName) {
         const ext = fileName.split('.').pop();
-        switch (ext) {
-            case 'js':
-                return 'javascript';
-            case 'py':
-                return 'python';
-            case 'rzn':
-                return 'razor';
-            default:
-                return 'plaintext';
-        }
+        const languages = {
+            'js': 'javascript',
+            'py': 'python',
+            'rzn': 'razor',
+            'html': 'html',
+            'css': 'css',
+            'ts': 'typescript',
+            'java': 'java',
+            'cs': 'csharp',
+            'cpp': 'cpp',
+            'go': 'go',
+            'php': 'php',
+            'rb': 'ruby',
+            'rs': 'rust',
+            'sql': 'sql',
+            'swift': 'swift',
+            'kt': 'kotlin',
+            'lua': 'lua',
+            'pl': 'perl',
+            'sh': 'shell',
+            'bat': 'bat',
+            'json': 'json',
+            'xml': 'xml',
+            'yaml': 'yaml',
+            'md': 'markdown',
+        };
+        return languages[ext] || 'plaintext';
     }
 
     require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs' } });
     require(['vs/editor/editor.main'], function () {
+        monaco.languages.register({ id: 'razor' });
+
+        monaco.languages.setMonarchTokensProvider('razor', {
+            tokenizer: {
+                root: [
+                    [/".*?"/, "string"],
+                    [/\b\d+\b/, "number"],
+                    [/\b(if|else|for|while|return)\b/, "keyword"],
+                    [/#.*/, "comment"],
+                ]
+            }
+        });
+
         monaco.editor.defineTheme('razen-dark', {
             base: 'vs-dark',
             inherit: true,
@@ -268,6 +298,11 @@ document.addEventListener('DOMContentLoaded', () => {
             minimap: { enabled: false },
             suggestOnTriggerCharacters: true,
             wordWrap: 'on',
+            folding: true,
+            bracketPairColorization: {
+                enabled: true
+            },
+            'semanticHighlighting.enabled': true,
         });
 
         editor.onDidChangeModelContent(() => {
