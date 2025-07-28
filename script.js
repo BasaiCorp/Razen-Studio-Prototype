@@ -145,7 +145,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function highlightSyntax() {
         const code = codeEditor.value;
-        const highlightedCode = Prism.highlight(code, Prism.languages.razen, 'razen');
+        const language = activeFileId ? getLanguage(files[activeFileId].name) : getLanguage('.rzn');
+        const highlightedCode = Prism.highlight(code, language, language);
         highlightingContent.innerHTML = highlightedCode + '\n';
     }
     
@@ -461,7 +462,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!fileName) {
             return;
         }
-        fileName += ".rzn";
+        if (!fileName.includes('.')) {
+            fileName += ".rzn";
+        }
 
         const fileId = `file-${fileCounter}`;
         files[fileId] = { id: fileId, name: fileName, content: '' };
