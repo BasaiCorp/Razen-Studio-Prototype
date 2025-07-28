@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('theme', newTheme);
 
         if (editor) {
-            monaco.editor.setTheme(isLightTheme ? 'vs' : 'vs-dark');
+            monaco.editor.setTheme(isLightTheme ? 'razen-light' : 'razen-dark');
         }
 
         // Update button text and icon based on the new theme
@@ -107,7 +107,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!fileName) {
             return;
         }
-        fileName += ".rzn";
+        if (!fileName.includes('.')) {
+            fileName += ".rzn";
+        }
 
         const fileId = `file-${fileCounter}`;
         files[fileId] = { id: fileId, name: fileName, content: '' };
@@ -228,10 +230,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs' } });
     require(['vs/editor/editor.main'], function () {
+        monaco.editor.defineTheme('razen-dark', {
+            base: 'vs-dark',
+            inherit: true,
+            rules: [
+                { token: 'comment', foreground: '608b4e', fontStyle: 'italic' },
+                { token: 'string', foreground: 'ce9178' },
+                { token: 'number', foreground: 'b5cea8' },
+                { token: 'keyword', foreground: 'c586c0', fontStyle: 'bold' },
+            ],
+            colors: {
+                'editor.background': '#1e1e2e',
+            }
+        });
+
+        monaco.editor.defineTheme('razen-light', {
+            base: 'vs',
+            inherit: true,
+            rules: [
+                { token: 'comment', foreground: '6a737d', fontStyle: 'italic' },
+                { token: 'string', foreground: '032f62' },
+                { token: 'number', foreground: '005cc5' },
+                { token: 'keyword', foreground: 'd73a49', fontStyle: 'bold' },
+            ],
+            colors: {
+                'editor.background': '#ffffff',
+            }
+        });
+
         editor = monaco.editor.create(document.getElementById('editor'), {
             value: '',
             language: 'plaintext',
-            theme: document.body.classList.contains('light-theme') ? 'vs' : 'vs-dark',
+            theme: document.body.classList.contains('light-theme') ? 'razen-light' : 'razen-dark',
             fontFamily: 'JetBrains Mono',
             automaticLayout: true,
             lineNumbers: 'on',

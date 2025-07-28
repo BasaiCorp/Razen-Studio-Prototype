@@ -203,7 +203,7 @@ main {
     height: 100%;
     width: 100%;
     border-radius: 8px;
-    background-color: var(--bg-editor);
+    background-color: var(--bg-primary);
     font-family: 'JetBrains Mono', monospace;
 }
 
