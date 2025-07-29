@@ -379,6 +379,11 @@ footer {
     font-family: 'JetBrains Mono', monospace;
 }
 
+.preview-pane {
+    height: 40%;
+    border-top: 1px solid var(--border-color);
+}
+
 /* Light theme */
 body.light-theme {
     --bg-primary: #ffffff;
