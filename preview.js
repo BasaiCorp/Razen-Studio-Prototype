@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     exitPreviewBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        window.parent.postMessage('exit-preview', '*');
+        window.close();
     });
 
     desktopModeBtn.addEventListener('click', (e) => {

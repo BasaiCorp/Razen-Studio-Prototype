@@ -32,7 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const filenameConfirm = document.getElementById('filename-confirm');
     const filenameCancel = document.getElementById('filename-cancel');
     const runBtn = document.getElementById('run-btn');
-    const previewIframe = document.getElementById('preview-iframe');
 
     // State
     let files = {};
@@ -140,10 +139,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const cssContent = cssFile ? cssFile.content : '';
         const jsContent = jsFile ? jsFile.content : '';
 
-        previewIframe.src = 'preview.html';
+        const previewWindow = window.open('preview.html', 'preview');
 
-        previewIframe.onload = () => {
-            previewIframe.contentWindow.postMessage({
+        previewWindow.onload = () => {
+            previewWindow.postMessage({
                 type: 'code',
                 html: htmlContent,
                 css: cssContent,
@@ -154,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('message', (event) => {
         if (event.data === 'exit-preview') {
-            previewIframe.style.display = 'none';
+            // This is handled in the preview window itself
         }
     });
 
