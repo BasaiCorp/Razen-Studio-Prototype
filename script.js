@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const filenameInput = document.getElementById('filename-input');
     const filenameConfirm = document.getElementById('filename-confirm');
     const filenameCancel = document.getElementById('filename-cancel');
+    const runBtn = document.getElementById('run-btn');
 
     // State
     let files = {};
@@ -122,6 +123,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     filenameConfirm.addEventListener('click', createNewFile);
     filenameCancel.addEventListener('click', hideFilenamePopup);
+    runBtn.addEventListener('click', runCode);
+
+    function runCode() {
+        const htmlFile = Object.values(files).find(file => file.name.endsWith('.html'));
+        if (!htmlFile) {
+            alert('No HTML file found to preview.');
+            return;
+        }
+
+        const cssFile = Object.values(files).find(file => file.name.endsWith('.css'));
+        const jsFile = Object.values(files).find(file => file.name.endsWith('.js'));
+
+        const htmlContent = htmlFile ? htmlFile.content : '';
+        const cssContent = cssFile ? cssFile.content : '';
+        const jsContent = jsFile ? jsFile.content : '';
+
+        const previewWindow = window.open('preview.html', 'preview');
+
+        previewWindow.onload = () => {
+            previewWindow.postMessage({
+                type: 'code',
+                html: htmlContent,
+                css: cssContent,
+                js: jsContent,
+            }, '*');
+        };
+    }
+
+    window.addEventListener('message', (event) => {
+        if (event.data === 'exit-preview') {
+            // This is handled in the preview window itself
+        }
+    });
 
     function renderFileList() {
         fileList.innerHTML = '';
