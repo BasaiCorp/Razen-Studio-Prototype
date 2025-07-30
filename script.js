@@ -157,6 +157,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Global click listener to close file context menus
+    window.addEventListener('click', (e) => {
+        document.querySelectorAll('.file-options-dropdown.show').forEach(dropdown => {
+            // Check if the click was outside the dropdown and its button
+            const button = dropdown.previousElementSibling;
+            if (!button.contains(e.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+    });
+
     function renderFileList() {
         fileList.innerHTML = '';
         for (const fileId in files) {

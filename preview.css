@@ -22,13 +22,14 @@ body {
 }
 
 #preview-manage-btn {
-    /* Uses the .btn class from style.css */
+    /* Now uses .btn and .s-btn from style.css */
+    font-size: 1rem; /* Ensure icon is a good size */
 }
 
 .dropdown-content {
     display: none; /* Initially hidden */
     position: absolute;
-    top: 100%;
+    top: calc(100% + 5px); /* Position below the header with a small gap */
     right: 0.75rem;
     background-color: var(--bg-tertiary);
     min-width: 200px;
