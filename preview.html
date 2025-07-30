@@ -10,18 +10,23 @@
 <body>
     <div class="preview-container">
         <div class="preview-header">
-            <div class="dropdown">
-                <button class="dropdown-btn">
-                    <i class="fas fa-ellipsis-v"></i>
-                </button>
-                <div class="dropdown-content">
-                    <a href="#" id="exit-preview">Exit Preview</a>
-                    <a href="#" id="desktop-mode">Desktop Mode</a>
-                </div>
+            <button id="preview-manage-btn" class="btn s-btn" title="Preview Options">
+                <i class="fas fa-sliders-h"></i>
+            </button>
+            <div id="preview-dropdown" class="dropdown-content" style="display: none;">
+                <a href="#" id="exit-preview"><i class="fas fa-sign-out-alt"></i> Exit Preview</a>
+                <a href="#" id="desktop-mode"><i class="fas fa-desktop"></i> Desktop Mode</a>
+                <a href="#" id="console-log"><i class="fas fa-terminal"></i> Console</a>
             </div>
         </div>
         <div id="content" class="preview-content"></div>
     </div>
+
+    <!-- Reload Toast Notification -->
+    <div id="reload-toast" class="toast">
+        <i class="fas fa-check-circle"></i> Content successfully reloaded!
+    </div>
+
     <script src="preview.js"></script>
 </body>
 </html>

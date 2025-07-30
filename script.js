@@ -157,6 +157,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Global click listener to close file context menus
+    window.addEventListener('click', (e) => {
+        document.querySelectorAll('.file-options-dropdown.show').forEach(dropdown => {
+            // Check if the click was outside the dropdown and its button
+            const button = dropdown.previousElementSibling;
+            if (!button.contains(e.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+    });
+
     function renderFileList() {
         fileList.innerHTML = '';
         for (const fileId in files) {
@@ -164,20 +175,95 @@ document.addEventListener('DOMContentLoaded', () => {
             const fileItem = document.createElement('div');
             fileItem.className = 'file-item';
             fileItem.dataset.fileId = file.id;
-            fileItem.textContent = file.name;
 
-            const closeBtn = document.createElement('button');
-            closeBtn.className = 'close-btn';
-            closeBtn.innerHTML = '<i class="fas fa-times"></i>';
-            closeBtn.addEventListener('click', (e) => {
+            const fileNameSpan = document.createElement('span');
+            fileNameSpan.textContent = file.name;
+            fileItem.appendChild(fileNameSpan);
+
+            const optionsBtn = document.createElement('button');
+            optionsBtn.className = 'btn s-btn file-options-btn';
+            optionsBtn.innerHTML = '<i class="fas fa-ellipsis-v"></i>';
+
+            const dropdown = createFileContextMenu(file);
+            fileItem.appendChild(dropdown);
+
+            optionsBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                showPopup(`Are you sure you want to close ${file.name}?`, () => closeFile(file.id));
+                // Close other dropdowns
+                document.querySelectorAll('.file-options-dropdown.show').forEach(d => {
+                    if (d !== dropdown) d.classList.remove('show');
+                });
+                dropdown.classList.toggle('show');
             });
 
-            fileItem.appendChild(closeBtn);
+            fileItem.appendChild(optionsBtn);
             fileItem.addEventListener('click', () => setActiveFile(file.id));
             fileList.appendChild(fileItem);
         }
+    }
+
+    function createFileContextMenu(file) {
+        const dropdown = document.createElement('div');
+        dropdown.className = 'file-options-dropdown';
+
+        // Download
+        const downloadLink = document.createElement('a');
+        downloadLink.innerHTML = '<i class="fas fa-download"></i> Download';
+        downloadLink.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const blob = new Blob([file.content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = file.name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            dropdown.classList.remove('show');
+        });
+        dropdown.appendChild(downloadLink);
+
+        // Copy Content
+        const copyLink = document.createElement('a');
+        copyLink.innerHTML = '<i class="fas fa-copy"></i> Copy Content';
+        copyLink.addEventListener('click', (e) => {
+            e.stopPropagation();
+            navigator.clipboard.writeText(file.content).then(() => {
+                alert(`${file.name} content copied to clipboard!`);
+            }).catch(err => console.error('Failed to copy content: ', err));
+            dropdown.classList.remove('show');
+        });
+        dropdown.appendChild(copyLink);
+
+        // Preview (only for HTML)
+        if (file.name.endsWith('.html')) {
+            const previewLink = document.createElement('a');
+            previewLink.innerHTML = '<i class="fas fa-eye"></i> Preview';
+            previewLink.addEventListener('click', (e) => {
+                e.stopPropagation();
+                runCode();
+                dropdown.classList.remove('show');
+            });
+            dropdown.appendChild(previewLink);
+        }
+
+        // Separator
+        const separator = document.createElement('div');
+        separator.className = 'dropdown-separator';
+        dropdown.appendChild(separator);
+
+        // Close
+        const closeLink = document.createElement('a');
+        closeLink.innerHTML = '<i class="fas fa-times"></i> Close';
+        closeLink.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showPopup(`Are you sure you want to close ${file.name}?`, () => closeFile(file.id));
+            dropdown.classList.remove('show');
+        });
+        dropdown.appendChild(closeLink);
+
+        return dropdown;
     }
 
     function renderActiveFiles() {
@@ -195,15 +281,23 @@ document.addEventListener('DOMContentLoaded', () => {
             activeFileDiv.dataset.fileId = file.id;
             activeFileDiv.textContent = file.name;
 
-            const closeBtn = document.createElement('button');
-            closeBtn.className = 'close-btn';
-            closeBtn.innerHTML = '<i class="fas fa-times"></i>';
-            closeBtn.addEventListener('click', (e) => {
+            const optionsBtn = document.createElement('button');
+            optionsBtn.className = 'btn s-btn file-options-btn';
+            optionsBtn.innerHTML = '<i class="fas fa-ellipsis-v"></i>';
+
+            const dropdown = createFileContextMenu(file);
+            activeFileDiv.appendChild(dropdown);
+
+            optionsBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                showPopup(`Are you sure you want to close ${file.name}?`, () => closeFile(file.id));
+                // Close other dropdowns
+                document.querySelectorAll('.file-options-dropdown.show').forEach(d => {
+                    if (d !== dropdown) d.classList.remove('show');
+                });
+                dropdown.classList.toggle('show');
             });
 
-            activeFileDiv.appendChild(closeBtn);
+            activeFileDiv.appendChild(optionsBtn);
             activeFileDiv.addEventListener('click', () => setActiveFile(file.id));
             activeFilesContainer.appendChild(activeFileDiv);
         }
