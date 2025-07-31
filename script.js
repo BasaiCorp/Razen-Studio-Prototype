@@ -31,6 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const filenameConfirm = document.getElementById('filename-confirm');
     const filenameCancel = document.getElementById('filename-cancel');
     const runBtn = document.getElementById('run-btn');
+    const previewModal = document.getElementById('preview-modal');
+    const previewIframe = document.getElementById('preview-iframe');
+    const previewModalCloseBtn = document.getElementById('preview-modal-close-btn');
 
     // State
     let files = {};
@@ -205,6 +208,10 @@ document.addEventListener('DOMContentLoaded', () => {
     filenameConfirm.addEventListener('click', createNewFile);
     filenameCancel.addEventListener('click', hideFilenamePopup);
     addToolbarButtonListener(runBtn, runCode);
+    previewModalCloseBtn.addEventListener('click', () => {
+        previewModal.style.display = 'none';
+        previewIframe.srcdoc = ''; // Clear content to stop any running scripts
+    });
 
     function runCode() {
         const htmlFile = Object.values(files).find(file => file.name.endsWith('.html'));
@@ -220,23 +227,40 @@ document.addEventListener('DOMContentLoaded', () => {
         const cssContent = cssFile ? cssFile.content : '';
         const jsContent = jsFile ? jsFile.content : '';
 
-        const previewWindow = window.open('preview.html', 'preview');
+        const iframeContent = `
+            <html>
+                <head>
+                    <style>${cssContent}</style>
+                </head>
+                <body>
+                    ${htmlContent}
+                    <script>${jsContent}<\/script>
+                </body>
+            </html>
+        `;
 
-        previewWindow.onload = () => {
-            previewWindow.postMessage({
-                type: 'code',
-                html: htmlContent,
-                css: cssContent,
-                js: jsContent,
-            }, '*');
+        previewIframe.srcdoc = iframeContent;
+        previewModal.style.display = 'flex';
+
+        // Intercept links in the iframe
+        previewIframe.onload = () => {
+            try {
+                const iframeDoc = previewIframe.contentWindow.document;
+                const links = iframeDoc.getElementsByTagName('a');
+                for (let link of links) {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const href = e.target.getAttribute('href');
+                        // Optional: Inform the user that navigation is blocked.
+                        // You can use a custom popup or a simple alert.
+                        alert(`Navigation to "${href}" is blocked in preview mode.`);
+                    });
+                }
+            } catch (e) {
+                console.error("Could not attach link listeners to iframe:", e);
+            }
         };
     }
-
-    window.addEventListener('message', (event) => {
-        if (event.data === 'exit-preview') {
-            // This is handled in the preview window itself
-        }
-    });
 
     // Global click listener to close file context menus
     window.addEventListener('click', (e) => {
