@@ -538,8 +538,7 @@ document.addEventListener('DOMContentLoaded', () => {
             : '<i class="fas fa-sun"></i>';
     }
 
-    // Create a welcome file
-    filenameInput.value = "welcome.rzn";
-    createNewFile();
-    hideFilenamePopup();
+    // A welcome file is not created by default anymore to ensure stability.
+
+    console.log("Razen Studio Initialized Successfully");
 });
