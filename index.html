@@ -76,6 +76,24 @@
         </div>
     </div>
 
+    <div id="preview-modal" class="preview-modal" style="display: none;">
+        <div class="preview-modal-content">
+            <div class="preview-modal-header">
+                <h2>Preview</h2>
+                <div class="preview-mode-controls">
+                    <button id="preview-mode-desktop" class="btn active">Desktop</button>
+                    <button id="preview-mode-mobile" class="btn">Mobile</button>
+                    <button id="preview-mode-custom" class="btn">Custom</button>
+                </div>
+                <button id="preview-modal-close-btn" class="btn">&times;</button>
+            </div>
+            <div class="preview-modal-body">
+                <iframe id="preview-iframe"></iframe>
+            </div>
+            <div class="preview-resize-handle"></div>
+        </div>
+    </div>
+
     <div id="custom-popup" class="popup-container" style="display: none;">
         <div class="popup-content">
             <p id="popup-message"></p>

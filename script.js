@@ -31,6 +31,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const filenameConfirm = document.getElementById('filename-confirm');
     const filenameCancel = document.getElementById('filename-cancel');
     const runBtn = document.getElementById('run-btn');
+    const previewModal = document.getElementById('preview-modal');
+    const previewIframe = document.getElementById('preview-iframe');
+    const previewModalCloseBtn = document.getElementById('preview-modal-close-btn');
+    const previewModeDesktopBtn = document.getElementById('preview-mode-desktop');
+    const previewModeMobileBtn = document.getElementById('preview-mode-mobile');
+    const previewModeCustomBtn = document.getElementById('preview-mode-custom');
+    const previewResizeHandle = document.querySelector('.preview-resize-handle');
+    const previewModalContent = document.querySelector('.preview-modal-content');
 
     // State
     let files = {};
@@ -205,6 +213,52 @@ document.addEventListener('DOMContentLoaded', () => {
     filenameConfirm.addEventListener('click', createNewFile);
     filenameCancel.addEventListener('click', hideFilenamePopup);
     addToolbarButtonListener(runBtn, runCode);
+    previewModalCloseBtn.addEventListener('click', () => {
+        previewModal.style.display = 'none';
+        previewIframe.srcdoc = ''; // Clear content to stop any running scripts
+    });
+
+    // Preview Mode Switching
+    const modeButtons = [previewModeDesktopBtn, previewModeMobileBtn, previewModeCustomBtn];
+    const modes = ['preview-desktop', 'preview-mobile', 'preview-custom'];
+
+    modeButtons.forEach((button, index) => {
+        button.addEventListener('click', () => {
+            modeButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            previewModalContent.classList.remove(...modes);
+            previewModalContent.classList.add(modes[index]);
+        });
+    });
+
+    // Resizing Logic
+    let isResizing = false;
+
+    previewResizeHandle.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        isResizing = true;
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const startWidth = previewModalContent.offsetWidth;
+        const startHeight = previewModalContent.offsetHeight;
+
+        const doDrag = (e) => {
+            if (!isResizing) return;
+            const newWidth = startWidth + (e.clientX - startX);
+            const newHeight = startHeight + (e.clientY - startY);
+            previewModalContent.style.width = `${newWidth > 300 ? newWidth : 300}px`;
+            previewModalContent.style.height = `${newHeight > 200 ? newHeight : 200}px`;
+        };
+
+        const stopDrag = () => {
+            isResizing = false;
+            document.removeEventListener('mousemove', doDrag);
+            document.removeEventListener('mouseup', stopDrag);
+        };
+
+        document.addEventListener('mousemove', doDrag);
+        document.addEventListener('mouseup', stopDrag);
+    });
 
     function runCode() {
         const htmlFile = Object.values(files).find(file => file.name.endsWith('.html'));
@@ -220,23 +274,40 @@ document.addEventListener('DOMContentLoaded', () => {
         const cssContent = cssFile ? cssFile.content : '';
         const jsContent = jsFile ? jsFile.content : '';
 
-        const previewWindow = window.open('preview.html', 'preview');
+        const iframeContent = `
+            <html>
+                <head>
+                    <style>${cssContent}</style>
+                </head>
+                <body>
+                    ${htmlContent}
+                    <script>${jsContent}<\/script>
+                </body>
+            </html>
+        `;
 
-        previewWindow.onload = () => {
-            previewWindow.postMessage({
-                type: 'code',
-                html: htmlContent,
-                css: cssContent,
-                js: jsContent,
-            }, '*');
+        previewIframe.srcdoc = iframeContent;
+        previewModal.style.display = 'flex';
+
+        // Intercept links in the iframe
+        previewIframe.onload = () => {
+            try {
+                const iframeDoc = previewIframe.contentWindow.document;
+                const links = iframeDoc.getElementsByTagName('a');
+                for (let link of links) {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const href = e.target.getAttribute('href');
+                        // Optional: Inform the user that navigation is blocked.
+                        // You can use a custom popup or a simple alert.
+                        alert(`Navigation to "${href}" is blocked in preview mode.`);
+                    });
+                }
+            } catch (e) {
+                console.error("Could not attach link listeners to iframe:", e);
+            }
         };
     }
-
-    window.addEventListener('message', (event) => {
-        if (event.data === 'exit-preview') {
-            // This is handled in the preview window itself
-        }
-    });
 
     // Global click listener to close file context menus
     window.addEventListener('click', (e) => {
