@@ -10,6 +10,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const redoBtn = document.getElementById('redo-btn');
     const bracketBtn = document.getElementById('bracket-btn');
     const searchBtn = document.getElementById('search-btn');
+    const cursorUpBtn = document.getElementById('cursor-up-btn');
+    const cursorDownBtn = document.getElementById('cursor-down-btn');
+    const cursorLeftBtn = document.getElementById('cursor-left-btn');
+    const cursorRightBtn = document.getElementById('cursor-right-btn');
+    const selectBtn = document.getElementById('select-btn');
+    const selectAllBtn = document.getElementById('select-all-btn');
     const sidebar = document.getElementById('sidebar');
     const sidebarToggle = document.getElementById('sidebar-toggle');
     const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
@@ -85,6 +91,49 @@ document.addEventListener('DOMContentLoaded', () => {
     searchBtn.addEventListener('click', () => {
         if (editor) {
             editor.getAction('editor.action.startFindReplaceAction').run();
+            editor.focus();
+        }
+    });
+
+    cursorUpBtn.addEventListener('click', () => {
+        if (editor) {
+            editor.trigger('toolbar', 'cursorUp');
+            editor.focus();
+        }
+    });
+
+    cursorDownBtn.addEventListener('click', () => {
+        if (editor) {
+            editor.trigger('toolbar', 'cursorDown');
+            editor.focus();
+        }
+    });
+
+    cursorLeftBtn.addEventListener('click', () => {
+        if (editor) {
+            editor.trigger('toolbar', 'cursorLeft');
+            editor.focus();
+        }
+    });
+
+    cursorRightBtn.addEventListener('click', () => {
+        if (editor) {
+            editor.trigger('toolbar', 'cursorRight');
+            editor.focus();
+        }
+    });
+
+    selectBtn.addEventListener('click', () => {
+        if (editor) {
+            editor.getAction('editor.action.smartSelect.expand').run();
+            editor.focus();
+        }
+    });
+
+    selectAllBtn.addEventListener('click', () => {
+        if (editor) {
+            editor.getAction('editor.action.selectAll').run();
+            editor.focus();
         }
     });
 
