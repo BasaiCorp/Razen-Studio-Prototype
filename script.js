@@ -34,6 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const previewModal = document.getElementById('preview-modal');
     const previewIframe = document.getElementById('preview-iframe');
     const previewModalCloseBtn = document.getElementById('preview-modal-close-btn');
+    const previewModeDesktopBtn = document.getElementById('preview-mode-desktop');
+    const previewModeMobileBtn = document.getElementById('preview-mode-mobile');
+    const previewModeCustomBtn = document.getElementById('preview-mode-custom');
+    const previewResizeHandle = document.querySelector('.preview-resize-handle');
+    const previewModalContent = document.querySelector('.preview-modal-content');
 
     // State
     let files = {};
@@ -211,6 +216,48 @@ document.addEventListener('DOMContentLoaded', () => {
     previewModalCloseBtn.addEventListener('click', () => {
         previewModal.style.display = 'none';
         previewIframe.srcdoc = ''; // Clear content to stop any running scripts
+    });
+
+    // Preview Mode Switching
+    const modeButtons = [previewModeDesktopBtn, previewModeMobileBtn, previewModeCustomBtn];
+    const modes = ['preview-desktop', 'preview-mobile', 'preview-custom'];
+
+    modeButtons.forEach((button, index) => {
+        button.addEventListener('click', () => {
+            modeButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            previewModalContent.classList.remove(...modes);
+            previewModalContent.classList.add(modes[index]);
+        });
+    });
+
+    // Resizing Logic
+    let isResizing = false;
+
+    previewResizeHandle.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        isResizing = true;
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const startWidth = previewModalContent.offsetWidth;
+        const startHeight = previewModalContent.offsetHeight;
+
+        const doDrag = (e) => {
+            if (!isResizing) return;
+            const newWidth = startWidth + (e.clientX - startX);
+            const newHeight = startHeight + (e.clientY - startY);
+            previewModalContent.style.width = `${newWidth > 300 ? newWidth : 300}px`;
+            previewModalContent.style.height = `${newHeight > 200 ? newHeight : 200}px`;
+        };
+
+        const stopDrag = () => {
+            isResizing = false;
+            document.removeEventListener('mousemove', doDrag);
+            document.removeEventListener('mouseup', stopDrag);
+        };
+
+        document.addEventListener('mousemove', doDrag);
+        document.addEventListener('mouseup', stopDrag);
     });
 
     function runCode() {
