@@ -1,10 +1,24 @@
-// script.js
+import { EditorState, Compartment } from "https://esm.sh/@codemirror/state";
+import { EditorView, keymap, lineNumbers, highlightActiveLine, highlightActiveLineGutter } from "https://esm.sh/@codemirror/view";
+import { defaultKeymap, history, indentWithTab, undo, redo } from "https://esm.sh/@codemirror/commands";
+import { search, searchKeymap, openSearchPanel, findNext, findPrevious, replaceNext, replaceAll, SearchQuery } from "https://esm.sh/@codemirror/search";
+import { javascript } from "https://esm.sh/@codemirror/lang-javascript";
+import { html } from "https://esm.sh/@codemirror/lang-html";
+import { css } from "https://esm.sh/@codemirror/lang-css";
+import { python } from "https://esm.sh/@codemirror/lang-python";
+import { rust } from "https://esm.sh/@codemirror/lang-rust";
+import { java } from "https://esm.sh/@codemirror/lang-java";
+import { cpp } from "https://esm.sh/@codemirror/lang-cpp";
+import { json } from "https://esm.sh/@codemirror/lang-json";
+import { markdown } from "https://esm.sh/@codemirror/lang-markdown";
+import { autocompletion, completionKeymap, closeBrackets, closeBracketsKeymap } from "https://esm.sh/@codemirror/autocomplete";
+import { bracketMatching, StreamLanguage, HighlightStyle, tags } from "https://esm.sh/@codemirror/language";
+
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const copyBtn = document.getElementById('copy-btn');
     const themeToggle = document.getElementById('theme-toggle');
     const cursorPosition = document.getElementById('cursor-position');
-    const autocompleteSuggestions = document.getElementById('autocomplete-suggestions');
     const tabBtn = document.getElementById('tab-btn');
     const undoBtn = document.getElementById('undo-btn');
     const redoBtn = document.getElementById('redo-btn');
@@ -39,25 +53,23 @@ document.addEventListener('DOMContentLoaded', () => {
     let fileCounter = 1;
     let editor;
 
+    // Codemirror specific compartments
+    let language = new Compartment,
+        theme = new Compartment;
+
     // Event Listeners
-    sidebarToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('open');
-    });
-
-    sidebarCloseBtn.addEventListener('click', () => {
-        sidebar.classList.remove('open');
-    });
-
-    newFileBtn.addEventListener('click', () => {
-        showFilenamePopup();
-    });
-    
+    sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+    sidebarCloseBtn.addEventListener('click', () => sidebar.classList.remove('open'));
+    newFileBtn.addEventListener('click', () => showFilenamePopup());
     copyBtn.addEventListener('click', copyCode);
     themeToggle.addEventListener('click', toggleTheme);
+    undoBtn.addEventListener('click', () => { if (editor) undo({state: editor.state, dispatch: editor.dispatch}) });
+    redoBtn.addEventListener('click', () => { if (editor) redo({state: editor.state, dispatch: editor.dispatch}) });
+    tabBtn.addEventListener('click', () => { if (editor) indentWithTab({state: editor.state, dispatch: editor.dispatch}) });
 
     function copyCode() {
         if (editor) {
-            navigator.clipboard.writeText(editor.getValue())
+            navigator.clipboard.writeText(editor.state.doc.toString())
                 .then(() => {
                     const originalText = copyBtn.innerHTML;
                     copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
@@ -72,19 +84,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function toggleTheme() {
-        const isLightTheme = document.body.classList.toggle('light-theme');
-        const newTheme = isLightTheme ? 'light-theme' : 'dark-theme';
-        localStorage.setItem('theme', newTheme);
+        document.body.classList.toggle('light-theme');
+        const isLightTheme = document.body.classList.contains('light-theme');
+        localStorage.setItem('theme', isLightTheme ? 'light-theme' : 'dark-theme');
 
-        if (editor) {
-            monaco.editor.setTheme(isLightTheme ? 'razen-light' : 'razen-dark');
-        }
+        const themeExtension = isLightTheme
+            ? [razenLightTheme, razenLightHighlight]
+            : [razenDarkTheme, razenDarkHighlight];
 
-        // Update button text and icon based on the new theme
+        editor.dispatch({
+            effects: theme.reconfigure(themeExtension)
+        });
+
         if (themeToggle) {
             themeToggle.innerHTML = isLightTheme
-                ? '<i class="fas fa-sun"></i> Light'
-                : '<i class="fas fa-moon"></i> Dark';
+                ? '<i class="fas fa-moon"></i>'
+                : '<i class="fas fa-sun"></i>';
         }
     }
 
@@ -157,12 +172,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Global click listener to close file context menus
     window.addEventListener('click', (e) => {
         document.querySelectorAll('.file-options-dropdown.show').forEach(dropdown => {
-            // Check if the click was outside the dropdown and its button
             const button = dropdown.previousElementSibling;
-            if (!button.contains(e.target)) {
+            if (button && !button.contains(e.target)) {
                 dropdown.classList.remove('show');
             }
         });
@@ -189,7 +202,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             optionsBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                // Close other dropdowns
                 document.querySelectorAll('.file-options-dropdown.show').forEach(d => {
                     if (d !== dropdown) d.classList.remove('show');
                 });
@@ -206,7 +218,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const dropdown = document.createElement('div');
         dropdown.className = 'file-options-dropdown';
 
-        // Download
         const downloadLink = document.createElement('a');
         downloadLink.innerHTML = '<i class="fas fa-download"></i> Download';
         downloadLink.addEventListener('click', (e) => {
@@ -224,7 +235,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         dropdown.appendChild(downloadLink);
 
-        // Copy Content
         const copyLink = document.createElement('a');
         copyLink.innerHTML = '<i class="fas fa-copy"></i> Copy Content';
         copyLink.addEventListener('click', (e) => {
@@ -236,7 +246,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         dropdown.appendChild(copyLink);
 
-        // Preview (only for HTML)
         if (file.name.endsWith('.html')) {
             const previewLink = document.createElement('a');
             previewLink.innerHTML = '<i class="fas fa-eye"></i> Preview';
@@ -248,12 +257,10 @@ document.addEventListener('DOMContentLoaded', () => {
             dropdown.appendChild(previewLink);
         }
 
-        // Separator
         const separator = document.createElement('div');
         separator.className = 'dropdown-separator';
         dropdown.appendChild(separator);
 
-        // Close
         const closeLink = document.createElement('a');
         closeLink.innerHTML = '<i class="fas fa-times"></i> Close';
         closeLink.addEventListener('click', (e) => {
@@ -290,7 +297,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             optionsBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                // Close other dropdowns
                 document.querySelectorAll('.file-options-dropdown.show').forEach(d => {
                     if (d !== dropdown) d.classList.remove('show');
                 });
@@ -304,24 +310,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setActiveFile(fileId) {
-        if (!files[fileId]) return;
+        if (!files[fileId] || (fileId === activeFileId && editor)) return;
 
         activeFileId = fileId;
-        editor.setValue(files[fileId].content);
-        const model = editor.getModel();
-        monaco.editor.setModelLanguage(model, detectLanguageFromExtension(files[fileId].name));
+
+        const lang = detectLanguageFromExtension(files[fileId].name);
+        const langName = files[fileId].name.split('.').pop();
+        document.getElementById('language-indicator').textContent = langName.toUpperCase();
+
+        if (editor) {
+            editor.dispatch({
+                changes: { from: 0, to: editor.state.doc.length, insert: files[fileId].content },
+                effects: language.reconfigure(lang)
+            });
+        }
+
         renderActiveFiles();
-        editor.focus();
+        if (editor) editor.focus();
     }
 
     function closeFile(fileId) {
         delete files[fileId];
         if (activeFileId === fileId) {
-            activeFileId = Object.keys(files)[0] || null;
-            if (activeFileId) {
-                setActiveFile(activeFileId);
-            } else {
-                editor.setValue('');
+            activeFileId = null;
+            const nextFileId = Object.keys(files)[0] || null;
+            if (nextFileId) {
+                setActiveFile(nextFileId);
+            } else if (editor) {
+                editor.dispatch({
+                    changes: { from: 0, to: editor.state.doc.length, insert: "" }
+                });
             }
         }
         renderFileList();
@@ -342,101 +360,186 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    function detectLanguageFromExtension(fileName) {
-        const ext = fileName.split('.').pop();
-        const languages = {
-            'js': 'javascript',
-            'py': 'python',
-            'rzn': 'razor',
-            'html': 'html',
-            'css': 'css',
-            'ts': 'typescript',
-            'java': 'java',
-            'cs': 'csharp',
-            'cpp': 'cpp',
-            'go': 'go',
-            'php': 'php',
-            'rb': 'ruby',
-            'rs': 'rust',
-            'sql': 'sql',
-            'swift': 'swift',
-            'kt': 'kotlin',
-            'lua': 'lua',
-            'pl': 'perl',
-            'sh': 'shell',
-            'bat': 'bat',
-            'json': 'json',
-            'xml': 'xml',
-            'yaml': 'yaml',
-            'md': 'markdown',
-        };
-        return languages[ext] || 'plaintext';
+    const razorLanguage = StreamLanguage.define({
+        token(stream) {
+            if (stream.match(/".*?"/)) return "string";
+            if (stream.match(/\b\d+\b/)) return "number";
+            if (stream.match(/\b(if|else|for|while|return)\b/)) return "keyword";
+            if (stream.match(/#.*/)) return "comment";
+            stream.next();
+            return null;
+        }
+    });
+
+    function razor() {
+        return razorLanguage;
     }
 
-    require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs' } });
-    require(['vs/editor/editor.main'], function () {
-        monaco.languages.register({ id: 'razor' });
+    const razenDarkHighlight = HighlightStyle.define([
+      { tag: tags.keyword, color: "#c586c0", fontWeight: "bold" },
+      { tag: tags.comment, color: "#608b4e", fontStyle: "italic" },
+      { tag: tags.string, color: "#ce9178" },
+      { tag: tags.number, color: "#b5cea8" },
+    ]);
 
-        monaco.languages.setMonarchTokensProvider('razor', {
-            tokenizer: {
-                root: [
-                    [/".*?"/, "string"],
-                    [/\b\d+\b/, "number"],
-                    [/\b(if|else|for|while|return)\b/, "keyword"],
-                    [/#.*/, "comment"],
-                ]
-            }
+    const razenLightHighlight = HighlightStyle.define([
+      { tag: tags.keyword, color: "#d73a49", fontWeight: "bold" },
+      { tag: tags.comment, color: "#6a737d", fontStyle: "italic" },
+      { tag: tags.string, color: "#032f62" },
+      { tag: tags.number, color: "#005cc5" },
+    ]);
+
+    const razenDarkTheme = EditorView.theme({
+      "&": {
+        color: "#cdd6f4",
+        backgroundColor: "#1e1e2e",
+        fontFamily: "'JetBrains Mono', monospace"
+      },
+      ".cm-content": {
+        caretColor: "#cdd6f4"
+      },
+      "&.cm-focused .cm-cursor": {
+        borderLeftColor: "#cdd6f4"
+      },
+      ".cm-gutters": {
+        backgroundColor: "#1e1e2e",
+        color: "#6c7086",
+        border: "none"
+      },
+    }, {dark: true});
+
+    const razenLightTheme = EditorView.theme({
+        "&": {
+            color: "#333333",
+            backgroundColor: "#ffffff",
+            fontFamily: "'JetBrains Mono', monospace"
+        },
+        ".cm-content": {
+            caretColor: "#333333"
+        },
+        "&.cm-focused .cm-cursor": {
+            borderLeftColor: "#333333"
+        },
+        ".cm-gutters": {
+            backgroundColor: "#f5f5f5",
+            color: "#999999",
+            border: "none"
+        },
+    }, {dark: false});
+
+    function detectLanguageFromExtension(fileName) {
+        const ext = fileName.split('.').pop();
+        const languageMap = {
+            'js': javascript(),
+            'py': python(),
+            'html': html(),
+            'css': css(),
+            'java': java(),
+            'cpp': cpp(),
+            'rs': rust(),
+            'json': json(),
+            'md': markdown(),
+            'rzn': razor()
+        };
+        return languageMap[ext] || [];
+    }
+
+    function initializeEditor() {
+        const isLightTheme = document.body.classList.contains('light-theme');
+        const initialTheme = isLightTheme
+            ? [razenLightTheme, razenLightHighlight]
+            : [razenDarkTheme, razenDarkHighlight];
+
+        const state = EditorState.create({
+            doc: '',
+            extensions: [
+                lineNumbers(),
+                highlightActiveLineGutter(),
+                history(),
+                search(),
+                keymap.of([
+                    ...defaultKeymap,
+                    ...closeBracketsKeymap,
+                    ...completionKeymap,
+                    ...searchKeymap,
+                    indentWithTab,
+                ]),
+                bracketMatching(),
+                closeBrackets(),
+                autocompletion(),
+                highlightActiveLine(),
+                language.of([]),
+                theme.of(initialTheme),
+                EditorView.updateListener.of((update) => {
+                    if (update.docChanged && activeFileId && files[activeFileId]) {
+                        files[activeFileId].content = editor.state.doc.toString();
+                    }
+                    if (update.selectionSet) {
+                        const pos = editor.state.selection.main.head;
+                        const line = editor.state.doc.lineAt(pos);
+                        cursorPosition.textContent = `Line ${line.number}, Column ${pos - line.from + 1}`;
+                    }
+                })
+            ]
         });
 
-        monaco.editor.defineTheme('razen-dark', {
-            base: 'vs-dark',
-            inherit: true,
-            rules: [
-                { token: 'comment', foreground: '608b4e', fontStyle: 'italic' },
-                { token: 'string', foreground: 'ce9178' },
-                { token: 'number', foreground: 'b5cea8' },
-                { token: 'keyword', foreground: 'c586c0', fontStyle: 'bold' },
-            ],
-            colors: {
-                'editor.background': '#1e1e2e',
-            }
+        editor = new EditorView({
+            state,
+            parent: document.getElementById('editor')
         });
+    }
 
-        monaco.editor.defineTheme('razen-light', {
-            base: 'vs',
-            inherit: true,
-            rules: [
-                { token: 'comment', foreground: '6a737d', fontStyle: 'italic' },
-                { token: 'string', foreground: '032f62' },
-                { token: 'number', foreground: '005cc5' },
-                { token: 'keyword', foreground: 'd73a49', fontStyle: 'bold' },
-            ],
-            colors: {
-                'editor.background': '#ffffff',
-            }
-        });
-
-        editor = monaco.editor.create(document.getElementById('editor'), {
-            value: '',
-            language: 'plaintext',
-            theme: document.body.classList.contains('light-theme') ? 'razen-light' : 'razen-dark',
-            fontFamily: 'JetBrains Mono',
-            automaticLayout: true,
-            lineNumbers: 'on',
-            minimap: { enabled: false },
-            suggestOnTriggerCharacters: true,
-            wordWrap: 'on',
-            folding: true,
-            bracketPairColorization: {
-                enabled: true
-            },
-            'semanticHighlighting.enabled': true,
-        });
-
-        editor.onDidChangeModelContent(() => {
-            if (activeFileId) {
-                files[activeFileId].content = editor.getValue();
-            }
-        });
+    searchBtn.addEventListener('click', () => {
+        searchPopup.style.display = 'flex';
+        searchInput.focus();
     });
+
+    searchCancelBtn.addEventListener('click', () => {
+        searchPopup.style.display = 'none';
+    });
+
+    findNextBtn.addEventListener('click', () => {
+        findNext({state: editor.state, dispatch: editor.dispatch})
+    });
+
+    replaceBtn.addEventListener('click', () => {
+        replaceNext({state: editor.state, dispatch: editor.dispatch})
+    });
+
+    replaceAllBtn.addEventListener('click', () => {
+        replaceAll({state: editor.state, dispatch: editor.dispatch})
+    });
+
+    searchInput.addEventListener('input', () => {
+        const query = new SearchQuery({
+            search: searchInput.value,
+            replace: replaceInput.value,
+            caseSensitive: true, // You can make this configurable
+        });
+        editor.dispatch({ effects: search.setQuery.of(query) });
+    });
+
+    replaceInput.addEventListener('input', () => {
+        const query = new SearchQuery({
+            search: searchInput.value,
+            replace: replaceInput.value,
+            caseSensitive: true, // You can make this configurable
+        });
+        editor.dispatch({ effects: search.setQuery.of(query) });
+    });
+
+    // Initial setup
+    initializeEditor();
+
+    // Set initial theme icon
+    if (themeToggle) {
+        themeToggle.innerHTML = document.body.classList.contains('light-theme')
+            ? '<i class="fas fa-moon"></i>'
+            : '<i class="fas fa-sun"></i>';
+    }
+
+    // Create a welcome file
+    filenameInput.value = "welcome.rzn";
+    createNewFile();
+    hideFilenamePopup();
 });
