@@ -38,6 +38,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let fileCounter = 1;
     let editor;
 
+    // Helper function to prevent editor focus loss on toolbar clicks
+    function addToolbarButtonListener(button, action) {
+        button.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            action();
+        });
+    }
+
     // Event Listeners
     sidebarToggle.addEventListener('click', () => {
         sidebar.classList.toggle('open');
@@ -51,89 +59,80 @@ document.addEventListener('DOMContentLoaded', () => {
         showFilenamePopup();
     });
     
-    copyBtn.addEventListener('click', copyCode);
-    themeToggle.addEventListener('click', toggleTheme);
+    addToolbarButtonListener(copyBtn, copyCode);
+    addToolbarButtonListener(themeToggle, toggleTheme);
 
-    undoBtn.addEventListener('click', () => {
+    addToolbarButtonListener(undoBtn, () => {
         if (editor) {
             editor.trigger('toolbar', 'undo');
         }
     });
 
-    redoBtn.addEventListener('click', () => {
+    addToolbarButtonListener(redoBtn, () => {
         if (editor) {
             editor.trigger('toolbar', 'redo');
         }
     });
 
-    tabBtn.addEventListener('click', () => {
+    addToolbarButtonListener(tabBtn, () => {
         if (editor) {
             editor.executeEdits('toolbar', [{
                 range: editor.getSelection(),
                 text: '  ',
                 forceMoveMarkers: true
             }]);
-            editor.focus();
         }
     });
 
-    bracketBtn.addEventListener('click', () => {
+    addToolbarButtonListener(bracketBtn, () => {
         if (editor) {
             // Using snippet controller to insert '()' and place cursor inside
             const snippetController = editor.getContribution('snippetController2');
             if (snippetController) {
                 snippetController.insert('($0)');
             }
-            editor.focus();
         }
     });
 
-    searchBtn.addEventListener('click', () => {
+    addToolbarButtonListener(searchBtn, () => {
         if (editor) {
             editor.getAction('editor.action.startFindReplaceAction').run();
-            editor.focus();
         }
     });
 
-    cursorUpBtn.addEventListener('click', () => {
+    addToolbarButtonListener(cursorUpBtn, () => {
         if (editor) {
             editor.trigger('toolbar', 'cursorUp');
-            editor.focus();
         }
     });
 
-    cursorDownBtn.addEventListener('click', () => {
+    addToolbarButtonListener(cursorDownBtn, () => {
         if (editor) {
             editor.trigger('toolbar', 'cursorDown');
-            editor.focus();
         }
     });
 
-    cursorLeftBtn.addEventListener('click', () => {
+    addToolbarButtonListener(cursorLeftBtn, () => {
         if (editor) {
             editor.trigger('toolbar', 'cursorLeft');
-            editor.focus();
         }
     });
 
-    cursorRightBtn.addEventListener('click', () => {
+    addToolbarButtonListener(cursorRightBtn, () => {
         if (editor) {
             editor.trigger('toolbar', 'cursorRight');
-            editor.focus();
         }
     });
 
-    selectBtn.addEventListener('click', () => {
+    addToolbarButtonListener(selectBtn, () => {
         if (editor) {
             editor.getAction('editor.action.smartSelect.expand').run();
-            editor.focus();
         }
     });
 
-    selectAllBtn.addEventListener('click', () => {
+    addToolbarButtonListener(selectAllBtn, () => {
         if (editor) {
             editor.getAction('editor.action.selectAll').run();
-            editor.focus();
         }
     });
 
@@ -205,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     filenameConfirm.addEventListener('click', createNewFile);
     filenameCancel.addEventListener('click', hideFilenamePopup);
-    runBtn.addEventListener('click', runCode);
+    addToolbarButtonListener(runBtn, runCode);
 
     function runCode() {
         const htmlFile = Object.values(files).find(file => file.name.endsWith('.html'));
