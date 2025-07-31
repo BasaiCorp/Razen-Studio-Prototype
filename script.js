@@ -40,6 +40,36 @@ document.addEventListener('DOMContentLoaded', () => {
     const previewResizeHandle = document.querySelector('.preview-resize-handle');
     const previewModalContent = document.querySelector('.preview-modal-content');
 
+    const presetCode = {
+        'html': `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Hello, World!</h1>
+    <script src="script.js"></script>
+</body>
+</html>`,
+        'js': `// JavaScript starter code
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Document loaded');
+});`,
+        'py': `# Python starter code
+def main():
+    print("Hello, World!")
+
+if __name__ == "__main__":
+    main()`,
+        'rs': `// Rust starter code
+fn main() {
+    println!("Hello, World!");
+}`
+    };
+
     // State
     let files = {};
     let activeFileId = null;
@@ -202,7 +232,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const fileId = `file-${fileCounter}`;
-        files[fileId] = { id: fileId, name: fileName, content: '' };
+        const extension = fileName.split('.').pop();
+        const content = presetCode[extension] || '';
+
+        files[fileId] = { id: fileId, name: fileName, content: content };
         fileCounter++;
 
         renderFileList();
