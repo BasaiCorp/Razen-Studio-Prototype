@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyBtn = document.getElementById('copy-btn');
     const themeToggle = document.getElementById('theme-toggle');
     const cursorPosition = document.getElementById('cursor-position');
+    const languageIndicator = document.getElementById('language-indicator');
     const autocompleteSuggestions = document.getElementById('autocomplete-suggestions');
     const tabBtn = document.getElementById('tab-btn');
     const undoBtn = document.getElementById('undo-btn');
@@ -293,13 +294,7 @@ fn main() {
         document.addEventListener('mouseup', stopDrag);
     });
 
-    function runCode() {
-        const htmlFile = Object.values(files).find(file => file.name.endsWith('.html'));
-        if (!htmlFile) {
-            alert('No HTML file found to preview.');
-            return;
-        }
-
+    function previewFile(htmlFile) {
         const cssFile = Object.values(files).find(file => file.name.endsWith('.css'));
         const jsFile = Object.values(files).find(file => file.name.endsWith('.js'));
 
@@ -322,7 +317,6 @@ fn main() {
         previewIframe.srcdoc = iframeContent;
         previewModal.style.display = 'flex';
 
-        // Intercept links in the iframe
         previewIframe.onload = () => {
             try {
                 const iframeDoc = previewIframe.contentWindow.document;
@@ -331,8 +325,6 @@ fn main() {
                     link.addEventListener('click', (e) => {
                         e.preventDefault();
                         const href = e.target.getAttribute('href');
-                        // Optional: Inform the user that navigation is blocked.
-                        // You can use a custom popup or a simple alert.
                         alert(`Navigation to "${href}" is blocked in preview mode.`);
                     });
                 }
@@ -340,6 +332,28 @@ fn main() {
                 console.error("Could not attach link listeners to iframe:", e);
             }
         };
+    }
+
+    function runCode() {
+        if (!activeFileId) {
+            showPopup("There is no active file to run.", () => {});
+            return;
+        }
+
+        const activeFile = files[activeFileId];
+        if (activeFile.name.endsWith('.html')) {
+            previewFile(activeFile);
+        } else {
+            const htmlFile = Object.values(files).find(file => file.name.endsWith('.html'));
+            if (htmlFile) {
+                showPopup(
+                    `The current file is not an HTML file. Do you want to run '${htmlFile.name}' instead?`,
+                    () => previewFile(htmlFile)
+                );
+            } else {
+                showPopup("No HTML file found to preview.", () => {});
+            }
+        }
     }
 
     // Global click listener to close file context menus
@@ -494,7 +508,9 @@ fn main() {
         activeFileId = fileId;
         editor.setValue(files[fileId].content);
         const model = editor.getModel();
-        monaco.editor.setModelLanguage(model, detectLanguageFromExtension(files[fileId].name));
+        const languageId = detectLanguageFromExtension(files[fileId].name);
+        monaco.editor.setModelLanguage(model, languageId);
+        languageIndicator.textContent = getLanguageName(languageId);
         renderActiveFiles();
         editor.focus();
     }
@@ -556,6 +572,19 @@ fn main() {
             'md': 'markdown',
         };
         return languages[ext] || 'plaintext';
+    }
+
+    function getLanguageName(languageId) {
+        const languageNames = {
+            'javascript': 'JavaScript', 'py': 'Python', 'rzn': 'Razor',
+            'html': 'HTML', 'css': 'CSS', 'ts': 'TypeScript', 'java': 'Java',
+            'cs': 'C#', 'cpp': 'C++', 'go': 'Go', 'php': 'PHP', 'rb': 'Ruby',
+            'rs': 'Rust', 'sql': 'SQL', 'swift': 'Swift', 'kt': 'Kotlin',
+            'lua': 'Lua', 'pl': 'Perl', 'sh': 'Shell', 'bat': 'Batch',
+            'json': 'JSON', 'xml': 'XML', 'yaml': 'YAML', 'md': 'Markdown',
+            'plaintext': 'Plain Text'
+        };
+        return languageNames[languageId] || languageId;
     }
 
     require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs' } });
@@ -622,6 +651,11 @@ fn main() {
             if (activeFileId) {
                 files[activeFileId].content = editor.getValue();
             }
+        });
+
+        editor.onDidChangeCursorPosition(e => {
+            const { lineNumber, column } = e.position;
+            cursorPosition.textContent = `Line ${lineNumber}, Column ${column}`;
         });
     });
 });
