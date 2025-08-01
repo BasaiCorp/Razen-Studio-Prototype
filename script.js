@@ -418,26 +418,30 @@ fn main() {
     if (navMenuBtn) {
         navMenuBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            // Toggle the main navigation dropdown
-            const isVisible = navMenuDropdown.style.display === 'block';
-            navMenuDropdown.style.display = isVisible ? 'none' : 'block';
+            navMenuDropdown.classList.toggle('show');
         });
     }
 
     // Global click listener to close ALL dropdowns when clicking outside
     window.addEventListener('click', (e) => {
-        // Close file context menus
+        // Close all dropdowns that have the 'show' class
         document.querySelectorAll('.file-options-dropdown.show').forEach(dropdown => {
-            if (!dropdown.previousElementSibling.contains(e.target)) {
+            // The nav dropdown button is not a sibling, so we check for it separately
+            const isNavDropdown = dropdown.id === 'nav-menu-dropdown';
+            const clickedNavBtn = navMenuBtn && navMenuBtn.contains(e.target);
+
+            if (isNavDropdown && !clickedNavBtn) {
+                dropdown.classList.remove('show');
+            }
+            // For file context menus, check the sibling button
+            else if (!isNavDropdown && !dropdown.previousElementSibling.contains(e.target)) {
                 dropdown.classList.remove('show');
             }
         });
 
-        // Close main navigation dropdown
-        if (navMenuDropdown && navMenuDropdown.style.display === 'block') {
-            if (!navMenuBtn.contains(e.target)) {
-                navMenuDropdown.style.display = 'none';
-            }
+        // A simpler way to close the nav dropdown if clicking outside
+        if (navMenuDropdown.classList.contains('show') && !navMenuBtn.contains(e.target)) {
+             navMenuDropdown.classList.remove('show');
         }
     });
 

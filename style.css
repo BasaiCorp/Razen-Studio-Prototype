@@ -307,12 +307,23 @@ main {
     gap: 0.5rem; /* Space between buttons */
 }
 
-/* Repositioning the nav dropdown specifically */
+/* Styling for the nav dropdown to match the file context menu */
 #nav-menu-dropdown {
+    display: none; /* Hidden by default */
     position: absolute;
-    bottom: 45px; /* Position above the button */
+    bottom: 45px; /* Position it above the button */
     right: 0;
-    width: 200px; /* A fixed width can look better */
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    min-width: 180px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 20;
+    padding: 0.25rem 0;
+}
+
+#nav-menu-dropdown.show {
+    display: block; /* Show the dropdown */
 }
 
 .version-text {

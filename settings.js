@@ -75,15 +75,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (navMenuBtn) {
         navMenuBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            const isVisible = navMenuDropdown.style.display === 'block';
-            navMenuDropdown.style.display = isVisible ? 'none' : 'block';
+            navMenuDropdown.classList.toggle('show');
         });
     }
 
     // Global click listener to close the dropdown
-    window.addEventListener('click', () => {
-        if (navMenuDropdown && navMenuDropdown.style.display === 'block') {
-            navMenuDropdown.style.display = 'none';
+    window.addEventListener('click', (e) => {
+        if (navMenuDropdown.classList.contains('show') && !navMenuBtn.contains(e.target)) {
+            navMenuDropdown.classList.remove('show');
         }
     });
 });
