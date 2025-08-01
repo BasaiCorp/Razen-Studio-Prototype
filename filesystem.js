@@ -29,7 +29,6 @@ const FileSystem = {
         } else {
             // Fallback: list items from localStorage
             console.warn("Using localStorage fallback for project listing.");
-            await this.seedLocalStorageForTesting(); // Add some fake data if none exists
             const projects = Object.keys(localStorage)
                 .filter(key => key.startsWith('project_'))
                 .map(key => {
@@ -154,16 +153,4 @@ const FileSystem = {
         }
     },
 
-    /**
-     * Seeds localStorage with a couple of example projects if it's empty.
-     * For testing purposes only.
-     */
-    async seedLocalStorageForTesting() {
-        const keys = Object.keys(localStorage).filter(k => k.startsWith('project_'));
-        if (keys.length === 0) {
-            console.log("Seeding localStorage with test projects...");
-            await this.createProject("My First Website");
-            await this.createProject("Another Cool Project");
-        }
-    }
 };
