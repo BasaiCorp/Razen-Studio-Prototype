@@ -343,11 +343,6 @@ main {
     font-size: 0.9rem; /* Adjust icon size if needed */
     text-decoration: none; /* Remove default underline from <a> */
 
-    /* Positioning */
-    position: absolute;
-    bottom: 10px; /* Adjust distance from bottom */
-    right: 10px;  /* Adjust distance from right */
-
     /* Interaction */
     cursor: pointer; /* Show pointer cursor */
     transition: all 0.2s ease; /* Smooth transition for hover effects */
@@ -615,6 +610,55 @@ body.light-theme #code-editor {
 
 .preview-modal-content.preview-custom .preview-resize-handle {
     display: block;
+}
+
+/* --- Nav Toggle Menu --- */
+.sidebar-actions {
+    position: relative; /* This is crucial for positioning the dropdown */
+    display: flex;
+    gap: 0.5rem; /* Space between buttons */
+}
+
+#nav-toggle-btn {
+    z-index: 11; /* Ensure it's above the menu when closed */
+}
+
+.nav-menu {
+    display: none; /* Hidden by default */
+    position: absolute;
+    bottom: 40px; /* Position it above the toggle button */
+    right: 0;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    min-width: 180px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 10;
+    padding: 0.5rem 0;
+}
+
+.nav-menu.show {
+    display: block; /* Show the menu */
+}
+
+.nav-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 1rem;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    text-decoration: none;
+}
+
+.nav-menu-item:hover {
+    background-color: var(--accent-primary);
+    color: var(--bg-primary);
+}
+
+.nav-menu-item i {
+    width: 14px;
+    text-align: center;
 }
 
 /* Responsive design */
