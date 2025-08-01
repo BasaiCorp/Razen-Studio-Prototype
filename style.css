@@ -298,6 +298,12 @@ main {
     color: var(--text-secondary); /* Uses the secondary text color */
     display: flex;
     align-items: center;
+    justify-content: space-between; /* This will push the buttons to the right */
+}
+
+.sidebar-actions {
+    display: flex;
+    gap: 0.5rem; /* Space between buttons */
 }
 
 .version-text {
