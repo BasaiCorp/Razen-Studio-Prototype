@@ -36,12 +36,17 @@
                 </div>
                 <!-- Action Buttons -->
                 <div class="sidebar-actions">
-                    <a href="dashboard.html" id="dashboard-btn" class="btn settings-btn-sidebar" title="Dashboard">
-                        <i class="fas fa-tachometer-alt"></i>
-                    </a>
-                    <a href="index.html" class="btn settings-btn-sidebar" title="Editor">
-                        <i class="fas fa-code"></i>
-                    </a>
+                    <button id="nav-toggle-btn" class="btn settings-btn-sidebar" title="Navigation">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <div id="nav-menu" class="nav-menu">
+                        <a href="dashboard.html" class="nav-menu-item">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        <a href="index.html" class="nav-menu-item">
+                            <i class="fas fa-code"></i> Editor
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
