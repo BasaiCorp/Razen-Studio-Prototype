@@ -750,6 +750,12 @@ fn main() {
     window.addEventListener('click', (e) => {
         const navMenu = document.getElementById('nav-menu');
         const navToggleBtn = document.getElementById('nav-toggle-btn');
+
+        // If the click is on a settings button, do nothing.
+        if (e.target.closest('.settings-nav-btn')) {
+            return;
+        }
+
         if (navMenu && navMenu.classList.contains('show')) {
             // Check if the click was outside the menu and its toggle button
             if (!navMenu.contains(e.target) && !navToggleBtn.contains(e.target)) {
