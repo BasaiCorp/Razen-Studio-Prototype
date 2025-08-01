@@ -169,5 +169,26 @@ SOFTWARE.
     <!-- Include script.js for sidebar toggle functionality -->
     <script src="script.js"></script>
     <script src="settings.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const navToggleBtn = document.getElementById('nav-toggle-btn');
+            const navMenu = document.getElementById('nav-menu');
+
+            if (navToggleBtn && navMenu) {
+                navToggleBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    navMenu.classList.toggle('show');
+                });
+            }
+
+            window.addEventListener('click', (e) => {
+                if (navMenu && navMenu.classList.contains('show')) {
+                    if (!navMenu.contains(e.target) && !navToggleBtn.contains(e.target)) {
+                        navMenu.classList.remove('show');
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>

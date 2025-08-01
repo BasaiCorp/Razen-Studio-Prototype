@@ -230,16 +230,6 @@ fn main() {
         }
     });
 
-    const navToggleBtn = document.getElementById('nav-toggle-btn');
-    const navMenu = document.getElementById('nav-menu');
-
-    if (navToggleBtn && navMenu) {
-        navToggleBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevent the window click listener from closing it immediately
-            navMenu.classList.toggle('show');
-        });
-    }
-
     function copyCode() {
         if (editor) {
             navigator.clipboard.writeText(editor.getValue())
@@ -746,15 +736,4 @@ fn main() {
         loadProjectFromURL();
     });
 
-    // Global click listener to close the nav menu
-    window.addEventListener('click', (e) => {
-        const navMenu = document.getElementById('nav-menu');
-        const navToggleBtn = document.getElementById('nav-toggle-btn');
-        if (navMenu && navMenu.classList.contains('show')) {
-            // Check if the click was outside the menu and its toggle button
-            if (!navMenu.contains(e.target) && !navToggleBtn.contains(e.target)) {
-                navMenu.classList.remove('show');
-            }
-        }
-    });
 });
