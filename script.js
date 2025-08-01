@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileList = document.getElementById('file-list');
     const activeFilesContainer = document.getElementById('active-files');
     const customPopup = document.getElementById('custom-popup');
+    const popupTitle = document.getElementById('popup-title');
     const popupMessage = document.getElementById('popup-message');
     const popupConfirm = document.getElementById('popup-confirm');
     const popupCancel = document.getElementById('popup-cancel');
@@ -76,6 +77,60 @@ fn main() {
     let activeFileId = null;
     let fileCounter = 1;
     let editor;
+    let currentProject = null; // To hold the name of the loaded project
+
+    // --- FileSystem Integration ---
+    // We need to include filesystem.js in index.html for this to work.
+    // Let's assume it will be added.
+    const fs = window.FileSystem;
+
+    /**
+     * Loads project files from the backend if a project is specified in the URL.
+     */
+    async function loadProjectFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const projectName = urlParams.get('project');
+
+        if (projectName && fs) {
+            currentProject = projectName;
+            const projectData = await fs.loadProject(projectName);
+
+            if (projectData && projectData.files) {
+                // Clear any existing files
+                files = {};
+                fileCounter = 1;
+
+                let firstFileId = null;
+                for (const fileName in projectData.files) {
+                    const fileId = `file-${fileCounter++}`;
+                    files[fileId] = {
+                        id: fileId,
+                        name: fileName,
+                        content: projectData.files[fileName]
+                    };
+                    if (!firstFileId) {
+                        firstFileId = fileId;
+                    }
+                }
+
+                if (firstFileId) {
+                    renderFileList();
+                    setActiveFile(firstFileId);
+                }
+                // Update the main h1 to show the project name
+                document.querySelector('header h1').innerHTML = `<i class="fas fa-code"></i> ${projectName}`;
+            } else {
+                await showPopup('Error Loading Project', `Could not load the project "${projectName}". It may not exist or the app needs storage permissions.`, { showCancel: false, confirmText: 'OK' });
+                // Redirect back to the dashboard on failure
+                window.location.href = 'dashboard.html';
+            }
+        } else {
+            // No project specified, or filesystem not available.
+            // Start with a default empty state or example file.
+            renderFileList();
+            renderActiveFiles();
+        }
+    }
 
     // Helper function to prevent editor focus loss on toolbar clicks
     function addToolbarButtonListener(button, action) {
@@ -529,18 +584,37 @@ fn main() {
         renderActiveFiles();
     }
 
-    function showPopup(message, onConfirm) {
+    function showPopup(title, message, options = {}) {
+        popupTitle.textContent = title;
         popupMessage.textContent = message;
+
+        popupConfirm.style.display = options.showConfirm !== false ? 'inline-block' : 'none';
+        popupCancel.style.display = options.showCancel !== false ? 'inline-block' : 'none';
+
+        popupConfirm.textContent = options.confirmText || 'Confirm';
+        popupCancel.textContent = options.cancelText || 'Cancel';
+
+        // A little trick to make a single button centered
+        if (options.showCancel === false) {
+             popupCancel.style.display = 'none';
+             popupConfirm.textContent = options.confirmText || 'OK';
+        } else {
+             popupConfirm.style.display = 'inline-block';
+             popupCancel.style.display = 'inline-block';
+        }
+
         customPopup.style.display = 'flex';
 
-        popupConfirm.onclick = () => {
-            onConfirm();
-            customPopup.style.display = 'none';
-        };
-
-        popupCancel.onclick = () => {
-            customPopup.style.display = 'none';
-        };
+        return new Promise((resolve) => {
+            popupConfirm.onclick = () => {
+                customPopup.style.display = 'none';
+                resolve(true);
+            };
+            popupCancel.onclick = () => {
+                customPopup.style.display = 'none';
+                resolve(false);
+            };
+        });
     }
 
     function detectLanguageFromExtension(fileName) {
@@ -657,5 +731,8 @@ fn main() {
             const { lineNumber, column } = e.position;
             cursorPosition.textContent = `Line ${lineNumber}, Column ${column}`;
         });
+
+        // Load project from URL after editor is initialized
+        loadProjectFromURL();
     });
 });

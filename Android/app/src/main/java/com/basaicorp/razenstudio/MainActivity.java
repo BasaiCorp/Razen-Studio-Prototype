@@ -69,7 +69,7 @@ public class MainActivity extends Activity {
 
     private void loadWebViewContent() {
         // Load local HTML file from assets
-        webView.loadUrl("file:///android_asset/index.html");
+        webView.loadUrl("file:///android_asset/dashboard.html");
     }
 
     @Override

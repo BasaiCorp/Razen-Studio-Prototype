@@ -26,12 +26,17 @@
             <div class="sidebar-version">
                 <div class="sv">
                     <p class="version-text">Beta v1.1.0</p>
-<p class="update-text">Monoco Added!</p>
+                    <p class="update-text">Dashboard Added!</p>
                 </div>
-                <!-- Settings Button -->
-                <a href="settings.html" id="settings-btn" class="btn settings-btn-sidebar" title="Settings">
-                    <i class="fas fa-cog"></i>
-                </a>
+                <!-- Action Buttons -->
+                <div class="sidebar-actions">
+                    <a href="dashboard.html" id="dashboard-btn" class="btn settings-btn-sidebar" title="Dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </a>
+                    <a href="settings.html" id="settings-btn" class="btn settings-btn-sidebar" title="Settings">
+                        <i class="fas fa-cog"></i>
+                    </a>
+                </div>
             </div>
         </div>
         <div class="main-content">
@@ -115,6 +120,18 @@
         </div>
     </div>
 
+    <!-- Re-using the custom popup from dashboard for consistency -->
+    <div id="custom-popup" class="popup-container" style="display: none;">
+        <div class="popup-content">
+            <h3 id="popup-title"></h3>
+            <p id="popup-message"></p>
+            <div class="popup-buttons">
+                <button id="popup-confirm" class="btn">Confirm</button>
+                <button id="popup-cancel" class="btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs/loader.js"></script>
     <script>
         // Improved theme detection script
@@ -133,6 +150,7 @@
             document.body.classList.add(themeToApply);
         })();
     </script>
+    <script src="filesystem.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
