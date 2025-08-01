@@ -302,8 +302,17 @@ main {
 }
 
 .sidebar-actions {
+    position: relative; /* Anchor for the dropdown */
     display: flex;
     gap: 0.5rem; /* Space between buttons */
+}
+
+/* Repositioning the nav dropdown specifically */
+#nav-menu-dropdown {
+    position: absolute;
+    bottom: 45px; /* Position above the button */
+    right: 0;
+    width: 200px; /* A fixed width can look better */
 }
 
 .version-text {

@@ -68,22 +68,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // --- Optional: Theme Toggle Persistence ---
-    // If you have a theme toggle button in the settings toolbar, you'd handle it here
-    // Example (assuming a button with id 'settings-theme-toggle'):
-    /*
-    const themeToggleBtn = document.getElementById('settings-theme-toggle');
-    if (themeToggleBtn) {
-         themeToggleBtn.addEventListener('click', () => {
-             // Logic similar to index.html's theme toggle
-             const currentTheme = document.body.classList.contains('dark-theme') ? 'dark-theme' : 'light-theme';
-             const newTheme = currentTheme === 'dark-theme' ? 'light-theme' : 'dark-theme';
-             document.body.classList.remove(currentTheme);
-             document.body.classList.add(newTheme);
-             localStorage.setItem('theme', newTheme);
-             // Update button text/icon if needed
-             // themeToggleBtn.innerHTML = newTheme === 'dark-theme' ? '<i class="fas fa-sun"></i> Light' : '<i class="fas fa-moon"></i> Dark';
-         });
+    // --- Navigation Dropdown Logic ---
+    const navMenuBtn = document.getElementById('nav-menu-btn');
+    const navMenuDropdown = document.getElementById('nav-menu-dropdown');
+
+    if (navMenuBtn) {
+        navMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isVisible = navMenuDropdown.style.display === 'block';
+            navMenuDropdown.style.display = isVisible ? 'none' : 'block';
+        });
     }
-    */
+
+    // Global click listener to close the dropdown
+    window.addEventListener('click', () => {
+        if (navMenuDropdown && navMenuDropdown.style.display === 'block') {
+            navMenuDropdown.style.display = 'none';
+        }
+    });
 });

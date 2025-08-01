@@ -411,15 +411,34 @@ fn main() {
         }
     }
 
-    // Global click listener to close file context menus
+    // --- Dropdown Logic ---
+    const navMenuBtn = document.getElementById('nav-menu-btn');
+    const navMenuDropdown = document.getElementById('nav-menu-dropdown');
+
+    if (navMenuBtn) {
+        navMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // Toggle the main navigation dropdown
+            const isVisible = navMenuDropdown.style.display === 'block';
+            navMenuDropdown.style.display = isVisible ? 'none' : 'block';
+        });
+    }
+
+    // Global click listener to close ALL dropdowns when clicking outside
     window.addEventListener('click', (e) => {
+        // Close file context menus
         document.querySelectorAll('.file-options-dropdown.show').forEach(dropdown => {
-            // Check if the click was outside the dropdown and its button
-            const button = dropdown.previousElementSibling;
-            if (!button.contains(e.target)) {
+            if (!dropdown.previousElementSibling.contains(e.target)) {
                 dropdown.classList.remove('show');
             }
         });
+
+        // Close main navigation dropdown
+        if (navMenuDropdown && navMenuDropdown.style.display === 'block') {
+            if (!navMenuBtn.contains(e.target)) {
+                navMenuDropdown.style.display = 'none';
+            }
+        }
     });
 
     function renderFileList() {
