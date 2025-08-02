@@ -37,17 +37,20 @@ body {
 
 .sidebar {
     position: absolute;
-    width: 250px;
-    height: 100%;
+    width: 260px; /* Slightly wider for the new shape */
+    height: 95%; /* Adjust height to prevent overlap */
+    top: 2.5%;
     background-color: var(--bg-secondary);
-    padding: 1rem;
-    border-right: 1px solid var(--border-color);
+    padding: 1.5rem 1rem; /* Adjust padding */
+    border-right: none; /* Remove border, as clip-path will handle the edge */
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    transition: transform 0.3s ease;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smoother transition */
     z-index: 100;
-    transform: translateX(-100%);
+    transform: translateX(-110%); /* Hide it completely */
+    clip-path: polygon(0 0, 100% 5%, 95% 100%, 0 95%); /* Custom shape */
+    border-radius: 15px; /* Rounded corners */
 }
 
 .sidebar.open {
@@ -121,13 +124,14 @@ header h1 {
 
 .active-file {
     background-color: var(--bg-tertiary);
-    padding: 0.35rem 0.8rem; /* Reduced padding */
-    border-radius: 4px;
+    padding: 0.4rem 0.9rem; /* Adjusted padding */
+    border-radius: 8px; /* Softer corners */
     display: flex;
     align-items: center;
     gap: 0.5rem;
     cursor: pointer;
     border: 1px solid transparent;
+    transition: all 0.2s ease-in-out;
 }
 
 .active-file.active {
@@ -151,10 +155,11 @@ header h1 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.5rem;
-    border-radius: 4px;
+    padding: 0.6rem 0.8rem; /* Adjusted padding */
+    border-radius: 8px; /* Softer corners */
     cursor: pointer;
     position: relative; /* For dropdown positioning */
+    transition: background-color 0.2s ease-in-out;
 }
 
 .file-item:hover {
@@ -182,11 +187,12 @@ header h1 {
     top: 5px;
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-color);
-    border-radius: 4px;
+    border-radius: 8px; /* Softer corners */
     min-width: 180px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25); /* Deeper shadow */
     z-index: 20;
-    padding: 0.25rem 0;
+    padding: 0.5rem; /* Increased padding */
+    overflow: hidden; /* To respect the border-radius */
 }
 
 .file-options-dropdown.show {
@@ -201,6 +207,7 @@ header h1 {
     color: var(--text-primary);
     font-size: 0.9rem;
     text-decoration: none;
+    transition: all 0.2s ease-in-out;
 }
 
 .file-options-dropdown a:hover {
@@ -222,16 +229,18 @@ header h1 {
 .btn {
     background-color: var(--bg-tertiary);
     color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
+    border: none; /* Remove border */
+    padding: 0.7rem 1.4rem; /* Adjust padding for a more premium feel */
     cursor: pointer;
     font-family: 'Work Sans', sans-serif;
     font-weight: 500;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    transition: all 0.2s ease;
+    gap: 0.6rem;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    clip-path: polygon(15% 0, 100% 0, 85% 100%, 0% 100%); /* More dramatic parallelogram */
+    border-radius: 10px; /* Softer corners */
+    position: relative;
 }
 
 .s-btn {
@@ -244,7 +253,8 @@ header h1 {
 .btn:hover {
     background-color: var(--accent-primary);
     color: var(--bg-primary);
-    border-color: var(--accent-primary);
+    transform: translateY(-4px) scale(1.02); /* Lift and slightly grow */
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3); /* Enhanced shadow */
 }
 
 main {
@@ -261,9 +271,10 @@ main {
 .editor {
     height: 100%;
     width: 100%;
-    border-radius: 8px;
+    border-radius: 12px; /* Softer corners */
     background-color: var(--bg-primary);
     font-family: 'JetBrains Mono', monospace;
+    overflow: hidden; /* Ensure content respects the border-radius */
 }
 
 .autocomplete-suggestions {
@@ -402,9 +413,10 @@ footer {
 .popup-content {
     background-color: var(--bg-secondary);
     padding: 2rem;
-    border-radius: 8px;
+    border-radius: 12px; /* Softer corners */
     text-align: center;
     margin: 1rem 2rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25); /* Deeper shadow */
 }
 
 .popup-buttons {
@@ -416,12 +428,19 @@ footer {
 
 .input-field {
     width: 100%;
-    padding: 0.5rem;
+    padding: 0.7rem; /* Increased padding */
     margin-top: 1rem;
     border: 1px solid var(--border-color);
-    border-radius: 4px;
+    border-radius: 8px; /* Softer corners */
     background-color: var(--bg-primary);
     color: var(--text-primary);
+    transition: all 0.2s ease-in-out;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(137, 180, 250, 0.3); /* Focus ring */
 }
 
 .search-input-group {
@@ -483,13 +502,13 @@ body.light-theme #code-editor {
 
 .preview-modal-content {
     background-color: var(--bg-secondary);
-    border-radius: 8px;
+    border-radius: 12px; /* Softer corners */
     width: 95%; /* Increased */
     height: 90%; /* Increased */
     max-width: 1600px; /* Increased */
     display: flex;
     flex-direction: column;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.35); /* Deeper shadow */
     overflow: hidden;
     position: relative; /* For resize handle */
 }
