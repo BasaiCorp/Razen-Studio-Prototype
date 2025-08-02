@@ -5,735 +5,299 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeToggle = document.getElementById('theme-toggle');
     const cursorPosition = document.getElementById('cursor-position');
     const languageIndicator = document.getElementById('language-indicator');
-    const autocompleteSuggestions = document.getElementById('autocomplete-suggestions');
     const tabBtn = document.getElementById('tab-btn');
     const undoBtn = document.getElementById('undo-btn');
     const redoBtn = document.getElementById('redo-btn');
     const bracketBtn = document.getElementById('bracket-btn');
     const searchBtn = document.getElementById('search-btn');
-    const cursorUpBtn = document.getElementById('cursor-up-btn');
-    const cursorDownBtn = document.getElementById('cursor-down-btn');
-    const cursorLeftBtn = document.getElementById('cursor-left-btn');
-    const cursorRightBtn = document.getElementById('cursor-right-btn');
-    const selectBtn = document.getElementById('select-btn');
-    const selectAllBtn = document.getElementById('select-all-btn');
     const sidebar = document.getElementById('sidebar');
     const sidebarToggle = document.getElementById('sidebar-toggle');
     const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
-    const newFileBtn = document.getElementById('new-file-btn');
-    const fileList = document.getElementById('file-list');
-    const activeFilesContainer = document.getElementById('active-files');
+    const fileListContainer = document.getElementById('file-list');
     const customPopup = document.getElementById('custom-popup');
     const popupTitle = document.getElementById('popup-title');
     const popupMessage = document.getElementById('popup-message');
     const popupConfirm = document.getElementById('popup-confirm');
     const popupCancel = document.getElementById('popup-cancel');
-    const filenamePopup = document.getElementById('filename-popup');
-    const filenameInput = document.getElementById('filename-input');
-    const filenameConfirm = document.getElementById('filename-confirm');
-    const filenameCancel = document.getElementById('filename-cancel');
     const runBtn = document.getElementById('run-btn');
     const previewModal = document.getElementById('preview-modal');
     const previewIframe = document.getElementById('preview-iframe');
     const previewModalCloseBtn = document.getElementById('preview-modal-close-btn');
-    const previewModeDesktopBtn = document.getElementById('preview-mode-desktop');
-    const previewModeMobileBtn = document.getElementById('preview-mode-mobile');
-    const previewModeCustomBtn = document.getElementById('preview-mode-custom');
-    const previewResizeHandle = document.querySelector('.preview-resize-handle');
-    const previewModalContent = document.querySelector('.preview-modal-content');
-
-    const presetCode = {
-        'html': `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <h1>Hello, World!</h1>
-    <script src="script.js"></script>
-</body>
-</html>`,
-        'js': `// JavaScript starter code
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('Document loaded');
-});`,
-        'py': `# Python starter code
-def main():
-    print("Hello, World!")
-
-if __name__ == "__main__":
-    main()`,
-        'rs': `// Rust starter code
-fn main() {
-    println!("Hello, World!");
-}`
-    };
 
     // State
-    let files = {};
-    let activeFileId = null;
-    let fileCounter = 1;
     let editor;
-    let currentProject = null; // To hold the name of the loaded project
-
-    // --- FileSystem Integration ---
-    // We need to include filesystem.js in index.html for this to work.
-    // Let's assume it will be added.
+    let currentProject = null;
+    let activeFilePath = null;
     const fs = window.FileSystem;
 
-    /**
-     * Loads project files from the backend if a project is specified in the URL.
-     */
+    // --- Project Loading ---
     async function loadProjectFromURL() {
         const urlParams = new URLSearchParams(window.location.search);
         const projectName = urlParams.get('project');
+        currentProject = projectName;
 
         if (projectName && fs) {
-            currentProject = projectName;
-            const projectData = await fs.loadProject(projectName);
-
-            if (projectData && projectData.files) {
-                // Clear any existing files
-                files = {};
-                fileCounter = 1;
-
-                let firstFileId = null;
-                for (const fileName in projectData.files) {
-                    const fileId = `file-${fileCounter++}`;
-                    files[fileId] = {
-                        id: fileId,
-                        name: fileName,
-                        content: projectData.files[fileName]
-                    };
-                    if (!firstFileId) {
-                        firstFileId = fileId;
-                    }
-                }
-
-                if (firstFileId) {
-                    renderFileList();
-                    setActiveFile(firstFileId);
-                }
-                // Update the main h1 to show the project name
-                document.querySelector('header h1').innerHTML = `<i class="fas fa-code"></i> ${projectName}`;
-            } else {
-                await showPopup('Error Loading Project', `Could not load the project "${projectName}". It may not exist or the app needs storage permissions.`, { showCancel: false, confirmText: 'OK' });
-                // Redirect back to the dashboard on failure
-                window.location.href = 'dashboard.html';
+            document.querySelector('header h1').innerHTML = `<i class="fas fa-folder-open"></i> ${projectName}`;
+            const fileTree = await fs.listProjectContents(projectName);
+            renderFileTree(fileTree, fileListContainer);
+            const firstFile = findDefaultFile(fileTree);
+            if (firstFile) {
+                openFile(firstFile.path);
             }
         } else {
-            // No project specified, or filesystem not available.
-            // Start with a default empty state or example file.
-            renderFileList();
-            renderActiveFiles();
+            fileListContainer.innerHTML = '<p style="padding: 10px;">No project loaded.</p>';
+        }
+    }
+    
+    function findDefaultFile(nodes) {
+        for (const node of nodes) {
+            if (node.type === 'file' && (node.name === 'index.html' || node.name === 'main.js')) {
+                return node;
+            }
+            if (node.type === 'folder' && node.children) {
+                const found = findDefaultFile(node.children);
+                if (found) return found;
+            }
+        }
+        return null;
+    }
+
+
+    // --- File Tree Rendering ---
+    function renderFileTree(nodes, container) {
+        const tree = container.tagName === 'UL' ? container : document.createElement('ul');
+        if (container.tagName !== 'UL') {
+            tree.className = 'file-tree';
+            container.innerHTML = '';
+        }
+
+        nodes.forEach(node => {
+            const li = document.createElement('li');
+            li.className = 'file-tree-item-container';
+
+            const itemButton = document.createElement('button');
+            itemButton.className = 'file-tree-item';
+            itemButton.dataset.path = node.path;
+            itemButton.dataset.type = node.type;
+
+            let caretIcon;
+            if (node.type === 'folder') {
+                caretIcon = document.createElement('i');
+                caretIcon.className = 'fas fa-chevron-right folder-caret';
+                itemButton.appendChild(caretIcon);
+
+                const folderIcon = document.createElement('i');
+                folderIcon.className = 'fas fa-folder folder-icon';
+                itemButton.appendChild(folderIcon);
+
+                itemButton.addEventListener('click', () => toggleFolder(li, caretIcon));
+            } else {
+                // Keep alignment
+                const placeholder = document.createElement('i');
+                placeholder.className = 'fas fa-file';
+                placeholder.style.visibility = 'hidden';
+                itemButton.appendChild(placeholder);
+
+                const fileIcon = document.createElement('i');
+                fileIcon.className = `fas ${getIconForFile(node.name)} file-icon`;
+                itemButton.appendChild(fileIcon);
+
+                itemButton.addEventListener('click', () => openFile(node.path));
+            }
+
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = node.name;
+            itemButton.appendChild(nameSpan);
+
+            li.appendChild(itemButton);
+
+            if (node.type === 'folder' && node.children && node.children.length > 0) {
+                const childrenContainer = document.createElement('ul');
+                li.appendChild(childrenContainer);
+                renderFileTree(node.children, childrenContainer);
+            }
+
+            tree.appendChild(li);
+        });
+
+        if (container.tagName !== 'UL') {
+            container.appendChild(tree);
         }
     }
 
-    // Helper function to prevent editor focus loss on toolbar clicks
-    function addToolbarButtonListener(button, action) {
-        button.addEventListener('mousedown', (e) => {
-            e.preventDefault();
-            action();
+    function toggleFolder(li_container, caret_icon) {
+        li_container.classList.toggle('open');
+        caret_icon.classList.toggle('open');
+    }
+
+    function getIconForFile(fileName) {
+        const ext = fileName.split('.').pop().toLowerCase();
+        const icons = {
+            'html': 'fa-html5', 'css': 'fa-css3-alt', 'js': 'fa-js-square',
+            'json': 'fa-file-code', 'md': 'fa-markdown', 'py': 'fa-python',
+            'java': 'fa-java', 'rs': 'fa-rust', 'png': 'fa-image', 'jpg': 'fa-image',
+            'jpeg': 'fa-image', 'gif': 'fa-image', 'svg': 'fa-image'
+        };
+        return icons[ext] || 'fa-file-alt';
+    }
+
+
+    // --- File Operations ---
+    async function openFile(filePath) {
+        if (!currentProject) return;
+
+        const projectRootPath = (await fs.listProjects()).find(p => p.name === currentProject).path;
+        const relativePath = filePath.replace(projectRootPath + File.separator, '');
+
+        const content = await fs.readFile(currentProject, relativePath);
+        if (typeof content === 'string' && !content.startsWith('Error:')) {
+            editor.setValue(content);
+            const languageId = detectLanguageFromExtension(filePath);
+            monaco.editor.setModelLanguage(editor.getModel(), languageId);
+            languageIndicator.textContent = getLanguageName(languageId);
+
+            updateActiveFileUI(filePath);
+            activeFilePath = filePath;
+        } else {
+            showPopup('Error', `Could not open file: ${content}`, { showCancel: false });
+        }
+    }
+
+    function updateActiveFileUI(filePath) {
+        document.querySelectorAll('.file-tree-item').forEach(item => {
+            item.classList.toggle('active', item.dataset.path === filePath);
         });
     }
 
-    // Event Listeners
-    sidebarToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('open');
-    });
 
-    sidebarCloseBtn.addEventListener('click', () => {
-        sidebar.classList.remove('open');
-    });
-
-    newFileBtn.addEventListener('click', () => {
-        showFilenamePopup();
-    });
-    
-    addToolbarButtonListener(copyBtn, copyCode);
-    addToolbarButtonListener(themeToggle, toggleTheme);
-
-    addToolbarButtonListener(undoBtn, () => {
-        if (editor) {
-            editor.trigger('toolbar', 'undo');
-        }
-    });
-
-    addToolbarButtonListener(redoBtn, () => {
-        if (editor) {
-            editor.trigger('toolbar', 'redo');
-        }
-    });
-
-    addToolbarButtonListener(tabBtn, () => {
-        if (editor) {
-            editor.executeEdits('toolbar', [{
-                range: editor.getSelection(),
-                text: '  ',
-                forceMoveMarkers: true
-            }]);
-        }
-    });
-
-    addToolbarButtonListener(bracketBtn, () => {
-        if (editor) {
-            // Using snippet controller to insert '()' and place cursor inside
-            const snippetController = editor.getContribution('snippetController2');
-            if (snippetController) {
-                snippetController.insert('($0)');
-            }
-        }
-    });
-
-    addToolbarButtonListener(searchBtn, () => {
-        if (editor) {
-            editor.getAction('editor.action.startFindReplaceAction').run();
-        }
-    });
-
-    addToolbarButtonListener(cursorUpBtn, () => {
-        if (editor) {
-            editor.trigger('toolbar', 'cursorUp');
-        }
-    });
-
-    addToolbarButtonListener(cursorDownBtn, () => {
-        if (editor) {
-            editor.trigger('toolbar', 'cursorDown');
-        }
-    });
-
-    addToolbarButtonListener(cursorLeftBtn, () => {
-        if (editor) {
-            editor.trigger('toolbar', 'cursorLeft');
-        }
-    });
-
-    addToolbarButtonListener(cursorRightBtn, () => {
-        if (editor) {
-            editor.trigger('toolbar', 'cursorRight');
-        }
-    });
-
-    addToolbarButtonListener(selectBtn, () => {
-        if (editor) {
-            editor.getAction('editor.action.smartSelect.expand').run();
-        }
-    });
-
-    addToolbarButtonListener(selectAllBtn, () => {
-        if (editor) {
-            editor.getAction('editor.action.selectAll').run();
-        }
-    });
-
-    function copyCode() {
-        if (editor) {
-            navigator.clipboard.writeText(editor.getValue())
-                .then(() => {
-                    const originalText = copyBtn.innerHTML;
-                    copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-                    setTimeout(() => {
-                        copyBtn.innerHTML = originalText;
-                    }, 2000);
-                })
-                .catch(err => {
-                    console.error('Failed to copy: ', err);
-                });
+    // --- Editor and UI Setup ---
+    function addToolbarButtonListener(button, action) {
+        if (button) {
+            button.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                if (editor) action(editor);
+            });
         }
     }
-    
+
+    sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+    sidebarCloseBtn.addEventListener('click', () => sidebar.classList.remove('open'));
+
+    addToolbarButtonListener(copyBtn, (editor) => navigator.clipboard.writeText(editor.getValue()));
+    addToolbarButtonListener(undoBtn, (editor) => editor.trigger('toolbar', 'undo'));
+    addToolbarButtonListener(redoBtn, (editor) => editor.trigger('toolbar', 'redo'));
+    addToolbarButtonListener(tabBtn, (editor) => editor.executeEdits('toolbar', [{ range: editor.getSelection(), text: '  ', forceMoveMarkers: true }]));
+    addToolbarButtonListener(bracketBtn, (editor) => editor.getContribution('snippetController2')?.insert('($0)'));
+    addToolbarButtonListener(searchBtn, (editor) => editor.getAction('editor.action.startFindReplaceAction').run());
+
+    themeToggle.addEventListener('click', toggleTheme);
     function toggleTheme() {
         const isLightTheme = document.body.classList.toggle('light-theme');
         const newTheme = isLightTheme ? 'light-theme' : 'dark-theme';
         localStorage.setItem('theme', newTheme);
-
-        if (editor) {
-            monaco.editor.setTheme(isLightTheme ? 'razen-light' : 'razen-dark');
-        }
-
-        // Update button text and icon based on the new theme
-        if (themeToggle) {
-            themeToggle.innerHTML = isLightTheme
-                ? '<i class="fas fa-sun"></i> Light'
-                : '<i class="fas fa-moon"></i> Dark';
-        }
+        monaco.editor.setTheme(isLightTheme ? 'razen-light' : 'razen-dark');
     }
 
-    function showFilenamePopup() {
-        filenamePopup.style.display = 'flex';
-        filenameInput.focus();
-    }
-
-    function hideFilenamePopup() {
-        filenamePopup.style.display = 'none';
-        filenameInput.value = '';
-    }
-
-    function createNewFile() {
-        if (Object.keys(files).length >= 10) {
-            alert("Maximum number of files reached.");
-            return;
-        }
-
-        let fileName = filenameInput.value;
-        if (!fileName) {
-            return;
-        }
-        if (!fileName.includes('.')) {
-            fileName += ".rzn";
-        }
-
-        const fileId = `file-${fileCounter}`;
-        const extension = fileName.split('.').pop();
-        const content = presetCode[extension] || '';
-
-        files[fileId] = { id: fileId, name: fileName, content: content };
-        fileCounter++;
-
-        renderFileList();
-        setActiveFile(fileId);
-        hideFilenamePopup();
-    }
-
-    filenameConfirm.addEventListener('click', createNewFile);
-    filenameCancel.addEventListener('click', hideFilenamePopup);
-    addToolbarButtonListener(runBtn, runCode);
+    runBtn.addEventListener('click', runCode);
     previewModalCloseBtn.addEventListener('click', () => {
         previewModal.style.display = 'none';
-        previewIframe.srcdoc = ''; // Clear content to stop any running scripts
+        previewIframe.srcdoc = '';
     });
 
-    // Preview Mode Switching
-    const modeButtons = [previewModeDesktopBtn, previewModeMobileBtn, previewModeCustomBtn];
-    const modes = ['preview-desktop', 'preview-mobile', 'preview-custom'];
-
-    modeButtons.forEach((button, index) => {
-        button.addEventListener('click', () => {
-            modeButtons.forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-            previewModalContent.classList.remove(...modes);
-            previewModalContent.classList.add(modes[index]);
-        });
-    });
-
-    // Resizing Logic
-    let isResizing = false;
-
-    previewResizeHandle.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        isResizing = true;
-        const startX = e.clientX;
-        const startY = e.clientY;
-        const startWidth = previewModalContent.offsetWidth;
-        const startHeight = previewModalContent.offsetHeight;
-
-        const doDrag = (e) => {
-            if (!isResizing) return;
-            const newWidth = startWidth + (e.clientX - startX);
-            const newHeight = startHeight + (e.clientY - startY);
-            previewModalContent.style.width = `${newWidth > 300 ? newWidth : 300}px`;
-            previewModalContent.style.height = `${newHeight > 200 ? newHeight : 200}px`;
-        };
-
-        const stopDrag = () => {
-            isResizing = false;
-            document.removeEventListener('mousemove', doDrag);
-            document.removeEventListener('mouseup', stopDrag);
-        };
-
-        document.addEventListener('mousemove', doDrag);
-        document.addEventListener('mouseup', stopDrag);
-    });
-
-    function previewFile(htmlFile) {
-        const cssFile = Object.values(files).find(file => file.name.endsWith('.css'));
-        const jsFile = Object.values(files).find(file => file.name.endsWith('.js'));
-
-        const htmlContent = htmlFile ? htmlFile.content : '';
-        const cssContent = cssFile ? cssFile.content : '';
-        const jsContent = jsFile ? jsFile.content : '';
+    async function runCode() {
+        if (!currentProject) return;
+        const htmlContent = await fs.readFile(currentProject, 'index.html');
+        const cssContent = await fs.readFile(currentProject, 'style.css');
+        const jsContent = await fs.readFile(currentProject, 'script.js');
 
         const iframeContent = `
             <html>
-                <head>
-                    <style>${cssContent}</style>
-                </head>
-                <body>
-                    ${htmlContent}
-                    <script>${jsContent}<\/script>
-                </body>
-            </html>
-        `;
+                <head><style>${cssContent || ''}</style></head>
+                <body>${htmlContent || ''}<script>${jsContent || ''}<\/script></body>
+            </html>`;
 
         previewIframe.srcdoc = iframeContent;
         previewModal.style.display = 'flex';
-
-        previewIframe.onload = () => {
-            try {
-                const iframeDoc = previewIframe.contentWindow.document;
-                const links = iframeDoc.getElementsByTagName('a');
-                for (let link of links) {
-                    link.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const href = e.target.getAttribute('href');
-                        alert(`Navigation to "${href}" is blocked in preview mode.`);
-                    });
-                }
-            } catch (e) {
-                console.error("Could not attach link listeners to iframe:", e);
-            }
-        };
     }
 
-    function runCode() {
-        if (!activeFileId) {
-            showPopup("There is no active file to run.", () => {});
-            return;
-        }
 
-        const activeFile = files[activeFileId];
-        if (activeFile.name.endsWith('.html')) {
-            previewFile(activeFile);
-        } else {
-            const htmlFile = Object.values(files).find(file => file.name.endsWith('.html'));
-            if (htmlFile) {
-                showPopup(
-                    `The current file is not an HTML file. Do you want to run '${htmlFile.name}' instead?`,
-                    () => previewFile(htmlFile)
-                );
-            } else {
-                showPopup("No HTML file found to preview.", () => {});
-            }
-        }
-    }
-
-    // Global click listener to close file context menus
-    window.addEventListener('click', (e) => {
-        document.querySelectorAll('.file-options-dropdown.show').forEach(dropdown => {
-            // Check if the click was outside the dropdown and its button
-            const button = dropdown.previousElementSibling;
-            if (!button.contains(e.target)) {
-                dropdown.classList.remove('show');
-            }
-        });
-    });
-
-    function renderFileList() {
-        fileList.innerHTML = '';
-        for (const fileId in files) {
-            const file = files[fileId];
-            const fileItem = document.createElement('div');
-            fileItem.className = 'file-item';
-            fileItem.dataset.fileId = file.id;
-
-            const fileNameSpan = document.createElement('span');
-            fileNameSpan.textContent = file.name;
-            fileItem.appendChild(fileNameSpan);
-
-            const optionsBtn = document.createElement('button');
-            optionsBtn.className = 'btn s-btn file-options-btn';
-            optionsBtn.innerHTML = '<i class="fas fa-ellipsis-v"></i>';
-
-            const dropdown = createFileContextMenu(file);
-            fileItem.appendChild(dropdown);
-
-            optionsBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                // Close other dropdowns
-                document.querySelectorAll('.file-options-dropdown.show').forEach(d => {
-                    if (d !== dropdown) d.classList.remove('show');
-                });
-                dropdown.classList.toggle('show');
-            });
-
-            fileItem.appendChild(optionsBtn);
-            fileItem.addEventListener('click', () => setActiveFile(file.id));
-            fileList.appendChild(fileItem);
-        }
-    }
-
-    function createFileContextMenu(file) {
-        const dropdown = document.createElement('div');
-        dropdown.className = 'file-options-dropdown';
-
-        // Download
-        const downloadLink = document.createElement('a');
-        downloadLink.innerHTML = '<i class="fas fa-download"></i> Download';
-        downloadLink.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const blob = new Blob([file.content], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = file.name;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            dropdown.classList.remove('show');
-        });
-        dropdown.appendChild(downloadLink);
-
-        // Copy Content
-        const copyLink = document.createElement('a');
-        copyLink.innerHTML = '<i class="fas fa-copy"></i> Copy Content';
-        copyLink.addEventListener('click', (e) => {
-            e.stopPropagation();
-            navigator.clipboard.writeText(file.content).then(() => {
-                alert(`${file.name} content copied to clipboard!`);
-            }).catch(err => console.error('Failed to copy content: ', err));
-            dropdown.classList.remove('show');
-        });
-        dropdown.appendChild(copyLink);
-
-        // Preview (only for HTML)
-        if (file.name.endsWith('.html')) {
-            const previewLink = document.createElement('a');
-            previewLink.innerHTML = '<i class="fas fa-eye"></i> Preview';
-            previewLink.addEventListener('click', (e) => {
-                e.stopPropagation();
-                runCode();
-                dropdown.classList.remove('show');
-            });
-            dropdown.appendChild(previewLink);
-        }
-
-        // Separator
-        const separator = document.createElement('div');
-        separator.className = 'dropdown-separator';
-        dropdown.appendChild(separator);
-
-        // Close
-        const closeLink = document.createElement('a');
-        closeLink.innerHTML = '<i class="fas fa-times"></i> Close';
-        closeLink.addEventListener('click', (e) => {
-            e.stopPropagation();
-            showPopup(`Are you sure you want to close ${file.name}?`, () => closeFile(file.id));
-            dropdown.classList.remove('show');
-        });
-        dropdown.appendChild(closeLink);
-
-        return dropdown;
-    }
-
-    function renderActiveFiles() {
-        activeFilesContainer.innerHTML = '';
-        if (Object.keys(files).length === 0) {
-            activeFilesContainer.classList.add('empty');
-        } else {
-            activeFilesContainer.classList.remove('empty');
-        }
-
-        for (const fileId in files) {
-            const file = files[fileId];
-            const activeFileDiv = document.createElement('div');
-            activeFileDiv.className = `active-file ${file.id === activeFileId ? 'active' : ''}`;
-            activeFileDiv.dataset.fileId = file.id;
-            activeFileDiv.textContent = file.name;
-
-            const optionsBtn = document.createElement('button');
-            optionsBtn.className = 'btn s-btn file-options-btn';
-            optionsBtn.innerHTML = '<i class="fas fa-ellipsis-v"></i>';
-
-            const dropdown = createFileContextMenu(file);
-            activeFileDiv.appendChild(dropdown);
-
-            optionsBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                // Close other dropdowns
-                document.querySelectorAll('.file-options-dropdown.show').forEach(d => {
-                    if (d !== dropdown) d.classList.remove('show');
-                });
-                dropdown.classList.toggle('show');
-            });
-
-            activeFileDiv.appendChild(optionsBtn);
-            activeFileDiv.addEventListener('click', () => setActiveFile(file.id));
-            activeFilesContainer.appendChild(activeFileDiv);
-        }
-    }
-
-    function setActiveFile(fileId) {
-        if (!files[fileId]) return;
-
-        activeFileId = fileId;
-        editor.setValue(files[fileId].content);
-        const model = editor.getModel();
-        const languageId = detectLanguageFromExtension(files[fileId].name);
-        monaco.editor.setModelLanguage(model, languageId);
-        languageIndicator.textContent = getLanguageName(languageId);
-        renderActiveFiles();
-        editor.focus();
-    }
-
-    function closeFile(fileId) {
-        delete files[fileId];
-        if (activeFileId === fileId) {
-            activeFileId = Object.keys(files)[0] || null;
-            if (activeFileId) {
-                setActiveFile(activeFileId);
-            } else {
-                editor.setValue('');
-            }
-        }
-        renderFileList();
-        renderActiveFiles();
-    }
-
+    // --- Popups ---
     function showPopup(title, message, options = {}) {
         popupTitle.textContent = title;
         popupMessage.textContent = message;
-
-        popupConfirm.style.display = options.showConfirm !== false ? 'inline-block' : 'none';
+        popupConfirm.style.display = options.showCancel === false ? 'inline-block' : 'none';
         popupCancel.style.display = options.showCancel !== false ? 'inline-block' : 'none';
-
-        popupConfirm.textContent = options.confirmText || 'Confirm';
-        popupCancel.textContent = options.cancelText || 'Cancel';
-
-        // A little trick to make a single button centered
-        if (options.showCancel === false) {
-             popupCancel.style.display = 'none';
-             popupConfirm.textContent = options.confirmText || 'OK';
-        } else {
-             popupConfirm.style.display = 'inline-block';
-             popupCancel.style.display = 'inline-block';
-        }
-
         customPopup.style.display = 'flex';
-
         return new Promise((resolve) => {
-            popupConfirm.onclick = () => {
-                customPopup.style.display = 'none';
-                resolve(true);
-            };
-            popupCancel.onclick = () => {
-                customPopup.style.display = 'none';
-                resolve(false);
-            };
+            popupConfirm.onclick = () => { customPopup.style.display = 'none'; resolve(true); };
+            popupCancel.onclick = () => { customPopup.style.display = 'none'; resolve(false); };
         });
     }
 
+    // --- Language Detection ---
     function detectLanguageFromExtension(fileName) {
         const ext = fileName.split('.').pop();
         const languages = {
-            'js': 'javascript',
-            'py': 'python',
-            'rzn': 'razor',
-            'html': 'html',
-            'css': 'css',
-            'ts': 'typescript',
-            'java': 'java',
-            'cs': 'csharp',
-            'cpp': 'cpp',
-            'go': 'go',
-            'php': 'php',
-            'rb': 'ruby',
-            'rs': 'rust',
-            'sql': 'sql',
-            'swift': 'swift',
-            'kt': 'kotlin',
-            'lua': 'lua',
-            'pl': 'perl',
-            'sh': 'shell',
-            'bat': 'bat',
-            'json': 'json',
-            'xml': 'xml',
-            'yaml': 'yaml',
-            'md': 'markdown',
+            'js': 'javascript', 'py': 'python', 'html': 'html', 'css': 'css', 'json': 'json',
+            'ts': 'typescript', 'java': 'java', 'cs': 'csharp', 'cpp': 'cpp', 'go': 'go',
+            'php': 'php', 'rb': 'ruby', 'rs': 'rust', 'sql': 'sql', 'swift': 'swift',
+            'kt': 'kotlin', 'lua': 'lua', 'pl': 'perl', 'sh': 'shell', 'md': 'markdown',
         };
         return languages[ext] || 'plaintext';
     }
 
     function getLanguageName(languageId) {
-        const languageNames = {
-            'javascript': 'JavaScript', 'py': 'Python', 'rzn': 'Razor',
-            'html': 'HTML', 'css': 'CSS', 'ts': 'TypeScript', 'java': 'Java',
-            'cs': 'C#', 'cpp': 'C++', 'go': 'Go', 'php': 'PHP', 'rb': 'Ruby',
-            'rs': 'Rust', 'sql': 'SQL', 'swift': 'Swift', 'kt': 'Kotlin',
-            'lua': 'Lua', 'pl': 'Perl', 'sh': 'Shell', 'bat': 'Batch',
-            'json': 'JSON', 'xml': 'XML', 'yaml': 'YAML', 'md': 'Markdown',
-            'plaintext': 'Plain Text'
+        const names = {
+            'javascript': 'JavaScript', 'python': 'Python', 'html': 'HTML', 'css': 'CSS',
+            'typescript': 'TypeScript', 'java': 'Java', 'csharp': 'C#', 'cpp': 'C++',
+            'go': 'Go', 'php': 'PHP', 'ruby': 'Ruby', 'rust': 'Rust', 'sql': 'SQL',
+            'swift': 'Swift', 'kotlin': 'Kotlin', 'lua': 'Lua', 'perl': 'Perl',
+            'shell': 'Shell', 'markdown': 'Markdown', 'plaintext': 'Plain Text'
         };
-        return languageNames[languageId] || languageId;
+        return names[languageId] || languageId;
     }
 
+
+    // --- Monaco Editor Initialization ---
     require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs' } });
     require(['vs/editor/editor.main'], function () {
-        monaco.languages.register({ id: 'razor' });
-
-        monaco.languages.setMonarchTokensProvider('razor', {
-            tokenizer: {
-                root: [
-                    [/".*?"/, "string"],
-                    [/\b\d+\b/, "number"],
-                    [/\b(if|else|for|while|return)\b/, "keyword"],
-                    [/#.*/, "comment"],
-                ]
-            }
-        });
-
         monaco.editor.defineTheme('razen-dark', {
-            base: 'vs-dark',
-            inherit: true,
-            rules: [
-                { token: 'comment', foreground: '608b4e', fontStyle: 'italic' },
-                { token: 'string', foreground: 'ce9178' },
-                { token: 'number', foreground: 'b5cea8' },
-                { token: 'keyword', foreground: 'c586c0', fontStyle: 'bold' },
-            ],
-            colors: {
-                'editor.background': '#1e1e2e',
-            }
+            base: 'vs-dark', inherit: true,
+            rules: [{ token: 'comment', foreground: '608b4e' }],
+            colors: { 'editor.background': '#1e1e2e' }
         });
-
         monaco.editor.defineTheme('razen-light', {
-            base: 'vs',
-            inherit: true,
-            rules: [
-                { token: 'comment', foreground: '6a737d', fontStyle: 'italic' },
-                { token: 'string', foreground: '032f62' },
-                { token: 'number', foreground: '005cc5' },
-                { token: 'keyword', foreground: 'd73a49', fontStyle: 'bold' },
-            ],
-            colors: {
-                'editor.background': '#ffffff',
-            }
+            base: 'vs', inherit: true,
+            rules: [{ token: 'comment', foreground: '6a737d' }],
+            colors: { 'editor.background': '#ffffff' }
         });
 
         editor = monaco.editor.create(document.getElementById('editor'), {
-            value: '',
+            value: `// Welcome to Razen Studio\n// Open a file from the sidebar to start editing.`,
             language: 'plaintext',
             theme: document.body.classList.contains('light-theme') ? 'razen-light' : 'razen-dark',
             fontFamily: 'JetBrains Mono',
             automaticLayout: true,
             lineNumbers: 'on',
             minimap: { enabled: false },
-            suggestOnTriggerCharacters: true,
             wordWrap: 'on',
             folding: true,
-            bracketPairColorization: {
-                enabled: true
-            },
-            'semanticHighlighting.enabled': true,
+            bracketPairColorization: { enabled: true },
         });
 
-        editor.onDidChangeModelContent(() => {
-            if (activeFileId) {
-                files[activeFileId].content = editor.getValue();
+        editor.onDidChangeModelContent(async () => {
+            if (activeFilePath && currentProject) {
+                const content = editor.getValue();
+                const projectRootPath = (await fs.listProjects()).find(p => p.name === currentProject).path;
+                const relativePath = activeFilePath.replace(projectRootPath + File.separator, '');
+                fs.writeFile(currentProject, relativePath, content);
             }
         });
 
         editor.onDidChangeCursorPosition(e => {
-            const { lineNumber, column } = e.position;
-            cursorPosition.textContent = `Line ${lineNumber}, Column ${column}`;
+            cursorPosition.textContent = `Line ${e.position.lineNumber}, Column ${e.position.column}`;
         });
 
-        // Load project from URL after editor is initialized
         loadProjectFromURL();
     });
-
 });

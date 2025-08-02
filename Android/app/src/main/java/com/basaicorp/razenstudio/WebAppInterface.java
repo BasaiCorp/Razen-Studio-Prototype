@@ -103,59 +103,104 @@ public class WebAppInterface {
     }
 
     @JavascriptInterface
-    public String loadProject(String projectName) {
+    public String listProjectContents(String projectName) {
         File projectDir = new File(getProjectsRoot(), projectName);
         if (!projectDir.exists() || !projectDir.isDirectory()) {
-            return "Error: Project not found";
+            return "[]"; // Return empty array if project not found
+        }
+        try {
+            return getDirContents(projectDir).toString();
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, "Error generating file tree for " + projectName, e);
+            return "[]";
+        }
+    }
+
+    private JSONArray getDirContents(File directory) throws JSONException {
+        JSONArray contents = new JSONArray();
+        File[] files = directory.listFiles();
+        if (files == null) {
+            return contents;
         }
 
-        JSONObject projectData = new JSONObject();
-        JSONObject files = new JSONObject();
-        try {
-            projectData.put("name", projectName);
-            File[] projectFiles = projectDir.listFiles();
-            if (projectFiles != null) {
-                for (File file : projectFiles) {
-                    if (file.isFile()) {
-                        files.put(file.getName(), readFileContent(file));
-                    }
-                }
+        // Sort files: folders first, then alphabetically
+        Arrays.sort(files, (f1, f2) -> {
+            if (f1.isDirectory() && !f2.isDirectory()) {
+                return -1;
+            } else if (!f1.isDirectory() && f2.isDirectory()) {
+                return 1;
+            } else {
+                return f1.getName().compareTo(f2.getName());
             }
-            projectData.put("files", files);
-        } catch (JSONException | IOException e) {
-            Log.e(LOG_TAG, "Error loading project " + projectName, e);
-            return "Error: " + e.getMessage();
+        });
+
+        for (File file : files) {
+            JSONObject fileJson = new JSONObject();
+            fileJson.put("name", file.getName());
+            fileJson.put("path", file.getPath());
+            if (file.isDirectory()) {
+                fileJson.put("type", "folder");
+                fileJson.put("children", getDirContents(file));
+            } else {
+                fileJson.put("type", "file");
+            }
+            contents.put(fileJson);
         }
-        return projectData.toString();
+        return contents;
     }
 
     @JavascriptInterface
-    public String readFile(String filePath) {
-        // This remains for general purpose file reading if needed, but should be used with care.
-        // It's recommended to use loadProject for project files.
-        File file = new File(Environment.getExternalStorageDirectory(), filePath);
-        if (!file.exists()) {
-            return "Error: File not found";
+    public String readFile(String projectName, String relativePath) {
+        File projectDir = new File(getProjectsRoot(), projectName);
+        File file = new File(projectDir, relativePath);
+
+        if (!file.exists() || !file.isFile()) {
+            return "Error: File not found at " + relativePath;
         }
+
+        // Security check to prevent path traversal
+        try {
+            if (!file.getCanonicalPath().startsWith(projectDir.getCanonicalPath())) {
+                return "Error: Access denied.";
+            }
+        } catch (IOException e) {
+            return "Error: Security check failed.";
+        }
+
         try {
             return readFileContent(file);
         } catch (IOException e) {
+            Log.e(LOG_TAG, "Error reading file: " + file.getPath(), e);
             return "Error: " + e.getMessage();
         }
     }
 
     @JavascriptInterface
-    public String writeFile(String filePath, String content) {
-        // This remains for general purpose file writing, e.g., the main editor functionality.
-        File file = new File(Environment.getExternalStorageDirectory(), filePath);
+    public String writeFile(String projectName, String relativePath, String content) {
+        File projectDir = new File(getProjectsRoot(), projectName);
+        File file = new File(projectDir, relativePath);
+
+        // Security check
+        try {
+            if (!file.getCanonicalPath().startsWith(projectDir.getCanonicalPath())) {
+                return "Error: Access denied.";
+            }
+        } catch (IOException e) {
+            return "Error: Security check failed.";
+        }
+
         File parentDir = file.getParentFile();
         if (parentDir != null && !parentDir.exists()) {
-            parentDir.mkdirs();
+            if (!parentDir.mkdirs()) {
+                return "Error: Could not create parent directories.";
+            }
         }
+
         try (FileOutputStream fos = new FileOutputStream(file)) {
             fos.write(content.getBytes(StandardCharsets.UTF_8));
-            return "Success: File written";
+            return "Success: File saved.";
         } catch (IOException e) {
+            Log.e(LOG_TAG, "Error writing file: " + file.getPath(), e);
             return "Error: " + e.getMessage();
         }
     }
