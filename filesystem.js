@@ -9,7 +9,6 @@ const FileSystem = {
 
     /**
      * Lists all projects by calling the native Android interface.
-     * The fallback lists keys from localStorage.
      * @returns {Promise<Array<Object>>} A list of project objects.
      */
     async listProjects() {
@@ -19,138 +18,131 @@ const FileSystem = {
                 return JSON.parse(projectsJson);
             } catch (error) {
                 console.error("Error listing projects from Android:", error);
-                // Try to parse the error if it's a string from the backend
-                try {
-                    return { error: JSON.parse(error.message) };
-                } catch (e) {
-                    return { error: error.message };
-                }
+                return { error: error.message };
             }
         } else {
-            // Fallback: list items from localStorage
+            // Fallback for browser testing
             console.warn("Using localStorage fallback for project listing.");
-            const projects = Object.keys(localStorage)
+            return Promise.resolve(Object.keys(localStorage)
                 .filter(key => key.startsWith('project_'))
-                .map(key => {
-                    try {
-                        const proj = JSON.parse(localStorage.getItem(key));
-                        // We only need metadata for the list view
-                        return {
-                            name: proj.name,
-                            path: `LocalStorage/Projects/${proj.name}`,
-                            createdAt: proj.createdAt,
-                        };
-                    } catch (e) {
-                        return null;
-                    }
-                })
-                .filter(p => p && p.name)
-                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Sort by date
-            return Promise.resolve(projects);
+                .map(key => ({ name: key.replace('project_', ''), path: `LocalStorage/${key}` }))
+            );
         }
     },
 
     /**
-     * Creates a new project using the native Android interface.
-     * The fallback creates a new entry in localStorage.
-     * @param {string} projectName - The name of the project to create.
-     * @returns {Promise<{success: boolean, message: string}>} An object indicating success and a message.
+     * Lists all files and folders within a project recursively.
+     * @param {string} projectName - The name of the project.
+     * @returns {Promise<Array<Object>>} A tree structure of files and folders.
      */
-    async createProject(projectName) {
-        if (!projectName || !projectName.trim()) {
-            return { success: false, message: "Project name cannot be empty." };
-        }
-
+    async listProjectContents(projectName) {
         if (this.isAndroid) {
             try {
-                const result = await window.Android.createProject(projectName);
-                if (result === "Success") {
-                    return { success: true, message: "Project created successfully." };
-                } else {
-                    return { success: false, message: result }; // "Error: ..."
-                }
+                const treeJson = await window.Android.listProjectContents(projectName);
+                return JSON.parse(treeJson);
             } catch (error) {
-                console.error(`Error creating project '${projectName}' on Android:`, error);
+                console.error(`Error listing contents for project '${projectName}':`, error);
+                return [];
+            }
+        } else {
+            console.warn(`Using localStorage fallback for listing contents of: ${projectName}`);
+            // This is a simplified fallback. A real implementation would be more complex.
+            return Promise.resolve([
+                { name: 'index.html', type: 'file', path: `${projectName}/index.html` },
+                { name: 'style.css', type: 'file', path: `${projectName}/style.css` },
+                { name: 'script.js', type: 'file', path: `${projectName}/script.js` },
+                { name: 'assets', type: 'folder', children: [
+                    { name: 'image.png', type: 'file', path: `${projectName}/assets/image.png` }
+                ]},
+            ]);
+        }
+    },
+
+    /**
+     * Reads the content of a single file within a project.
+     * @param {string} projectName - The name of the project.
+     * @param {string} relativePath - The relative path of the file within the project.
+     * @returns {Promise<string>} The content of the file.
+     */
+    async readFile(projectName, relativePath) {
+        if (this.isAndroid) {
+            try {
+                const content = await window.Android.readFile(projectName, relativePath);
+                if (content.startsWith("Error:")) {
+                    throw new Error(content);
+                }
+                return content;
+            } catch (error) {
+                console.error(`Error reading file '${relativePath}' in project '${projectName}':`, error);
+                return `// Error loading file: ${error.message}`;
+            }
+        } else {
+            console.warn(`Using localStorage fallback for reading file: ${relativePath}`);
+            // This is a simplified fallback.
+            return `// Fallback content for ${relativePath}`;
+        }
+    },
+
+    /**
+     * Writes content to a single file within a project.
+     * @param {string} projectName - The name of the project.
+     * @param {string} relativePath - The relative path of the file.
+     * @param {string} content - The content to write.
+     * @returns {Promise<{success: boolean, message: string}>} Result object.
+     */
+    async writeFile(projectName, relativePath, content) {
+        if (this.isAndroid) {
+            try {
+                const result = await window.Android.writeFile(projectName, relativePath, content);
+                if (result.startsWith("Error:")) {
+                    return { success: false, message: result };
+                }
+                return { success: true, message: result };
+            } catch (error) {
+                console.error(`Error writing file '${relativePath}':`, error);
                 return { success: false, message: error.message };
             }
         } else {
-            // Fallback: save project data to localStorage
-            console.warn(`Using localStorage fallback to create project: ${projectName}`);
-            const projectKey = `project_${projectName.replace(/\s+/g, '_')}`;
-            if (localStorage.getItem(projectKey)) {
-                return { success: false, message: "Error: Project already exists." };
+            console.warn(`Using localStorage fallback for writing file: ${relativePath}`);
+            return Promise.resolve({ success: true, message: "File saved to localStorage (mock)." });
+        }
+    },
+
+    /**
+     * Creates a new project.
+     * @param {string} projectName - The name for the new project.
+     * @returns {Promise<{success: boolean, message: string}>} Result object.
+     */
+    async createProject(projectName) {
+        if (this.isAndroid) {
+            const result = await window.Android.createProject(projectName);
+            if (result === "Success") {
+                return { success: true, message: "Project created successfully." };
             }
-            const projectData = {
-                name: projectName,
-                createdAt: new Date().toISOString(),
-                files: {
-                    'index.html': `<!DOCTYPE html><html><head><title>${projectName}</title><link rel="stylesheet" href="style.css"></head><body><h1>Welcome to ${projectName}</h1><script src="script.js"></script></body></html>`,
-                    'style.css': `body { font-family: sans-serif; }`,
-                    'script.js': `console.log("Hello from ${projectName}");`
-                }
-            };
-            localStorage.setItem(projectKey, JSON.stringify(projectData));
+            return { success: false, message: result };
+        } else {
+            console.warn(`Using localStorage fallback to create project: ${projectName}`);
+            localStorage.setItem(`project_${projectName}`, JSON.stringify({ files: {} }));
             return Promise.resolve({ success: true, message: "Project created in localStorage." });
         }
     },
 
     /**
-     * Deletes a project using the native Android interface.
-     * The fallback removes the item from localStorage.
+     * Deletes a project.
      * @param {string} projectName - The name of the project to delete.
-     * @returns {Promise<{success: boolean, message: string}>} An object indicating success and a message.
+     * @returns {Promise<{success: boolean, message: string}>} Result object.
      */
     async deleteProject(projectName) {
         if (this.isAndroid) {
-            try {
-                const result = await window.Android.deleteProject(projectName);
-                if (result === "Success") {
-                    return { success: true, message: "Project deleted successfully." };
-                } else {
-                    return { success: false, message: result };
-                }
-            } catch (error) {
-                console.error(`Error deleting project '${projectName}' on Android:`, error);
-                return { success: false, message: error.message };
+            const result = await window.Android.deleteProject(projectName);
+            if (result === "Success") {
+                return { success: true, message: "Project deleted successfully." };
             }
+            return { success: false, message: result };
         } else {
-            // Fallback: remove from localStorage
             console.warn(`Using localStorage fallback to delete project: ${projectName}`);
-            const projectKey = `project_${projectName.replace(/\s+/g, '_')}`;
-            if (!localStorage.getItem(projectKey)) {
-                return { success: false, message: "Error: Project not found." };
-            }
-            localStorage.removeItem(projectKey);
+            localStorage.removeItem(`project_${projectName}`);
             return Promise.resolve({ success: true, message: "Project deleted from localStorage." });
         }
-    },
-
-    /**
-     * Loads a project's data using the native Android interface.
-     * The fallback reads from localStorage.
-     * @param {string} projectName - The name of the project to load.
-     * @returns {Promise<Object|null>} The project data or null if not found.
-     */
-    async loadProject(projectName) {
-        if (this.isAndroid) {
-            try {
-                const projectDataJSON = await window.Android.loadProject(projectName);
-                if (projectDataJSON.startsWith("Error:")) {
-                    console.error("Failed to load project:", projectDataJSON);
-                    return null;
-                }
-                return JSON.parse(projectDataJSON);
-            } catch (error) {
-                console.error(`Error loading project '${projectName}' from Android:`, error);
-                return null;
-            }
-        } else {
-            // Fallback: load from localStorage
-            console.warn(`Using localStorage fallback to load project: ${projectName}`);
-            const projectKey = `project_${projectName.replace(/\s+/g, '_')}`;
-            const data = localStorage.getItem(projectKey);
-            return Promise.resolve(data ? JSON.parse(data) : null);
-        }
-    },
-
+    }
 };

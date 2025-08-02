@@ -141,24 +141,79 @@ header h1 {
     cursor: pointer;
 }
 
+/* --- File Tree Stylings --- */
 .file-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    flex-grow: 1; /* Allow the list to take up available space */
+    overflow-y: auto; /* Add scroll for long file lists */
 }
 
-.file-item {
+.file-tree, .file-tree ul {
+    list-style-type: none;
+    padding-left: 15px; /* Indentation for nesting */
+}
+
+.file-tree {
+    padding-left: 0;
+}
+
+.file-tree-item-container {
+    padding-left: 0; /* The container itself shouldn't be indented */
+}
+
+.file-tree-item {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 0.5rem;
-    border-radius: 4px;
+    padding: 6px 5px;
     cursor: pointer;
-    position: relative; /* For dropdown positioning */
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-family: 'Work Sans', sans-serif;
+    font-size: 1rem;
 }
 
-.file-item:hover {
+.file-tree-item:hover {
     background-color: var(--bg-tertiary);
+}
+
+.file-tree-item.active {
+    background-color: var(--accent-primary-translucent, rgba(137, 180, 250, 0.2));
+    font-weight: 500;
+    color: var(--accent-primary);
+}
+
+.file-tree-item > i {
+    margin-right: 8px;
+    color: var(--text-secondary);
+    width: 16px;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.file-tree-item .folder-caret.open {
+    transform: rotate(90deg);
+}
+
+.file-tree-item .file-icon {
+    color: var(--accent-secondary);
+}
+
+.file-tree-item .folder-icon {
+    color: var(--accent-primary);
+}
+
+/* Children are hidden by default */
+.file-tree-item-container > ul {
+    display: none;
+}
+
+/* Show children when the parent container is open */
+.file-tree-item-container.open > ul {
+    display: block;
 }
 
 .file-options-btn {
