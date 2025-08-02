@@ -27,7 +27,10 @@ public class WebAppInterface {
     }
 
     private File getProjectsRoot() {
-        File root = new File(Environment.getExternalStorageDirectory(), PROJECTS_DIR);
+        // Use the app-specific directory to comply with Scoped Storage.
+        // This does not require special permissions.
+        File appSpecificDir = context.getExternalFilesDir(null);
+        File root = new File(appSpecificDir, PROJECTS_DIR);
         if (!root.exists()) {
             root.mkdirs();
         }
