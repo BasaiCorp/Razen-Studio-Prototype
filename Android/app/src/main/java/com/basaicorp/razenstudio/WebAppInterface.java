@@ -205,6 +205,90 @@ public class WebAppInterface {
         }
     }
 
+    @JavascriptInterface
+    public String createFile(String projectName, String relativePath) {
+        File projectDir = new File(getProjectsRoot(), projectName);
+        File file = new File(projectDir, relativePath);
+
+        try {
+            if (!file.getCanonicalPath().startsWith(projectDir.getCanonicalPath())) {
+                return "Error: Access denied.";
+            }
+            if (file.exists()) {
+                return "Error: File already exists.";
+            }
+            if (file.createNewFile()) {
+                return "Success";
+            } else {
+                return "Error: Could not create file.";
+            }
+        } catch (IOException e) {
+            return "Error: " + e.getMessage();
+        }
+    }
+
+    @JavascriptInterface
+    public String createFolder(String projectName, String relativePath) {
+        File projectDir = new File(getProjectsRoot(), projectName);
+        File folder = new File(projectDir, relativePath);
+
+        try {
+            if (!folder.getCanonicalPath().startsWith(projectDir.getCanonicalPath())) {
+                return "Error: Access denied.";
+            }
+            if (folder.exists()) {
+                return "Error: Folder already exists.";
+            }
+            if (folder.mkdirs()) {
+                return "Success";
+            } else {
+                return "Error: Could not create folder.";
+            }
+        } catch (IOException e) {
+            return "Error: " + e.getMessage();
+        }
+    }
+
+    @JavascriptInterface
+    public String deletePath(String projectName, String relativePath) {
+        File projectDir = new File(getProjectsRoot(), projectName);
+        File path = new File(projectDir, relativePath);
+
+        try {
+            if (!path.getCanonicalPath().startsWith(projectDir.getCanonicalPath())) {
+                return "Error: Access denied.";
+            }
+            if (!path.exists()) {
+                return "Error: Path not found.";
+            }
+
+            if (path.isDirectory()) {
+                if (deleteDirectory(path)) {
+                    return "Success";
+                } else {
+                    return "Error: Failed to delete directory.";
+                }
+            } else {
+                if (path.delete()) {
+                    return "Success";
+                } else {
+                    return "Error: Failed to delete file.";
+                }
+            }
+        } catch (IOException e) {
+            return "Error: " + e.getMessage();
+        }
+    }
+
+    @JavascriptInterface
+    public String importFiles(String projectName, String relativePath) {
+        // This is a placeholder. A real implementation would require
+        // starting a file picker activity and handling the result, which is
+        // complex to do solely from the WebAppInterface.
+        return "Error: Not implemented yet.";
+    }
+
+
     // --- Helper Methods ---
 
     private void createFile(File parentDir, String fileName, String content) throws IOException {
