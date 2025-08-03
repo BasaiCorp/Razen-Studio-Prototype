@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!currentProject) return;
 
         const projectRootPath = (await fs.listProjects()).find(p => p.name === currentProject).path;
-        const relativePath = filePath.replace(projectRootPath + File.separator, '');
+        const relativePath = filePath.replace(projectRootPath + '/', '');
 
         const content = await fs.readFile(currentProject, relativePath);
         if (typeof content === 'string' && !content.startsWith('Error:')) {
@@ -354,7 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const confirm = await showPopup('Confirm Deletion', `Are you sure you want to delete this ${type}?`, { showCancel: true });
             if (confirm) {
                 const projectRootPath = (await fs.listProjects()).find(p => p.name === currentProject).path;
-                const relativePath = path.replace(projectRootPath + '/', ''); // Ensure trailing slash for root
+                const relativePath = path.replace(projectRootPath + '/', '');
 
                 const result = await fs.deletePath(currentProject, relativePath);
                 if (result.success) {
@@ -405,7 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (activeFilePath && currentProject) {
                 const content = editor.getValue();
                 const projectRootPath = (await fs.listProjects()).find(p => p.name === currentProject).path;
-                const relativePath = activeFilePath.replace(projectRootPath + File.separator, '');
+                const relativePath = activeFilePath.replace(projectRootPath + '/', '');
                 fs.writeFile(currentProject, relativePath, content);
             }
         });
