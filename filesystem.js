@@ -5,14 +5,20 @@
  * Provides a fallback to localStorage for use in a standard browser environment.
  */
 const FileSystem = {
-    isAndroid: typeof window.Android !== 'undefined',
+    /**
+     * Checks if the Android interface is available.
+     * @returns {boolean} True if the Android interface is available.
+     */
+    isAndroid() {
+        return typeof window.Android !== 'undefined';
+    },
 
     /**
      * Lists all projects by calling the native Android interface.
      * @returns {Promise<Array<Object>>} A list of project objects.
      */
     async listProjects() {
-        if (this.isAndroid) {
+        if (this.isAndroid()) {
             try {
                 const projectsJson = await window.Android.listProjects();
                 return JSON.parse(projectsJson);
@@ -36,7 +42,7 @@ const FileSystem = {
      * @returns {Promise<Array<Object>>} A tree structure of files and folders.
      */
     async listProjectContents(projectName) {
-        if (this.isAndroid) {
+        if (this.isAndroid()) {
             try {
                 const treeJson = await window.Android.listProjectContents(projectName);
                 return JSON.parse(treeJson);
@@ -65,7 +71,7 @@ const FileSystem = {
      * @returns {Promise<string>} The content of the file.
      */
     async readFile(projectName, relativePath) {
-        if (this.isAndroid) {
+        if (this.isAndroid()) {
             try {
                 const content = await window.Android.readFile(projectName, relativePath);
                 if (content.startsWith("Error:")) {
@@ -91,7 +97,7 @@ const FileSystem = {
      * @returns {Promise<{success: boolean, message: string}>} Result object.
      */
     async writeFile(projectName, relativePath, content) {
-        if (this.isAndroid) {
+        if (this.isAndroid()) {
             try {
                 const result = await window.Android.writeFile(projectName, relativePath, content);
                 if (result.startsWith("Error:")) {
@@ -114,7 +120,7 @@ const FileSystem = {
      * @returns {Promise<{success: boolean, message: string}>} Result object.
      */
     async createProject(projectName) {
-        if (this.isAndroid) {
+        if (this.isAndroid()) {
             const result = await window.Android.createProject(projectName);
             if (result === "Success") {
                 return { success: true, message: "Project created successfully." };
@@ -133,7 +139,7 @@ const FileSystem = {
      * @returns {Promise<{success: boolean, message: string}>} Result object.
      */
     async deleteProject(projectName) {
-        if (this.isAndroid) {
+        if (this.isAndroid()) {
             const result = await window.Android.deleteProject(projectName);
             if (result === "Success") {
                 return { success: true, message: "Project deleted successfully." };
@@ -147,7 +153,7 @@ const FileSystem = {
     },
 
     async createFile(projectName, relativePath) {
-        if (this.isAndroid) {
+        if (this.isAndroid()) {
             const result = await window.Android.createFile(projectName, relativePath);
             return { success: result === "Success", message: result };
         } else {
@@ -157,7 +163,7 @@ const FileSystem = {
     },
 
     async createFolder(projectName, relativePath) {
-        if (this.isAndroid) {
+        if (this.isAndroid()) {
             const result = await window.Android.createFolder(projectName, relativePath);
             return { success: result === "Success", message: result };
         } else {
@@ -167,7 +173,7 @@ const FileSystem = {
     },
 
     async deletePath(projectName, relativePath) {
-        if (this.isAndroid) {
+        if (this.isAndroid()) {
             const result = await window.Android.deletePath(projectName, relativePath);
             return { success: result === "Success", message: result };
         } else {
@@ -177,7 +183,7 @@ const FileSystem = {
     },
 
     async importFiles(projectName, relativePath) {
-        if (this.isAndroid) {
+        if (this.isAndroid()) {
             const result = await window.Android.importFiles(projectName, relativePath);
             return { success: result === "Success", message: result };
         } else {
