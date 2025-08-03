@@ -3,12 +3,12 @@
     "artifactId": "core",
     "excludes": [],
     "groupId": "androidx.core",
-    "versionName": "1.9.0"
+    "versionName": "1.12.0"
   },
   {
     "artifactId": "webkit",
     "excludes": [],
     "groupId": "androidx.webkit",
-    "versionName": "1.6.0"
+    "versionName": "1.8.0"
   }
 ]
