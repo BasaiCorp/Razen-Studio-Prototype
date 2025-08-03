@@ -72,6 +72,18 @@ header {
     overflow-y: auto;
 }
 
+a {
+    text-decoration: none;
+}
+
+#theme-toggle {
+    width: 41px;
+    height: 41px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .dashboard-actions {
     display: flex;
     justify-content: space-between;
