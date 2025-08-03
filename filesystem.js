@@ -144,5 +144,45 @@ const FileSystem = {
             localStorage.removeItem(`project_${projectName}`);
             return Promise.resolve({ success: true, message: "Project deleted from localStorage." });
         }
+    },
+
+    async createFile(projectName, relativePath) {
+        if (this.isAndroid) {
+            const result = await window.Android.createFile(projectName, relativePath);
+            return { success: result === "Success", message: result };
+        } else {
+            console.warn(`FS Fallback: Creating file ${relativePath}`);
+            return Promise.resolve({ success: true, message: "File created (mock)." });
+        }
+    },
+
+    async createFolder(projectName, relativePath) {
+        if (this.isAndroid) {
+            const result = await window.Android.createFolder(projectName, relativePath);
+            return { success: result === "Success", message: result };
+        } else {
+            console.warn(`FS Fallback: Creating folder ${relativePath}`);
+            return Promise.resolve({ success: true, message: "Folder created (mock)." });
+        }
+    },
+
+    async deletePath(projectName, relativePath) {
+        if (this.isAndroid) {
+            const result = await window.Android.deletePath(projectName, relativePath);
+            return { success: result === "Success", message: result };
+        } else {
+            console.warn(`FS Fallback: Deleting path ${relativePath}`);
+            return Promise.resolve({ success: true, message: "Path deleted (mock)." });
+        }
+    },
+
+    async importFiles(projectName, relativePath) {
+        if (this.isAndroid) {
+            const result = await window.Android.importFiles(projectName, relativePath);
+            return { success: result === "Success", message: result };
+        } else {
+            console.warn(`FS Fallback: Importing files to ${relativePath}`);
+            return Promise.resolve({ success: false, message: "Not implemented in browser." });
+        }
     }
 };

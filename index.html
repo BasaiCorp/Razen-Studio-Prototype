@@ -19,8 +19,18 @@
                 <h3>Files</h3>
                 <button id="sidebar-close-btn" class="btn"><i class="fas fa-times"></i></button>
             </div>
-            <button id="new-file-btn" class="btn"><i class="fas fa-plus"></i> New File</button>
+            <div class="sidebar-actions-top">
+                <button id="new-file-btn" class="btn" title="New File"><i class="fas fa-plus"></i></button>
+                <button id="new-folder-btn" class="btn" title="New Folder"><i class="fas fa-folder-plus"></i></button>
+                <button id="import-files-btn" class="btn" title="Import Files"><i class="fas fa-upload"></i></button>
+            </div>
             <div id="file-list" class="file-list"></div>
+            <div id="file-context-menu" class="context-menu" style="display: none;">
+                <ul>
+                    <li id="context-menu-delete"><i class="fas fa-trash-alt"></i> Delete</li>
+                </ul>
+            </div>
+
 
             <!-- Version Info Section -->
             <div class="sidebar-version">

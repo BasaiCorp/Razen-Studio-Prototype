@@ -29,23 +29,38 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentProject = null;
     let activeFilePath = null;
     const fs = window.FileSystem;
+    let contextMenuTarget = null; // To keep track of the context menu target
 
     // --- Project Loading ---
     async function loadProjectFromURL() {
         const urlParams = new URLSearchParams(window.location.search);
         const projectName = urlParams.get('project');
+
+        if (!projectName) {
+            // If no project is specified in the URL, redirect to the dashboard.
+            window.location.href = 'dashboard.html';
+            return;
+        }
+
         currentProject = projectName;
 
-        if (projectName && fs) {
+        if (fs) {
             document.querySelector('header h1').innerHTML = `<i class="fas fa-folder-open"></i> ${projectName}`;
+            refreshFileTree(); // Initial load
             const fileTree = await fs.listProjectContents(projectName);
-            renderFileTree(fileTree, fileListContainer);
             const firstFile = findDefaultFile(fileTree);
             if (firstFile) {
                 openFile(firstFile.path);
             }
         } else {
-            fileListContainer.innerHTML = '<p style="padding: 10px;">No project loaded.</p>';
+            fileListContainer.innerHTML = '<p style="padding: 10px;">FileSystem API not available.</p>';
+        }
+    }
+
+    async function refreshFileTree() {
+        if (currentProject && fs) {
+            const fileTree = await fs.listProjectContents(currentProject);
+            renderFileTree(fileTree, fileListContainer);
         }
     }
     
@@ -108,6 +123,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const nameSpan = document.createElement('span');
             nameSpan.textContent = node.name;
             itemButton.appendChild(nameSpan);
+
+            // Add context menu listener
+            itemButton.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                showContextMenu(e, node.path, node.type);
+            });
 
             li.appendChild(itemButton);
 
@@ -183,6 +204,61 @@ document.addEventListener('DOMContentLoaded', () => {
     sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
     sidebarCloseBtn.addEventListener('click', () => sidebar.classList.remove('open'));
 
+    document.getElementById('new-file-btn').addEventListener('click', () => createNewItem('file'));
+    document.getElementById('new-folder-btn').addEventListener('click', () => createNewItem('folder'));
+    document.getElementById('import-files-btn').addEventListener('click', async () => {
+        // A simple alert for now, as full implementation is complex
+        showPopup('Not Implemented', 'File import is not yet available.', { showCancel: false });
+    });
+
+    async function createNewItem(type) {
+        const promptMessage = type === 'file' ? 'Enter new filename:' : 'Enter new folder name:';
+        const itemName = await showInputPopup(promptMessage);
+
+        if (itemName) {
+            // For now, creating at the root. A more advanced implementation
+            // could create relative to a selected folder.
+            const result = type === 'file'
+                ? await fs.createFile(currentProject, itemName)
+                : await fs.createFolder(currentProject, itemName);
+
+            if (result.success) {
+                refreshFileTree();
+            } else {
+                showPopup('Error', `Could not create ${type}: ${result.message}`, { showCancel: false });
+            }
+        }
+    }
+
+    function showInputPopup(message) {
+        // This reuses the existing filename-popup from index.html
+        const popup = document.getElementById('filename-popup');
+        const input = document.getElementById('filename-input');
+        const confirmBtn = document.getElementById('filename-confirm');
+        const cancelBtn = document.getElementById('filename-cancel');
+
+        document.getElementById('filename-popup').querySelector('p').textContent = message;
+        input.value = '';
+        popup.style.display = 'flex';
+        input.focus();
+
+        return new Promise((resolve) => {
+            confirmBtn.onclick = () => {
+                popup.style.display = 'none';
+                resolve(input.value.trim());
+            };
+            cancelBtn.onclick = () => {
+                popup.style.display = 'none';
+                resolve(null);
+            };
+            input.onkeydown = (e) => {
+                if (e.key === 'Enter') confirmBtn.click();
+                if (e.key === 'Escape') cancelBtn.click();
+            };
+        });
+    }
+
+
     addToolbarButtonListener(copyBtn, (editor) => navigator.clipboard.writeText(editor.getValue()));
     addToolbarButtonListener(undoBtn, (editor) => editor.trigger('toolbar', 'undo'));
     addToolbarButtonListener(redoBtn, (editor) => editor.trigger('toolbar', 'redo'));
@@ -256,6 +332,46 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         return names[languageId] || languageId;
     }
+
+    // --- Context Menu ---
+    function showContextMenu(event, path, type) {
+        const menu = document.getElementById('file-context-menu');
+        contextMenuTarget = { path, type }; // Store the target info
+
+        menu.style.display = 'block';
+        menu.style.left = `${event.pageX}px`;
+        menu.style.top = `${event.pageY}px`;
+    }
+
+    function hideContextMenu() {
+        document.getElementById('file-context-menu').style.display = 'none';
+    }
+
+    document.getElementById('context-menu-delete').addEventListener('click', async () => {
+        hideContextMenu();
+        if (contextMenuTarget) {
+            const { path, type } = contextMenuTarget;
+            const confirm = await showPopup('Confirm Deletion', `Are you sure you want to delete this ${type}?`, { showCancel: true });
+            if (confirm) {
+                const projectRootPath = (await fs.listProjects()).find(p => p.name === currentProject).path;
+                const relativePath = path.replace(projectRootPath + '/', ''); // Ensure trailing slash for root
+
+                const result = await fs.deletePath(currentProject, relativePath);
+                if (result.success) {
+                    // If the deleted file was the active one, clear the editor
+                    if (path === activeFilePath) {
+                        editor.setValue(`// File deleted: ${relativePath}`);
+                        activeFilePath = null;
+                    }
+                    refreshFileTree();
+                } else {
+                    showPopup('Error', `Could not delete: ${result.message}`, { showCancel: false });
+                }
+            }
+        }
+    });
+
+    window.addEventListener('click', hideContextMenu);
 
 
     // --- Monaco Editor Initialization ---
