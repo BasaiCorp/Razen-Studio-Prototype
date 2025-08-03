@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeFilePath = null;
     const fs = window.FileSystem;
     let contextMenuTarget = null; // To keep track of the context menu target
+    const brandIcons = ['fa-html5', 'fa-css3-alt', 'fa-js-square', 'fa-python', 'fa-java', 'fa-rust', 'fa-markdown'];
 
     // --- Project Loading ---
     async function loadProjectFromURL() {
@@ -114,7 +115,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 itemButton.appendChild(placeholder);
 
                 const fileIcon = document.createElement('i');
-                fileIcon.className = `fas ${getIconForFile(node.name)} file-icon`;
+                const iconName = getIconForFile(node.name);
+                const prefix = brandIcons.includes(iconName) ? 'fab' : 'fas';
+                fileIcon.className = `${prefix} ${iconName} file-icon`;
                 itemButton.appendChild(fileIcon);
 
                 itemButton.addEventListener('click', () => openFile(node.path));
@@ -281,19 +284,96 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     async function runCode() {
-        if (!currentProject) return;
-        const htmlContent = await fs.readFile(currentProject, 'index.html');
-        const cssContent = await fs.readFile(currentProject, 'style.css');
-        const jsContent = await fs.readFile(currentProject, 'script.js');
+        if (!currentProject) {
+            showPopup('Error', 'No project is currently open.', { showCancel: false });
+            return;
+        }
 
-        const iframeContent = `
-            <html>
-                <head><style>${cssContent || ''}</style></head>
-                <body>${htmlContent || ''}<script>${jsContent || ''}<\/script></body>
-            </html>`;
+        // Fallback to index.html if no file is active or the active one isn't HTML
+        let entryHtmlRelativePath;
+        if (activeFilePath && activeFilePath.toLowerCase().endsWith('.html')) {
+            const projectRootPath = (await fs.listProjects()).find(p => p.name === currentProject).path;
+            entryHtmlRelativePath = activeFilePath.replace(projectRootPath + '/', '');
+        } else {
+            // Check if index.html exists at the root
+            const projectContents = await fs.listProjectContents(currentProject);
+            const indexFile = projectContents.find(f => f.name === 'index.html' && f.type === 'file');
+            if (indexFile) {
+                const projectRootPath = (await fs.listProjects()).find(p => p.name === currentProject).path;
+                entryHtmlRelativePath = indexFile.path.replace(projectRootPath + '/', '');
+            } else {
+                showPopup('Error', 'Could not find an HTML file to preview. Please open an HTML file or create an index.html.', { showCancel: false });
+                return;
+            }
+        }
 
-        previewIframe.srcdoc = iframeContent;
-        previewModal.style.display = 'flex';
+        try {
+            const entryHtmlContent = await fs.readFile(currentProject, entryHtmlRelativePath);
+            if (typeof entryHtmlContent !== 'string' || entryHtmlContent.startsWith('Error:')) {
+                showPopup('Error', `Could not read the HTML file: ${entryHtmlContent}`, { showCancel: false });
+                return;
+            }
+
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(entryHtmlContent, 'text/html');
+            const basePath = entryHtmlRelativePath.includes('/') ? entryHtmlRelativePath.substring(0, entryHtmlRelativePath.lastIndexOf('/') + 1) : '';
+
+            const processPromises = [];
+
+            // Process CSS <link> tags
+            doc.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && !href.startsWith('http:') && !href.startsWith('https:') && !href.startsWith('//')) {
+                    const cssPath = new URL(href, `file:///${basePath}`).pathname.substring(1);
+                    const promise = fs.readFile(currentProject, cssPath).then(cssContent => {
+                        if (typeof cssContent === 'string' && !cssContent.startsWith('Error:')) {
+                            const style = doc.createElement('style');
+                            style.textContent = cssContent;
+                            link.replaceWith(style);
+                        } else {
+                            console.warn(`Could not load CSS file: ${cssPath}`);
+                        }
+                    });
+                    processPromises.push(promise);
+                }
+            });
+
+            // Process <script> tags with src
+            doc.querySelectorAll('script[src]').forEach(script => {
+                const src = script.getAttribute('src');
+                if (src && !src.startsWith('http:') && !src.startsWith('https:') && !src.startsWith('//')) {
+                    const jsPath = new URL(src, `file:///${basePath}`).pathname.substring(1);
+                    const promise = fs.readFile(currentProject, jsPath).then(jsContent => {
+                        if (typeof jsContent === 'string' && !jsContent.startsWith('Error:')) {
+                            const newScript = doc.createElement('script');
+                            newScript.textContent = jsContent;
+                            // Copy other attributes like type, defer, etc.
+                            for (const attr of script.attributes) {
+                                if (attr.name !== 'src') {
+                                    newScript.setAttribute(attr.name, attr.value);
+                                }
+                            }
+                            script.parentNode.replaceChild(newScript, script);
+                        } else {
+                            console.warn(`Could not load JS file: ${jsPath}`);
+                        }
+                    });
+                    processPromises.push(promise);
+                }
+            });
+
+            await Promise.all(processPromises);
+
+            // Serialize the document back to a string, ensuring correct doctype
+            const finalHtml = '<!DOCTYPE html>' + doc.documentElement.outerHTML;
+
+            previewIframe.srcdoc = finalHtml;
+            previewModal.style.display = 'flex';
+
+        } catch (error) {
+            console.error("Error during code preview generation:", error);
+            showPopup('Preview Error', `An unexpected error occurred: ${error.message}`, { showCancel: false });
+        }
     }
 
 
