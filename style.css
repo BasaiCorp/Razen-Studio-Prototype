@@ -121,6 +121,18 @@ body {
     text-align: center;
 }
 
+.context-menu-divider {
+    height: 1px;
+    background-color: var(--border-color);
+    margin: 4px 0;
+}
+
+.context-menu li.disabled {
+    color: var(--text-secondary);
+    cursor: not-allowed;
+    background-color: transparent;
+}
+
 .main-content {
     flex: 1;
     display: flex;

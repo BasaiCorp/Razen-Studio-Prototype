@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeFilePath = null;
     const fs = window.FileSystem;
     let contextMenuTarget = null; // To keep track of the context menu target
+    let clipboard = null; // To hold {path, type, operation: 'copy' | 'cut'}
     const brandIcons = ['fa-html5', 'fa-css3-alt', 'fa-js-square', 'fa-python', 'fa-java', 'fa-rust', 'fa-markdown'];
 
     // --- Project Loading ---
@@ -416,7 +417,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Context Menu ---
     function showContextMenu(event, path, type) {
         const menu = document.getElementById('file-context-menu');
-        contextMenuTarget = { path, type }; // Store the target info
+        contextMenuTarget = { path, type };
+
+        // Enable/disable paste
+        const pasteItem = document.getElementById('context-menu-paste');
+        pasteItem.classList.toggle('disabled', !clipboard || type !== 'folder');
+
+        // Enable/disable preview
+        const previewItem = document.getElementById('context-menu-preview');
+        previewItem.classList.toggle('disabled', !path.toLowerCase().endsWith('.html'));
 
         menu.style.display = 'block';
         menu.style.left = `${event.pageX}px`;
@@ -427,29 +436,97 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('file-context-menu').style.display = 'none';
     }
 
-    document.getElementById('context-menu-delete').addEventListener('click', async () => {
+    async function handleContextMenuAction(action) {
         hideContextMenu();
-        if (contextMenuTarget) {
-            const { path, type } = contextMenuTarget;
-            const confirm = await showPopup('Confirm Deletion', `Are you sure you want to delete this ${type}?`, { showCancel: true });
-            if (confirm) {
-                const projectRootPath = (await fs.listProjects()).find(p => p.name === currentProject).path;
-                const relativePath = path.replace(projectRootPath + '/', '');
+        if (!contextMenuTarget) return;
 
-                const result = await fs.deletePath(currentProject, relativePath);
-                if (result.success) {
-                    // If the deleted file was the active one, clear the editor
-                    if (path === activeFilePath) {
-                        editor.setValue(`// File deleted: ${relativePath}`);
-                        activeFilePath = null;
+        const { path, type } = contextMenuTarget;
+        const projectRootPath = (await fs.listProjects()).find(p => p.name === currentProject).path;
+        const relativePath = path.replace(projectRootPath + '/', '');
+
+        switch (action) {
+            case 'copy':
+                clipboard = { path, type, operation: 'copy' };
+                break;
+
+            case 'cut':
+                clipboard = { path, type, operation: 'cut' };
+                break;
+
+            case 'paste':
+                if (clipboard && type === 'folder') {
+                    const destRelativePath = relativePath;
+                    const srcRelativePath = clipboard.path.replace(projectRootPath + '/', '');
+
+                    const result = clipboard.operation === 'cut'
+                        ? await fs.rename(currentProject, srcRelativePath, `${destRelativePath}/${clipboard.path.split('/').pop()}`)
+                        : await fs.copy(currentProject, srcRelativePath, destRelativePath);
+
+                    if (result.success) {
+                        if (clipboard.operation === 'cut') clipboard = null; // Clear after paste
+                        refreshFileTree();
+                    } else {
+                        showPopup('Error', `Paste failed: ${result.message}`, { showCancel: false });
                     }
-                    refreshFileTree();
-                } else {
-                    showPopup('Error', `Could not delete: ${result.message}`, { showCancel: false });
                 }
-            }
+                break;
+
+            case 'rename':
+                const newName = await showInputPopup(`Rename ${type}:`);
+                if (newName) {
+                    const result = await fs.rename(currentProject, relativePath, newName);
+                    if (result.success) {
+                        refreshFileTree();
+                    } else {
+                        showPopup('Error', `Rename failed: ${result.message}`, { showCancel: false });
+                    }
+                }
+                break;
+
+            case 'copy-path':
+                navigator.clipboard.writeText(path).catch(err => console.error('Failed to copy path: ', err));
+                break;
+
+            case 'preview':
+                if (path.toLowerCase().endsWith('.html')) {
+                    runCode(path);
+                }
+                break;
+
+            case 'download':
+                showPopup('Not Implemented', 'Download is not yet available.', { showCancel: false });
+                break;
+
+            case 'delete':
+                const confirm = await showPopup('Confirm Deletion', `Are you sure you want to delete this ${type}?`, { showCancel: true });
+                if (confirm) {
+                    const result = await fs.deletePath(currentProject, relativePath);
+                    if (result.success) {
+                        if (path === activeFilePath) {
+                            editor.setValue(`// File deleted: ${relativePath}`);
+                            activeFilePath = null;
+                        }
+                        refreshFileTree();
+                    } else {
+                        showPopup('Error', `Could not delete: ${result.message}`, { showCancel: false });
+                    }
+                }
+                break;
         }
+    }
+
+    document.getElementById('context-menu-copy').addEventListener('click', () => handleContextMenuAction('copy'));
+    document.getElementById('context-menu-cut').addEventListener('click', () => handleContextMenuAction('cut'));
+    document.getElementById('context-menu-paste').addEventListener('click', (e) => {
+        if (!e.target.classList.contains('disabled')) handleContextMenuAction('paste');
     });
+    document.getElementById('context-menu-rename').addEventListener('click', () => handleContextMenuAction('rename'));
+    document.getElementById('context-menu-copy-path').addEventListener('click', () => handleContextMenuAction('copy-path'));
+    document.getElementById('context-menu-preview').addEventListener('click', (e) => {
+        if (!e.target.classList.contains('disabled')) handleContextMenuAction('preview');
+    });
+    document.getElementById('context-menu-download').addEventListener('click', () => handleContextMenuAction('download'));
+    document.getElementById('context-menu-delete').addEventListener('click', () => handleContextMenuAction('delete'));
 
     window.addEventListener('click', hideContextMenu);
 
