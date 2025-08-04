@@ -124,7 +124,7 @@ body {
 .context-menu-divider {
     height: 1px;
     background-color: var(--border-color);
-    margin: 4px 0;
+    margin: 2px 0;
 }
 
 .context-menu li.disabled {
@@ -235,6 +235,7 @@ header h1 {
 .file-tree-item {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     padding: 6px 5px;
     cursor: pointer;
     border-radius: 4px;
@@ -295,6 +296,7 @@ header h1 {
     padding: 0.25rem 0.5rem;
     font-size: 0.9rem;
     border-radius: 4px;
+    cursor: pointer;
 }
 
 .file-options-btn:hover {

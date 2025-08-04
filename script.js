@@ -128,11 +128,15 @@ document.addEventListener('DOMContentLoaded', () => {
             nameSpan.textContent = node.name;
             itemButton.appendChild(nameSpan);
 
-            // Add context menu listener
-            itemButton.addEventListener('contextmenu', (e) => {
-                e.preventDefault();
+            const moreBtn = document.createElement('button');
+            moreBtn.className = 'file-options-btn';
+            moreBtn.innerHTML = '<i class="fas fa-ellipsis-v"></i>';
+            moreBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent the file from being opened
                 showContextMenu(e, node.path, node.type);
             });
+
+            itemButton.appendChild(moreBtn);
 
             li.appendChild(itemButton);
 
