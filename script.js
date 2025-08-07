@@ -397,8 +397,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function showPopup(title, message, options = {}) {
         popupTitle.textContent = title;
         popupMessage.textContent = message;
-        popupConfirm.style.display = options.showCancel === false ? 'inline-block' : 'none';
-        popupCancel.style.display = options.showCancel !== false ? 'inline-block' : 'none';
+
+        const isAlert = options.showCancel === false;
+
+        popupConfirm.style.display = 'inline-block';
+        popupCancel.style.display = isAlert ? 'none' : 'inline-block';
+
         customPopup.style.display = 'flex';
         return new Promise((resolve) => {
             popupConfirm.onclick = () => { customPopup.style.display = 'none'; resolve(true); };
