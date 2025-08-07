@@ -97,36 +97,47 @@ document.addEventListener('DOMContentLoaded', () => {
             itemButton.dataset.path = node.path;
             itemButton.dataset.type = node.type;
 
+            // Create a wrapper for the left-side content (icon and name)
+            const leftGroup = document.createElement('div');
+            leftGroup.style.display = 'flex';
+            leftGroup.style.alignItems = 'center';
+            leftGroup.style.gap = '8px'; // Consistent spacing
+            leftGroup.style.overflow = 'hidden'; // For long text
+            leftGroup.style.textOverflow = 'ellipsis';
+
             let caretIcon;
             if (node.type === 'folder') {
                 caretIcon = document.createElement('i');
                 caretIcon.className = 'fas fa-chevron-right folder-caret';
-                itemButton.appendChild(caretIcon);
+                // Remove individual margin as gap is used now
+                leftGroup.appendChild(caretIcon);
 
                 const folderIcon = document.createElement('i');
                 folderIcon.className = 'fas fa-folder folder-icon';
-                itemButton.appendChild(folderIcon);
+                leftGroup.appendChild(folderIcon);
 
                 itemButton.addEventListener('click', () => toggleFolder(li, caretIcon));
             } else {
-                // Keep alignment
+                // Keep alignment with a placeholder
                 const placeholder = document.createElement('i');
-                placeholder.className = 'fas fa-file';
+                placeholder.className = 'fas fa-chevron-right folder-caret'; // Match folder caret for alignment
                 placeholder.style.visibility = 'hidden';
-                itemButton.appendChild(placeholder);
+                leftGroup.appendChild(placeholder);
 
                 const fileIcon = document.createElement('i');
                 const iconName = getIconForFile(node.name);
                 const prefix = brandIcons.includes(iconName) ? 'fab' : 'fas';
                 fileIcon.className = `${prefix} ${iconName} file-icon`;
-                itemButton.appendChild(fileIcon);
+                leftGroup.appendChild(fileIcon);
 
                 itemButton.addEventListener('click', () => openFile(node.path));
             }
 
             const nameSpan = document.createElement('span');
             nameSpan.textContent = node.name;
-            itemButton.appendChild(nameSpan);
+            leftGroup.appendChild(nameSpan);
+
+            itemButton.appendChild(leftGroup);
 
             const moreBtn = document.createElement('button');
             moreBtn.className = 'file-options-btn';
