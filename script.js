@@ -31,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const fs = window.FileSystem;
     let contextMenuTarget = null; // To keep track of the context menu target
     let clipboard = null; // To hold {path, type, operation: 'copy' | 'cut'}
-    const brandIcons = ['fa-html5', 'fa-css3-alt', 'fa-js-square', 'fa-python', 'fa-java', 'fa-rust', 'fa-markdown'];
 
     // --- Project Loading ---
     async function loadProjectFromURL() {
@@ -125,9 +124,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 leftGroup.appendChild(placeholder);
 
                 const fileIcon = document.createElement('i');
-                const iconName = getIconForFile(node.name);
-                const prefix = brandIcons.includes(iconName) ? 'fab' : 'fas';
-                fileIcon.className = `${prefix} ${iconName} file-icon`;
+                const iconInfo = getFileIcon(node.name);
+                fileIcon.className = `${iconInfo.icon} file-icon ${iconInfo.colorClass}`;
+                fileIcon.title = iconInfo.tooltip; // Add title attribute for accessibility
                 leftGroup.appendChild(fileIcon);
 
                 itemButton.addEventListener('click', () => openFile(node.path));
@@ -170,15 +169,90 @@ document.addEventListener('DOMContentLoaded', () => {
         caret_icon.classList.toggle('open');
     }
 
-    function getIconForFile(fileName) {
-        const ext = fileName.split('.').pop().toLowerCase();
-        const icons = {
-            'html': 'fa-html5', 'css': 'fa-css3-alt', 'js': 'fa-js-square',
-            'json': 'fa-file-code', 'md': 'fa-markdown', 'py': 'fa-python',
-            'java': 'fa-java', 'rs': 'fa-rust', 'png': 'fa-image', 'jpg': 'fa-image',
-            'jpeg': 'fa-image', 'gif': 'fa-image', 'svg': 'fa-image'
-        };
-        return icons[ext] || 'fa-file-alt';
+    const fileIconMap = {
+        // Programming Languages
+        js: { icon: 'fab fa-js-square', colorClass: 'icon-js', tooltip: 'JavaScript' },
+        ts: { icon: 'fas fa-file-code', colorClass: 'icon-ts', tooltip: 'TypeScript' },
+        py: { icon: 'fab fa-python', colorClass: 'icon-py', tooltip: 'Python' },
+        java: { icon: 'fab fa-java', colorClass: 'icon-java', tooltip: 'Java' },
+        cs: { icon: 'fas fa-file-code', colorClass: 'icon-cs', tooltip: 'C#' },
+        cpp: { icon: 'fas fa-file-code', colorClass: 'icon-cpp', tooltip: 'C++' },
+        c: { icon: 'fas fa-file-code', colorClass: 'icon-c', tooltip: 'C' },
+        html: { icon: 'fab fa-html5', colorClass: 'icon-html', tooltip: 'HTML' },
+        css: { icon: 'fab fa-css3-alt', colorClass: 'icon-css', tooltip: 'CSS' },
+        scss: { icon: 'fab fa-sass', colorClass: 'icon-scss', tooltip: 'SCSS' },
+        sass: { icon: 'fab fa-sass', colorClass: 'icon-sass', tooltip: 'SASS' },
+        php: { icon: 'fab fa-php', colorClass: 'icon-php', tooltip: 'PHP' },
+        rb: { icon: 'fas fa-gem', colorClass: 'icon-rb', tooltip: 'Ruby' },
+        go: { icon: 'fab fa-golang', colorClass: 'icon-go', tooltip: 'Go' },
+        rs: { icon: 'fab fa-rust', colorClass: 'icon-rs', tooltip: 'Rust' },
+        swift: { icon: 'fab fa-swift', colorClass: 'icon-swift', tooltip: 'Swift' },
+        kt: { icon: 'fab fa-kickstarter-k', colorClass: 'icon-kt', tooltip: 'Kotlin' },
+        dart: { icon: 'fab fa-dart', colorClass: 'icon-dart', tooltip: 'Dart' },
+        r: { icon: 'fab fa-r-project', colorClass: 'icon-r', tooltip: 'R' },
+        m: { icon: 'fas fa-file-code', colorClass: 'icon-m', tooltip: 'MATLAB/Objective-C' },
+        pl: { icon: 'fas fa-file-code', colorClass: 'icon-pl', tooltip: 'Perl' },
+        sh: { icon: 'fas fa-terminal', colorClass: 'icon-sh', tooltip: 'Shell Script' },
+        ps1: { icon: 'fas fa-terminal', colorClass: 'icon-ps1', tooltip: 'PowerShell' },
+        sql: { icon: 'fas fa-database', colorClass: 'icon-sql', tooltip: 'SQL' },
+        vue: { icon: 'fab fa-vuejs', colorClass: 'icon-vue', tooltip: 'Vue' },
+        jsx: { icon: 'fab fa-react', colorClass: 'icon-jsx', tooltip: 'React JSX' },
+        tsx: { icon: 'fab fa-react', colorClass: 'icon-tsx', tooltip: 'React TSX' },
+        svelte: { icon: 'fas fa-file-code', colorClass: 'icon-svelte', tooltip: 'Svelte' },
+        lua: { icon: 'fas fa-file-code', colorClass: 'icon-lua', tooltip: 'Lua' },
+        scala: { icon: 'fas fa-file-code', colorClass: 'icon-scala', tooltip: 'Scala' },
+        hs: { icon: 'fas fa-file-code', colorClass: 'icon-hs', tooltip: 'Haskell' },
+        clj: { icon: 'fas fa-file-code', colorClass: 'icon-clj', tooltip: 'Clojure' },
+        ex: { icon: 'fas fa-file-code', colorClass: 'icon-ex', tooltip: 'Elixir' },
+        erl: { icon: 'fas fa-file-code', colorClass: 'icon-erl', tooltip: 'Erlang' },
+        fs: { icon: 'fas fa-file-code', colorClass: 'icon-fs', tooltip: 'F#' },
+        vb: { icon: 'fas fa-file-code', colorClass: 'icon-vb', tooltip: 'Visual Basic' },
+        asm: { icon: 'fas fa-microchip', colorClass: 'icon-asm', tooltip: 'Assembly' },
+        cob: { icon: 'fas fa-file-code', colorClass: 'icon-cob', tooltip: 'COBOL' },
+        f90: { icon: 'fas fa-file-code', colorClass: 'icon-f90', tooltip: 'Fortran' },
+        ada: { icon: 'fas fa-file-code', colorClass: 'icon-ada', tooltip: 'Ada' },
+        pas: { icon: 'fas fa-file-code', colorClass: 'icon-pas', tooltip: 'Pascal' },
+
+        // Data & Config
+        json: { icon: 'fas fa-file-alt', colorClass: 'icon-json', tooltip: 'JSON' },
+        xml: { icon: 'fas fa-file-code', colorClass: 'icon-xml', tooltip: 'XML' },
+        yml: { icon: 'fas fa-file-alt', colorClass: 'icon-yml', tooltip: 'YAML' },
+        yaml: { icon: 'fas fa-file-alt', colorClass: 'icon-yaml', tooltip: 'YAML' },
+        md: { icon: 'fab fa-markdown', colorClass: 'icon-md', tooltip: 'Markdown' },
+        config: { icon: 'fas fa-cog', colorClass: 'icon-config', tooltip: 'Config' },
+        ini: { icon: 'fas fa-cog', colorClass: 'icon-ini', tooltip: 'INI' },
+        env: { icon: 'fas fa-cog', colorClass: 'icon-env', tooltip: 'Environment' },
+
+        // Documents & Images
+        pdf: { icon: 'fas fa-file-pdf', colorClass: 'icon-pdf', tooltip: 'PDF' },
+        doc: { icon: 'fas fa-file-word', colorClass: 'icon-doc', tooltip: 'Word Document' },
+        docx: { icon: 'fas fa-file-word', colorClass: 'icon-docx', tooltip: 'Word Document' },
+        txt: { icon: 'fas fa-file-alt', colorClass: 'icon-txt', tooltip: 'Text File' },
+        png: { icon: 'fas fa-file-image', colorClass: 'icon-png', tooltip: 'PNG Image' },
+        jpg: { icon: 'fas fa-file-image', colorClass: 'icon-jpg', tooltip: 'JPEG Image' },
+        jpeg: { icon: 'fas fa-file-image', colorClass: 'icon-jpeg', tooltip: 'JPEG Image' },
+        svg: { icon: 'fas fa-file-image', colorClass: 'icon-svg', tooltip: 'SVG Image' },
+
+        // Archives & Other
+        zip: { icon: 'fas fa-file-archive', colorClass: 'icon-zip', tooltip: 'ZIP Archive' },
+        tar: { icon: 'fas fa-file-archive', colorClass: 'icon-tar', tooltip: 'TAR Archive' },
+        gz: { icon: 'fas fa-file-archive', colorClass: 'icon-gz', tooltip: 'Gzip Archive' },
+        db: { icon: 'fas fa-database', colorClass: 'icon-db', tooltip: 'Database' },
+        sqlite: { icon: 'fas fa-database', colorClass: 'icon-sqlite', tooltip: 'SQLite DB' },
+        lock: { icon: 'fas fa-lock', colorClass: 'icon-lock', tooltip: 'Lock File' },
+        log: { icon: 'fas fa-file-alt', colorClass: 'icon-log', tooltip: 'Log File' },
+    };
+
+    function getFileIcon(filename) {
+        const extension = filename.split('.').pop().toLowerCase();
+        // Handle special cases like 'README.md'
+        if (filename.toLowerCase() === 'readme.md') {
+            return { icon: 'fas fa-book-open', colorClass: 'icon-readme', tooltip: 'README' };
+        }
+        if (filename.toLowerCase() === 'license') {
+            return { icon: 'fas fa-id-badge', colorClass: 'icon-license', tooltip: 'License' };
+        }
+        return fileIconMap[extension] || { icon: 'fas fa-file-alt', colorClass: 'icon-default', tooltip: 'File' };
     }
 
 
