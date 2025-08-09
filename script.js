@@ -10,6 +10,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const redoBtn = document.getElementById('redo-btn');
     const bracketBtn = document.getElementById('bracket-btn');
     const searchBtn = document.getElementById('search-btn');
+    const cursorUpBtn = document.getElementById('cursor-up-btn');
+    const cursorDownBtn = document.getElementById('cursor-down-btn');
+    const cursorLeftBtn = document.getElementById('cursor-left-btn');
+    const cursorRightBtn = document.getElementById('cursor-right-btn');
+    const selectBtn = document.getElementById('select-btn');
+    const selectAllBtn = document.getElementById('select-all-btn');
     const sidebar = document.getElementById('sidebar');
     const sidebarToggle = document.getElementById('sidebar-toggle');
     const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
@@ -289,7 +295,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (button) {
             button.addEventListener('mousedown', (e) => {
                 e.preventDefault();
-                if (editor) action(editor);
+                if (editor) {
+                    action(editor);
+                    editor.focus();
+                }
             });
         }
     }
@@ -358,6 +367,16 @@ document.addEventListener('DOMContentLoaded', () => {
     addToolbarButtonListener(tabBtn, (editor) => editor.executeEdits('toolbar', [{ range: editor.getSelection(), text: '  ', forceMoveMarkers: true }]));
     addToolbarButtonListener(bracketBtn, (editor) => editor.getContribution('snippetController2')?.insert('($0)'));
     addToolbarButtonListener(searchBtn, (editor) => editor.getAction('editor.action.startFindReplaceAction').run());
+
+    // Arrow buttons
+    addToolbarButtonListener(cursorUpBtn, (editor) => editor.trigger('toolbar', 'cursorUp', null));
+    addToolbarButtonListener(cursorDownBtn, (editor) => editor.trigger('toolbar', 'cursorDown', null));
+    addToolbarButtonListener(cursorLeftBtn, (editor) => editor.trigger('toolbar', 'cursorLeft', null));
+    addToolbarButtonListener(cursorRightBtn, (editor) => editor.trigger('toolbar', 'cursorRight', null));
+
+    // Select buttons
+    addToolbarButtonListener(selectBtn, (editor) => editor.getAction('editor.action.smartSelect.expand').run());
+    addToolbarButtonListener(selectAllBtn, (editor) => editor.getAction('editor.action.selectAll').run());
 
     themeToggle.addEventListener('click', toggleTheme);
     function toggleTheme() {
