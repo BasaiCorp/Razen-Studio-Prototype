@@ -60,7 +60,7 @@ body {
 /* --- HEADER --- */
 header {
     background-color: var(--bg-secondary);
-    padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 3);
+    padding: 1.5rem 2rem; /* Increased padding */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -306,15 +306,15 @@ body.light-theme #framework-filter {
     align-items: center;
     z-index: 1000;
     backdrop-filter: blur(5px);
+    padding: 1rem; /* Add padding to container to avoid touching edges */
 }
 
 .popup-content {
     background-color: var(--bg-secondary);
-    padding: calc(var(--spacing-unit) * 3);
-    border-radius: var(--spacing-unit);
+    padding: 2rem; /* Consistent padding */
+    border-radius: calc(var(--spacing-unit) * 1.5); /* Slightly larger radius */
     text-align: center;
     box-shadow: 0 10px 30px var(--shadow-color);
-    margin: 1rem;
     position: relative;
     max-width: 90vw;
 }
@@ -322,15 +322,16 @@ body.light-theme #framework-filter {
     width: 700px;
     max-width: 95vw;
     text-align: left;
+    padding: 2.5rem; /* More generous padding for large modal */
 }
 
 .btn-close {
     position: absolute;
-    top: var(--spacing-unit);
-    right: var(--spacing-unit);
+    top: calc(var(--spacing-unit) * 1.5);
+    right: calc(var(--spacing-unit) * 1.5);
     background: none;
     border: none;
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     line-height: 1;
     padding: var(--spacing-unit);
 }
@@ -339,11 +340,9 @@ body.light-theme #framework-filter {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: calc(var(--spacing-unit) * 3);
-    padding-bottom: calc(var(--spacing-unit) * 2);
-    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 2.5rem; /* Increased margin */
 }
-.modal-header h2 { font-size: 1.5rem; }
+.modal-header h2 { font-size: 1.75rem; }
 
 .step-indicator {
     display: flex;
@@ -380,7 +379,7 @@ body.light-theme #framework-filter {
 
 .form-step label {
     display: block;
-    margin-bottom: var(--spacing-unit);
+    margin-bottom: calc(var(--spacing-unit) * 1.5); /* Increased margin */
     font-weight: bold;
     color: var(--text-secondary);
 }
@@ -432,7 +431,7 @@ body.light-theme #framework-filter {
 }
 
 .popup-navigation {
-    margin-top: calc(var(--spacing-unit) * 4);
+    margin-top: 2.5rem; /* Consistent with header margin */
     display: flex;
     justify-content: flex-end;
     gap: calc(var(--spacing-unit) * 1.5);
