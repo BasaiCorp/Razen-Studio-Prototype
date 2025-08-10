@@ -661,7 +661,7 @@ document.addEventListener('DOMContentLoaded', () => {
             value: `// Welcome to Razen Studio\n// Open a file from the sidebar to start editing.`,
             language: 'plaintext',
             theme: document.body.classList.contains('light-theme') ? 'razen-light' : 'razen-dark',
-            fontFamily: 'JetBrains Mono',
+            fontFamily: 'Google Sans Code',
             automaticLayout: true,
             lineNumbers: 'on',
             minimap: { enabled: false },
