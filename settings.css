@@ -74,7 +74,7 @@ body.light-theme {
     padding: 1rem;
     border-radius: 4px;
     overflow-x: auto;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Google Sans Code', monospace;
     font-size: 0.9em;
     border: 1px solid var(--border-color);
     white-space: pre-wrap; /* Wrap long lines */
@@ -109,7 +109,7 @@ body.light-theme {
     padding: 0.75rem 1rem;
     border-radius: 4px;
     cursor: pointer;
-    font-family: 'Work Sans', sans-serif;
+    font-family: 'Nata Sans', sans-serif;
     font-weight: 500;
     text-align: left;
     margin-bottom: 0.25rem;
