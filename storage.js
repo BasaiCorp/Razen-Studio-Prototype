@@ -71,14 +71,19 @@ const BrowserStorageProvider = {
             const request = store.getAll();
 
             request.onsuccess = () => {
-                const projects = request.result.map(p => ({ ...p, path: `IndexedDB/${p.name}` }));
+                // Add migration for projects without a framework
+                const projects = request.result.map(p => ({
+                    ...p,
+                    path: `IndexedDB/${p.name}`,
+                    framework: p.framework || 'no_framework' // Default to 'no_framework' if not set
+                }));
                 resolve(projects);
             };
             request.onerror = (event) => reject(event.target.error);
         });
     },
 
-    async createProject(projectName) {
+    async createProject(projectName, framework = 'no_framework') {
         await dbReady;
         if (!projectName || projectName.trim().length === 0) {
             return { success: false, message: "Project name cannot be empty." };
@@ -87,10 +92,18 @@ const BrowserStorageProvider = {
         return new Promise((resolve, reject) => {
             const transaction = db.transaction(PROJECTS_STORE, 'readwrite');
             const store = transaction.objectStore(PROJECTS_STORE);
-            const request = store.add({ name: projectName, createdAt: new Date() });
+            const projectData = {
+                name: projectName,
+                createdAt: new Date(),
+                framework: framework
+            };
+            const request = store.add(projectData);
 
             request.onsuccess = () => {
-                resolve({ success: true, message: "Project created successfully." });
+                // Also create a placeholder file to represent the project in the files store
+                this.createFile(projectName, 'welcome.txt').then(() => {
+                     resolve({ success: true, message: "Project created successfully." });
+                });
             };
             request.onerror = (event) => {
                 if (event.target.error.name === 'ConstraintError') {
