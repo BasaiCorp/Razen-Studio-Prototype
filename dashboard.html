@@ -26,32 +26,16 @@
         <main class="dashboard-main">
             <div class="dashboard-actions">
                 <button id="create-project-btn" class="btn btn-primary"><i class="fas fa-plus"></i> Create New Project</button>
-                <div class="filters">
-                    <div class="search-container">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="search-projects-input" placeholder="Search projects...">
-                    </div>
-                    <div class="filter-container">
-                        <i class="fas fa-filter"></i>
-                        <select id="framework-filter">
-                            <option value="all">All Frameworks</option>
-                            <!-- Framework options will be added here dynamically -->
-                        </select>
-                    </div>
+                <div class="search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-projects-input" placeholder="Search projects...">
                 </div>
             </div>
 
             <section id="projects-section">
-                <div class="section-header">
-                    <h2>Recent Projects</h2>
-                    <div class="view-options">
-                        <button id="grid-view-btn" class="view-btn active" title="Grid View"><i class="fas fa-th-large"></i></button>
-                        <button id="list-view-btn" class="view-btn" title="List View"><i class="fas fa-list"></i></button>
-                    </div>
-                </div>
+                <h2>Recent Projects</h2>
                 <div id="project-list" class="project-grid">
                     <!-- Projects will be dynamically inserted here -->
-                    <p class="loading-message">Loading projects...</p>
                 </div>
             </section>
         </main>
@@ -59,34 +43,13 @@
 
     <!-- Create Project Modal -->
     <div id="create-project-modal" class="popup-container" style="display: none;">
-        <div class="popup-content large">
-            <button id="cancel-create-project-btn" class="btn btn-close">&times;</button>
-            <div class="modal-header">
-                <h2>Create New Project</h2>
-                <div class="step-indicator">
-                    <span class="step-number active">1</span>
-                    <span class="step-line"></span>
-                    <span class="step-number">2</span>
-                </div>
-            </div>
-
-            <div class="form-step active" id="step-1">
-                <label for="project-name-input">Project Name</label>
-                <input type="text" id="project-name-input" class="input-field" placeholder="my-awesome-project">
-                <p class="input-hint">Use lowercase letters, numbers, and hyphens.</p>
-            </div>
-
-            <div class="form-step" id="step-2">
-                <label>Choose a Framework or Template</label>
-                <div id="framework-selection" class="framework-grid">
-                    <!-- Frameworks will be dynamically inserted here -->
-                </div>
-            </div>
-
-            <div class="popup-navigation">
-                <button id="prev-step-btn" class="btn" style="display: none;">Back</button>
-                <button id="next-step-btn" class="btn btn-primary">Next <i class="fas fa-arrow-right"></i></button>
-                <button id="confirm-create-project-btn" class="btn btn-primary" style="display: none;">Create Project</button>
+        <div class="popup-content">
+            <h2>Create New Project</h2>
+            <p>Enter a name for your new project.</p>
+            <input type="text" id="project-name-input" class="input-field" placeholder="My awesome project">
+            <div class="popup-buttons">
+                <button id="confirm-create-project-btn" class="btn">Create</button>
+                <button id="cancel-create-project-btn" class="btn">Cancel</button>
             </div>
         </div>
     </div>
@@ -116,7 +79,6 @@
             document.body.classList.add(themeToApply);
         })();
     </script>
-    <script src="storage.js"></script>
     <script src="filesystem.js"></script>
     <script src="dashboard.js"></script>
 </body>

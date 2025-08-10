@@ -106,16 +106,16 @@ const FileSystem = {
      * @param {string} projectName - The name for the new project.
      * @returns {Promise<{success: boolean, message: string}>} Result object.
      */
-    async createProject(projectName, framework = 'no_framework') {
+    async createProject(projectName) {
         if (this.isAndroid()) {
-            const result = await window.Android.createProject(projectName, framework);
+            const result = await window.Android.createProject(projectName);
             if (result === "Success") {
                 return { success: true, message: "Project created successfully." };
             }
             return { success: false, message: result };
         } else {
             console.warn(`Using IndexedDB fallback to create project: ${projectName}`);
-            return BrowserStorageProvider.createProject(projectName, framework);
+            return BrowserStorageProvider.createProject(projectName);
         }
     },
 
