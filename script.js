@@ -218,6 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
         f90: { icon: 'fas fa-file-code', colorClass: 'icon-f90', tooltip: 'Fortran' },
         ada: { icon: 'fas fa-file-code', colorClass: 'icon-ada', tooltip: 'Ada' },
         pas: { icon: 'fas fa-file-code', colorClass: 'icon-pas', tooltip: 'Pascal' },
+        rzn: { icon: 'fas fa-file-code', colorClass: 'icon-rzn', tooltip: 'Razen' },
 
         // Data & Config
         json: { icon: 'fas fa-file-alt', colorClass: 'icon-json', tooltip: 'JSON' },
@@ -511,6 +512,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'ts': 'typescript', 'java': 'java', 'cs': 'csharp', 'cpp': 'cpp', 'go': 'go',
             'php': 'php', 'rb': 'ruby', 'rs': 'rust', 'sql': 'sql', 'swift': 'swift',
             'kt': 'kotlin', 'lua': 'lua', 'pl': 'perl', 'sh': 'shell', 'md': 'markdown',
+            'rzn': 'razen',
         };
         return languages[ext] || 'plaintext';
     }
@@ -521,7 +523,8 @@ document.addEventListener('DOMContentLoaded', () => {
             'typescript': 'TypeScript', 'java': 'Java', 'csharp': 'C#', 'cpp': 'C++',
             'go': 'Go', 'php': 'PHP', 'ruby': 'Ruby', 'rust': 'Rust', 'sql': 'SQL',
             'swift': 'Swift', 'kotlin': 'Kotlin', 'lua': 'Lua', 'perl': 'Perl',
-            'shell': 'Shell', 'markdown': 'Markdown', 'plaintext': 'Plain Text'
+            'shell': 'Shell', 'markdown': 'Markdown', 'plaintext': 'Plain Text',
+            'razen': 'Razen'
         };
         return names[languageId] || languageId;
     }
