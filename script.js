@@ -670,6 +670,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 { open: '{', close: '}' },
                 { open: '[', close: ']' },
                 { open: '(', close: ')' },
+                { open: '<', close: '>' },
                 { open: '"', close: '"' },
                 { open: "'", close: "'" },
             ],
@@ -677,6 +678,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 { open: '{', close: '}' },
                 { open: '[', close: ']' },
                 { open: '(', close: ')' },
+                { open: '<', close: '>' },
                 { open: '"', close: '"' },
                 { open: "'", close: "'" },
             ],
@@ -685,10 +687,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // Set tokenizer for Razen
         monaco.languages.setMonarchTokensProvider('razen', {
             keywords: [
-                'num', 'str', 'bool', 'var', 'const', 'if', 'else', 'while', 'for', 'is', 'when', 'not',
-                'list', 'arr', 'append', 'remove', 'map', 'key', 'value', 'store', 'box', 'ref', 'show',
+                'var', 'const', 'if', 'else', 'while', 'for', 'is', 'when', 'not',
+                'append', 'remove', 'key', 'value', 'store', 'box', 'ref', 'show',
                 'read', 'fun', 'async', 'await', 'class', 'return', 'continue', 'break', 'import',
-                'export', 'use', 'from', 'to', 'lib', 'true', 'false', 'null'
+                'export', 'use', 'from', 'to', 'lib', 'true', 'false', 'null', 'struct', 'match'
+            ],
+            typeKeywords: [
+                'num', 'str', 'bool', 'map', 'list', 'arr', 'obj', 'tuple'
             ],
             operators: [
                 '=', '>', '<', '!', '~', '?', ':', '==', '<=', '>=', '!=',
@@ -702,6 +707,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 root: [
                     [/#.*$/, 'comment'],
                     [/[ \t\r\n]+/, ''],
+
+                    // f-string
+                    [/f"/, { token: 'string.prefix', next: '@f_string' }],
+
                     [/\d*\.\d+([eE][-+]?\d+)?/, 'number.float'],
                     [/0[xX][0-9a-fA-F]+/, 'number.hex'],
                     [/\d+/, 'number'],
@@ -716,6 +725,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             '@default': 'identifier'
                         }
                     }],
+
+                    // Angle brackets for type annotations
+                    [/</, { token: 'delimiter.angle', next: '@type_annotation' }],
+                    [/>/, 'delimiter.angle'],
+
                     [/[{}()\[\]]/, '@brackets'],
                     [/@symbols/, {
                         cases: {
@@ -731,6 +745,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     [/\\./, 'string.escape.invalid'],
                     [/"/, { token: 'string.quote', bracket: '@close', next: '@pop' }]
                 ],
+                f_string: [
+                    [/{/, { token: 'delimiter.curly', next: '@f_string_expression' }],
+                    [/"/, { token: 'string.quote', bracket: '@close', next: '@pop' }],
+                    [/[^"{]+/, 'string']
+                ],
+                f_string_expression: [
+                    [/}/, { token: 'delimiter.curly', next: '@pop' }],
+                    { include: 'root' }
+                ],
+                type_annotation: [
+                    [/[a-zA-Z_]\w*/, {
+                        cases: {
+                            '@typeKeywords': 'type.identifier',
+                            '@default': 'identifier'
+                        }
+                    }],
+                    [/</, { token: 'delimiter.angle', next: '@type_annotation' }],
+                    [/>/, { token: 'delimiter.angle', next: '@pop' }]
+                ]
             }
         });
 
