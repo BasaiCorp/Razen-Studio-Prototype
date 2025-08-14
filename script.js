@@ -695,6 +695,10 @@ document.addEventListener('DOMContentLoaded', () => {
             typeKeywords: [
                 'num', 'str', 'bool', 'map', 'list', 'arr', 'obj', 'tuple'
             ],
+            colorKeywords: [
+                'cyan', 'red', 'yellow', 'green', 'blue', 'magenta', 'white',
+                'light_cyan', 'light_red', 'light_yellow', 'light_green', 'light_blue', 'light_magenta', 'light_white'
+            ],
             operators: [
                 '=', '>', '<', '!', '~', '?', ':', '==', '<=', '>=', '!=',
                 '&&', '||', '++', '--', '+', '-', '*', '/', '&', '|', '^', '%',
@@ -721,6 +725,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     [/'/, 'string.invalid'],
                     [/[a-zA-Z_]\w*/, {
                         cases: {
+                            'show': { token: 'keyword', next: '@show_arguments' },
                             '@keywords': 'keyword',
                             '@default': 'identifier'
                         }
@@ -762,6 +767,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }],
                     [/</, { token: 'delimiter.angle', next: '@type_annotation' }],
+                    [/>/, { token: 'delimiter.angle', next: '@pop' }]
+                ],
+                show_arguments: [
+                    [/\s*</, { token: 'delimiter.angle', next: '@show_annotation' }],
+                    { include: 'root', next: '@pop' }
+                ],
+                show_annotation: [
+                    [/[a-zA-Z_]\w*/, {
+                        cases: {
+                            '@colorKeywords': 'metatag',
+                            '@default': 'identifier'
+                        }
+                    }],
                     [/>/, { token: 'delimiter.angle', next: '@pop' }]
                 ]
             }
