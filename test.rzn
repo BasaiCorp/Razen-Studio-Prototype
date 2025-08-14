@@ -1,0 +1,20 @@
+# This is a Razen test file.
+
+fun main() {
+    # Variables
+    num age = 30
+    str name = "Jules"
+    bool is_engineer = true
+
+    # Control flow
+    if is_engineer and age > 25 {
+        show("Welcome, experienced engineer!")
+    } else {
+        show("Welcome, guest!")
+    }
+
+    # A simple loop
+    for i from 0 to 5 {
+        show("Iteration: " + i)
+    }
+}
