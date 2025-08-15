@@ -776,7 +776,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Namespace highlighting (e.g., math::sqrt)
                     [/\b([a-zA-Z_]\w*)\b(?=::)/, {
                         cases: {
-                            '@stdLibNames': 'comment', // Green for library name
+                            '@stdLibNames': 'entity.name.library', // Custom green for library name
                             '@default': 'identifier'
                         }
                     }],
@@ -862,7 +862,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     [/\s+/, ''],
                     [/[a-zA-Z_]\w*/, {
                         cases: {
-                            '@stdLibNames': { token: 'comment', next: '@pop' },
+                            '@stdLibNames': { token: 'entity.name.library', next: '@pop' },
                             '@default': {token: 'identifier', next: '@pop'}
                         }
                     }],
@@ -889,7 +889,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         monaco.editor.defineTheme('razen-dark', {
             base: 'vs-dark', inherit: true,
-            rules: [{ token: 'comment', foreground: '608b4e' }],
+            rules: [
+                { token: 'comment', foreground: '608b4e' },
+                { token: 'entity.name.library', foreground: '98C379' }
+            ],
             colors: { 'editor.background': '#1e1e2e' }
         });
         monaco.editor.defineTheme('razen-light', {
