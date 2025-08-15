@@ -11,19 +11,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // Set active theme button
         const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark-theme' : 'light-theme');
         document.querySelectorAll('.theme-btn').forEach(btn => {
-            if (btn.dataset.theme === savedTheme) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
+            btn.classList.toggle('active', btn.dataset.theme === savedTheme);
         });
 
-        // Set selected font in dropdown
+        // Set active font button
         const savedFont = localStorage.getItem('editorFont') || 'Google Sans Code';
-        const fontSelect = document.getElementById('font-select');
-        if (fontSelect) {
-            fontSelect.value = savedFont;
-        }
+        document.querySelectorAll('.font-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.font === savedFont);
+        });
     }
 
     // Function to load content based on target ID
@@ -95,29 +90,25 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- Event Delegation for Customisation Settings ---
     contentContainer.addEventListener('click', (e) => {
-        // Theme switcher logic
         const themeButton = e.target.closest('.theme-btn');
+        const fontButton = e.target.closest('.font-btn');
+
         if (themeButton) {
             const newTheme = themeButton.dataset.theme;
-
-            // Remove old theme, add new one
             document.body.classList.remove('light-theme', 'dark-theme');
             document.body.classList.add(newTheme);
-
-            // Save to local storage
             localStorage.setItem('theme', newTheme);
 
-            // Update active button UI
             document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
             themeButton.classList.add('active');
         }
-    });
 
-    contentContainer.addEventListener('change', (e) => {
-        // Font selector logic
-        if (e.target.id === 'font-select') {
-            const selectedFont = e.target.value;
-            localStorage.setItem('editorFont', selectedFont);
+        if (fontButton) {
+            const newFont = fontButton.dataset.font;
+            localStorage.setItem('editorFont', newFont);
+
+            document.querySelectorAll('.font-btn').forEach(btn => btn.classList.remove('active'));
+            fontButton.classList.add('active');
         }
     });
 });
