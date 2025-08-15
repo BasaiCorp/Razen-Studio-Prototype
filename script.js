@@ -704,7 +704,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         const stdLibNames = Object.keys(razenStdLibs);
         const stdLibFunctions = [].concat(...Object.values(razenStdLibs));
-        const stdLibNamesRegex = new RegExp(`\\b(${stdLibNames.join('|')})\\b(?=::)`);
 
         // Register the Razen language
         monaco.languages.register({
@@ -761,6 +760,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 '&&', '||', '++', '--', '+', '-', '*', '/', '&', '|', '^', '%',
                 '->', '=>'
             ],
+            stdLibNames: stdLibNames,
             stdLibFunctions: stdLibFunctions,
             symbols: /[=><!~?:&|+\-*\/\^%]+/,
             escapes: /\\(?:[abfnrtv\\"']|x[0-9A-Fa-f]{1,4}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/,
@@ -773,9 +773,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     // f-string
                     [/f"/, { token: 'string.prefix', next: '@f_string' }],
 
-                    // Namespace highlighting
-                    [stdLibNamesRegex, 'entity.name.namespace'],
-                    [/::/, { token: 'operator', next: '@library_function_call' }],
+                    // Namespace highlighting (e.g., math::sqrt)
+                    [/\b([a-zA-Z_]\w*)\b(?=::)/, {
+                        cases: {
+                            '@stdLibNames': 'comment', // Green for library name
+                            '@default': 'identifier'
+                        }
+                    }],
+                    [/::/, { token: 'metatag', next: '@library_function_call' }], // Yellow for ::
 
                     [/\d*\.\d+([eE][-+]?\d+)?/, 'number.float'],
                     [/0[xX][0-9a-fA-F]+/, 'number.hex'],
@@ -785,8 +790,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     [/'[^\\']'/, 'string.char'],
                     [/(')(@escapes)(')/, ['string.char', 'string.escape', 'string.char']],
                     [/'/, 'string.invalid'],
+
+                    // Keywords and identifiers
                     [/[a-zA-Z_]\w*/, {
                         cases: {
+                            'use': { token: 'keyword', next: '@use_statement' },
                             'show': { token: 'keyword', next: '@show_arguments' },
                             'var': { token: 'keyword', next: '@variable_declaration' },
                             'const': { token: 'keyword', next: '@variable_declaration' },
@@ -850,10 +858,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     [/\s*</, { token: 'delimiter.angle', next: '@type_annotation' }],
                     { include: 'root', next: '@pop' }
                 ],
+                use_statement: [
+                    [/\s+/, ''],
+                    [/[a-zA-Z_]\w*/, {
+                        cases: {
+                            '@stdLibNames': { token: 'comment', next: '@pop' },
+                            '@default': {token: 'identifier', next: '@pop'}
+                        }
+                    }],
+                    [/"/, { token: 'string.quote', bracket: '@open', next: '@string_lib_pop' }],
+                    ['', '', '@pop']
+                ],
+                string_lib_pop: [
+                    [/[^\\"]+/, 'string'],
+                    [/@escapes/, 'string.escape'],
+                    [/\\./, 'string.escape.invalid'],
+                    [/"/, { token: 'string.quote', bracket: '@close', next: '@pop' }]
+                ],
                 library_function_call: [
                     [/[a-zA-Z_]\w*/, {
                         cases: {
-                            '@stdLibFunctions': { token: 'entity.name.function', next: '@pop' },
+                            '@stdLibFunctions': { token: 'type.identifier', next: '@pop' },
                             '@default': { token: 'identifier', next: '@pop' }
                         }
                     }],
