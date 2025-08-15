@@ -6,6 +6,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const contentContainer = document.getElementById('settings-content');
     const contentTemplates = document.getElementById('settings-data'); // Hidden div containing templates
     
+    // Function to apply currently saved customisation settings to the UI
+    function applyCustomisationSettings() {
+        // Set active theme button
+        const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark-theme' : 'light-theme');
+        document.querySelectorAll('.theme-btn').forEach(btn => {
+            if (btn.dataset.theme === savedTheme) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        // Set selected font in dropdown
+        const savedFont = localStorage.getItem('editorFont') || 'Google Sans Code';
+        const fontSelect = document.getElementById('font-select');
+        if (fontSelect) {
+            fontSelect.value = savedFont;
+        }
+    }
+
     // Function to load content based on target ID
     function loadContent(targetId) {
         // Clear current content
@@ -20,6 +40,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // Remove the ID from the clone to avoid duplicates
             clonedContent.removeAttribute('id');
             contentContainer.appendChild(clonedContent);
+
+            // If we just loaded the customisation content, apply its settings
+            if (targetId === 'customisation') {
+                applyCustomisationSettings();
+            }
         } else {
             // Handle case where content is not found
             contentContainer.innerHTML = '<p>Content not found.</p>';
@@ -68,22 +93,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // --- Optional: Theme Toggle Persistence ---
-    // If you have a theme toggle button in the settings toolbar, you'd handle it here
-    // Example (assuming a button with id 'settings-theme-toggle'):
-    /*
-    const themeToggleBtn = document.getElementById('settings-theme-toggle');
-    if (themeToggleBtn) {
-         themeToggleBtn.addEventListener('click', () => {
-             // Logic similar to index.html's theme toggle
-             const currentTheme = document.body.classList.contains('dark-theme') ? 'dark-theme' : 'light-theme';
-             const newTheme = currentTheme === 'dark-theme' ? 'light-theme' : 'dark-theme';
-             document.body.classList.remove(currentTheme);
-             document.body.classList.add(newTheme);
-             localStorage.setItem('theme', newTheme);
-             // Update button text/icon if needed
-             // themeToggleBtn.innerHTML = newTheme === 'dark-theme' ? '<i class="fas fa-sun"></i> Light' : '<i class="fas fa-moon"></i> Dark';
-         });
-    }
-    */
+    // --- Event Delegation for Customisation Settings ---
+    contentContainer.addEventListener('click', (e) => {
+        // Theme switcher logic
+        const themeButton = e.target.closest('.theme-btn');
+        if (themeButton) {
+            const newTheme = themeButton.dataset.theme;
+
+            // Remove old theme, add new one
+            document.body.classList.remove('light-theme', 'dark-theme');
+            document.body.classList.add(newTheme);
+
+            // Save to local storage
+            localStorage.setItem('theme', newTheme);
+
+            // Update active button UI
+            document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+            themeButton.classList.add('active');
+        }
+    });
+
+    contentContainer.addEventListener('change', (e) => {
+        // Font selector logic
+        if (e.target.id === 'font-select') {
+            const selectedFont = e.target.value;
+            localStorage.setItem('editorFont', selectedFont);
+        }
+    });
 });
