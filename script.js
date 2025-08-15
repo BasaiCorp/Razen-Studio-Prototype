@@ -702,7 +702,7 @@ document.addEventListener('DOMContentLoaded', () => {
             operators: [
                 '=', '>', '<', '!', '~', '?', ':', '==', '<=', '>=', '!=',
                 '&&', '||', '++', '--', '+', '-', '*', '/', '&', '|', '^', '%',
-                '->', '=>'
+                '->', '=>', '::'
             ],
             symbols: /[=><!~?:&|+\-*\/\^%]+/,
             escapes: /\\(?:[abfnrtv\\"']|x[0-9A-Fa-f]{1,4}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/,
@@ -715,6 +715,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     // f-string
                     [/f"/, { token: 'string.prefix', next: '@f_string' }],
 
+                    // Namespace highlighting
+                    [/[a-zA-Z_]\w*(?=::)/, 'entity.name.namespace'],
+
                     [/\d*\.\d+([eE][-+]?\d+)?/, 'number.float'],
                     [/0[xX][0-9a-fA-F]+/, 'number.hex'],
                     [/\d+/, 'number'],
@@ -726,6 +729,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     [/[a-zA-Z_]\w*/, {
                         cases: {
                             'show': { token: 'keyword', next: '@show_arguments' },
+                            'var': { token: 'keyword', next: '@variable_declaration' },
+                            'const': { token: 'keyword', next: '@variable_declaration' },
                             '@keywords': 'keyword',
                             '@default': 'identifier'
                         }
@@ -781,6 +786,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }],
                     [/>/, { token: 'delimiter.angle', next: '@pop' }]
+                ],
+                variable_declaration: [
+                    [/\s*</, { token: 'delimiter.angle', next: '@type_annotation' }],
+                    { include: 'root', next: '@pop' }
                 ]
             }
         });

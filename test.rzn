@@ -1,57 +1,35 @@
-# New Razen Syntax Test File
+# Razen Syntax Test File - V3
 
+# Structs and Type Annotations
 struct userData {
     name<str>,
     age<num>
 }
 
-var any_type_value = "Prathmesh" # any type data
-
+# Variable and Constant Declarations
 var<num> x = 10
-var<num> y = 4.26
+const<str> app_name = "Razen Studio"
+var any_type_value = "Prathmesh"
 
-var<str> name = "Razen"
+# Library Usage
+use math
+use "discordRZN"
 
-var<bool> isAdmin = false
+# Namespace operator
+var<num> squared = math::sqrt(256)
 
-var<map> Foods = {
-    "Chai": 40,
-    "Coffee": 40,
-    "Dosa": 60
-}
+# F-string and show<color>
+show<green> f"The square root of 256 is {squared}."
+show<light_red> "This is a test message."
 
-var<list> Fruits = ["Apple", "Banana", "Cheery"]
-
-var<arr> Numbers = [1, 2, 3, 4]
-var<arr<num>> Numbers_same = Numbers
-
-# This part is commented out as 'User' is not defined as a callable constructor
-# var<obj> User = User("Prathmesh", 16)
-
-var<tuple> Words = ("Apple", "Banana", "Dog")
-
-read choise
-read<num> number
-read<str> name_input
-read<bool> condition
-
-if (number<num>) {
-    show<green> "This is a number"
-    show<light_blue> "This is a light blue message."
-} else {
-    show<red> "This is Not a number hehe"
-    show "This is a normal show message."
-}
-
-while (true) {
-    # F-string test
-    show f"Hello, {name}! Your number is {number}."
-}
-
-match x {
-    10: show "x is 10",
-    default: show "x is not 10"
+# Control Flow
+match squared {
+    16: show "Correct!",
+    default: show "Incorrect."
 }
 
 # Standalone types should not be highlighted
 num str bool map list arr obj tuple
+
+# A regular function call for comparison
+some_function()
