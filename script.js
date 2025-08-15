@@ -901,11 +901,13 @@ document.addEventListener('DOMContentLoaded', () => {
             colors: { 'editor.background': '#ffffff' }
         });
 
+        const savedFont = localStorage.getItem('editorFont') || 'Google Sans Code';
+
         editor = monaco.editor.create(document.getElementById('editor'), {
             value: `// Welcome to Razen Studio\n// Open a file from the sidebar to start editing.`,
             language: 'plaintext',
             theme: document.body.classList.contains('light-theme') ? 'razen-light' : 'razen-dark',
-            fontFamily: 'Google Sans Code',
+            fontFamily: savedFont,
             automaticLayout: true,
             lineNumbers: 'on',
             minimap: { enabled: false },
@@ -925,6 +927,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         editor.onDidChangeCursorPosition(e => {
             cursorPosition.textContent = `Line ${e.position.lineNumber}, Column ${e.position.column}`;
+        });
+
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'editorFont' && e.newValue && editor) {
+                editor.updateOptions({ fontFamily: e.newValue });
+            }
+            if (e.key === 'theme' && e.newValue && editor) {
+                const newTheme = e.newValue === 'light-theme' ? 'razen-light' : 'razen-dark';
+                monaco.editor.setTheme(newTheme);
+            }
         });
 
         loadProjectFromURL();
