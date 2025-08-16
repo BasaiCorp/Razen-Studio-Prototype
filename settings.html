@@ -120,6 +120,23 @@
                         <li data-font="Space Mono">Space Mono</li>
                     </ul>
                 </div>
+                <div class="font-preview-container">
+                    <pre><code id="font-preview-code" class="language-python">
+<span class="token keyword">import</span> os
+
+<span class="token keyword">class</span> <span class="token class-name">Greeter</span>:
+    <span class="token string">"""A simple class to greet."""</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span>(<span class="token parameter">self</span>, name):
+        <span class="token parameter">self</span>.name = name
+
+    <span class="token keyword">def</span> <span class="token function">greet</span>(<span class="token parameter">self</span>):
+        <span class="token comment"># Say hello</span>
+        print(f<span class="token string">"Hello, {</span><span class="token parameter">self</span><span class="token string">.name}!"</span>)
+
+greeter = Greeter(<span class="token string">"World"</span>)
+greeter.greet()
+                    </code></pre>
+                </div>
             </div>
         </div>
 

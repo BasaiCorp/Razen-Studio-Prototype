@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const selectedFontName = document.getElementById('selected-font-name');
             const fontItems = fontDropdown.querySelectorAll('.dropdown-menu li');
             const savedFont = localStorage.getItem('editorFont') || 'Google Sans Code';
+            const fontPreview = document.getElementById('font-preview-code');
 
             // Set initial text and selected item
             if(selectedFontName) {
@@ -28,6 +29,11 @@ document.addEventListener('DOMContentLoaded', () => {
             fontItems.forEach(item => {
                 item.classList.toggle('selected', item.dataset.font === savedFont);
             });
+
+            // Set initial font for preview
+            if (fontPreview) {
+                fontPreview.style.fontFamily = savedFont;
+            }
         }
     }
 
@@ -114,6 +120,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Update selected class
                 dropdownMenu.querySelectorAll('li').forEach(item => item.classList.remove('selected'));
                 target.classList.add('selected');
+
+                // Update preview font
+                const fontPreview = document.getElementById('font-preview-code');
+                if (fontPreview) {
+                    fontPreview.style.fontFamily = newFont;
+                }
 
                 fontDropdown.classList.remove('open');
             }

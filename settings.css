@@ -283,3 +283,36 @@ body.light-theme {
     color: var(--accent-primary);
     font-weight: 500;
 }
+
+/* Font Preview */
+.font-preview-container {
+    margin-top: 1rem;
+}
+
+#font-preview-code {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 1rem;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre;
+    overflow-x: auto;
+    transition: font-family 0.2s ease; /* Smooth font transition */
+}
+
+/* Syntax Highlighting Tokens */
+#font-preview-code .token.keyword { color: #cba6f7; }
+#font-preview-code .token.class-name { color: #f9e2af; }
+#font-preview-code .token.function { color: #89b4fa; }
+#font-preview-code .token.string { color: #a6e3a1; }
+#font-preview-code .token.comment { color: #6c7086; }
+#font-preview-code .token.parameter { color: #f38ba8; }
+
+/* Light Theme Overrides */
+body.light-theme #font-preview-code .token.keyword { color: #7e57c2; }
+body.light-theme #font-preview-code .token.class-name { color: #c49000; }
+body.light-theme #font-preview-code .token.function { color: #4285f4; }
+body.light-theme #font-preview-code .token.string { color: #34a853; }
+body.light-theme #font-preview-code .token.comment { color: #6a737d; }
+body.light-theme #font-preview-code .token.parameter { color: #d81b60; }
