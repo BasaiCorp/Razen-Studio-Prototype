@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="settings.css"> <!-- Settings specific overrides -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Work+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Mozilla+Text:wght@200..700&family=Nata+Sans:wght@100..900&family=Outfit:wght@100..900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Rubik:ital,wght@0,300..900;1,300..900&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -21,7 +21,8 @@
             </div>
             <!-- Settings Navigation moved to Sidebar -->
             <nav class="settings-sidebar-nav">
-                <button class="settings-nav-btn active" data-target="github"><i class="fab fa-github"></i> GitHub</button>
+                <button class="settings-nav-btn" data-target="github"><i class="fab fa-github"></i> GitHub</button>
+                <button class="settings-nav-btn active" data-target="customisation"><i class="fas fa-palette"></i> Customisation</button>
                 <button class="settings-nav-btn" data-target="version"><i class="fas fa-code-branch"></i> Version</button>
                 <button class="settings-nav-btn" data-target="changelogs"><i class="fas fa-history"></i> Changelogs</button>
                 <button class="settings-nav-btn" data-target="license"><i class="fas fa-file-alt"></i> License</button>
@@ -31,13 +32,23 @@
             <!-- Version Info Section - Same as index.html -->
             <div class="sidebar-version">
                 <div class="sv">
-                    <p class="version-text">Beta v1.0.3</p>
-                    <p class="update-text">Sidebar Update!</p>
+                    <p class="version-text">Beta-3 v1.2.0</p>
+                    <p class="update-text">UX Enhancements!</p>
                 </div>
-                <!-- Settings Button - Links back to Editor -->
-                <a href="index.html" class="btn settings-btn-sidebar" title="Editor">
-                    <i class="fas fa-home"></i>
-                </a>
+                <!-- Action Buttons -->
+                <div class="sidebar-actions">
+                    <button id="nav-toggle-btn" class="btn settings-btn-sidebar" title="Navigation">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <div id="nav-menu" class="nav-menu">
+                        <a href="dashboard.html" class="nav-menu-item">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        <a href="index.html" class="nav-menu-item">
+                            <i class="fas fa-code"></i> Editor
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -80,16 +91,93 @@
             <p>Releases: <a href="https://github.com/BasaiCorp/razen-studio/releases" target="_blank">View Releases</a></p>
         </div>
 
+        <div id="customisation-content">
+            <h2>Customisation</h2>
+            <div class="setting-group">
+                <h3>Theme</h3>
+                <div class="theme-buttons">
+                    <button class="btn theme-btn" data-theme="light-theme">
+                        <i class="fas fa-sun"></i> Light
+                    </button>
+                    <button class="btn theme-btn" data-theme="dark-theme">
+                        <i class="fas fa-moon"></i> Dark
+                    </button>
+                </div>
+            </div>
+            <div class="setting-group">
+                <h3>Code Editor Font</h3>
+                <div class="custom-dropdown" id="font-dropdown">
+                    <button class="dropdown-toggle" id="font-dropdown-toggle">
+                        <span id="selected-font-name">Google Sans Code</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <ul class="dropdown-menu" id="font-dropdown-menu">
+                        <li data-font="Google Sans Code">Google Sans Code</li>
+                        <li data-font="JetBrains Mono">JetBrains Mono</li>
+                        <li data-font="Roboto Mono">Roboto Mono</li>
+                        <li data-font="Source Code Pro">Source Code Pro</li>
+                        <li data-font="IBM Plex Mono">IBM Plex Mono</li>
+                        <li data-font="Space Mono">Space Mono</li>
+                    </ul>
+                </div>
+                <div class="font-preview-container">
+                    <pre><code id="font-preview-code" class="language-python">
+<span class="token keyword">import</span> os
+
+<span class="token keyword">class</span> <span class="token class-name">Greeter</span>:
+    <span class="token string">"""A simple class to greet."""</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span>(<span class="token parameter">self</span>, name):
+        <span class="token parameter">self</span>.name = name
+
+    <span class="token keyword">def</span> <span class="token function">greet</span>(<span class="token parameter">self</span>):
+        <span class="token comment"># Say hello</span>
+        print(f<span class="token string">"Hello, {</span><span class="token parameter">self</span><span class="token string">.name}!"</span>)
+
+greeter = Greeter(<span class="token string">"World"</span>)
+greeter.greet()
+                    </code></pre>
+                </div>
+            </div>
+        </div>
+
         <div id="version-content">
             <h2>Version</h2>
-            <p>Current Version: <strong>Beta v1.0.3</strong></p>
+            <p>Current Version: <strong>Beta-3 v1.2.0</strong></p>
+            <p>VersionName: <code>v1.2.0-beta.3</code></p>
+            <p>VersionCode: <code>1020003</code></p>
             <p>Status: <span class="status-beta">Beta</span></p>
         </div>
 
         <div id="changelogs-content">
             <h2>Changelogs</h2>
             <ul>
-                <li><strong>v1.0.3</strong> -- Initial Beta Release</li>
+                <h3>v1.2.0-beta.3 -- UX Enhancements!</h3>
+                <li>Fixed UX and keyboard syncing issue in the toolbar.</li>
+                <li>Fixed preview issue in HTML + CSS + JS/TS websites - now working perfectly.</li>
+                <li>Added 40+ language icons in the file tree for better visual representation.</li>
+                <li>Added more menu options in files and folders to access additional features.</li>
+                <li>Fixed delete files and folders issue.</li>
+            </ul>
+            <ul>
+                <h3>v1.2.0-beta.2 -- Feature Rich Update</h3>
+                <li>Added a new <strong>Dashboard Page</strong> for a better overview.</li>
+                <li>Implemented a <strong>Tree System</strong> for files and folders, improving organization.</li>
+                <li>Added <strong>Live Preview</strong> for HTML, CSS, and JS/TS files.</li>
+                <li>The toolbar has been updated to be <strong>icon-only</strong> for a cleaner interface.</li>
+                <li>New buttons have been added to the toolbar for enhanced functionality.</li>
+                <li>Major <strong>UI Enhancements</strong> for a more modern look and feel.</li>
+                <li>Improved performance and stability.</li>
+            </ul>
+            <ul>
+                <h3>v1.1.0-beta.1 -- Major Editor Overhaul</h3>
+                <li>Integrated <strong>Monaco Editor</strong> (used in VS Code)</li>
+                <li>Added multi-language support: Javascript, Python, Rust, TypeScript, Go</li>
+                <li>Toolbar redesign: icon-only layout for cleaner look</li>
+                <li>Toolbar is now <strong>horizontally scrollable</strong> for better UX on small screens</li>
+                <li>General UI improvements and performance enhancements</li>
+            </ul>
+            <ul>
+                <h3>v1.0.3-- Initial Beta Release</h3>
                 <li>Implemented core editor features</li>
                 <li>Added file management</li>
                 <li>Integrated basic syntax highlighting</li>
@@ -125,7 +213,7 @@ SOFTWARE.
 
         <div id="about-content">
             <h2>About Razen Studio</h2>
-            <p>Razen Studio is a modern code editor built for the Razen Lang programming language.</p>
+            <p>Razen Studio is a modern code editor designed for Android users, featuring support for over 20 programming languages.</p>
             <p>Developed with passion by Prathmesh  (Prathmesh Barot).</p>
         </div>
     </div>
@@ -149,5 +237,26 @@ SOFTWARE.
     <!-- Include script.js for sidebar toggle functionality -->
     <script src="script.js"></script>
     <script src="settings.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const navToggleBtn = document.getElementById('nav-toggle-btn');
+            const navMenu = document.getElementById('nav-menu');
+
+            if (navToggleBtn && navMenu) {
+                navToggleBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    navMenu.classList.toggle('show');
+                });
+            }
+
+            window.addEventListener('click', (e) => {
+                if (navMenu && navMenu.classList.contains('show')) {
+                    if (!navMenu.contains(e.target) && !navToggleBtn.contains(e.target)) {
+                        navMenu.classList.remove('show');
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>

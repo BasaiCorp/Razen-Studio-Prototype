@@ -49,6 +49,7 @@ public class WebAppInterface {
             return "[]";
         }
 
+        // Sort by most recently modified
         Arrays.sort(projectDirs, Comparator.comparingLong(File::lastModified).reversed());
 
         JSONArray projects = new JSONArray();
@@ -58,21 +59,6 @@ public class WebAppInterface {
                 project.put("name", dir.getName());
                 project.put("path", dir.getPath());
                 project.put("createdAt", dir.lastModified());
-
-                // Read framework from razen.json
-                File metadataFile = new File(dir, "razen.json");
-                String framework = "no_framework"; // Default
-                if (metadataFile.exists()) {
-                    try {
-                        String content = readFileContent(metadataFile);
-                        JSONObject metadata = new JSONObject(content);
-                        framework = metadata.optString("framework", "no_framework");
-                    } catch (IOException | JSONException e) {
-                        Log.e(LOG_TAG, "Error reading metadata for " + dir.getName(), e);
-                    }
-                }
-                project.put("framework", framework);
-
                 projects.put(project);
             } catch (JSONException e) {
                 Log.e(LOG_TAG, "Error creating JSON for project " + dir.getName(), e);
@@ -82,14 +68,10 @@ public class WebAppInterface {
     }
 
     @JavascriptInterface
-    public String createProject(String projectName, String framework) {
-        if (projectName == null || projectName.trim().isEmpty() || !projectName.matches("^[a-z0-9-]+$")) {
-            return "Error: Project name is invalid. Use lowercase letters, numbers, and hyphens.";
+    public String createProject(String projectName) {
+        if (projectName == null || projectName.trim().isEmpty()) {
+            return "Error: Project name is invalid.";
         }
-        if (framework == null || framework.trim().isEmpty()) {
-            framework = "no_framework";
-        }
-
         File projectDir = new File(getProjectsRoot(), projectName);
         if (projectDir.exists()) {
             return "Error: Project already exists.";
@@ -99,16 +81,14 @@ public class WebAppInterface {
         }
 
         try {
-            // Create metadata file
-            createProjectMetadata(projectDir, projectName, framework);
-
-            // Create preset files based on framework
-            createPresetFiles(projectDir, projectName, framework);
-
+            createFile(projectDir, "index.html", getPresetHtmlContent(projectName));
+            createFile(projectDir, "style.css", "/* CSS for " + projectName + " */\n\nbody {\n    font-family: sans-serif;\n}");
+            createFile(projectDir, "script.js", "// JavaScript for " + projectName + "\n\nconsole.log('Hello, " + projectName + "!');");
             return "Success";
-        } catch (IOException | JSONException e) {
+        } catch (IOException e) {
             Log.e(LOG_TAG, "Error creating files for project " + projectName, e);
-            deleteDirectory(projectDir); // Clean up
+            // Clean up created directory if file creation fails
+            deleteDirectory(projectDir);
             return "Error: " + e.getMessage();
         }
     }
