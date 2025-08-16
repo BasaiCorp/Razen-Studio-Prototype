@@ -8,45 +8,43 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Function to apply currently saved customisation settings to the UI
     function applyCustomisationSettings() {
-        // Set active theme button
+        // --- Theme ---
         const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark-theme' : 'light-theme');
         document.querySelectorAll('.theme-btn').forEach(btn => {
-            if (btn.dataset.theme === savedTheme) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
+            btn.classList.toggle('active', btn.dataset.theme === savedTheme);
         });
 
-        // Set selected font in dropdown
-        const savedFont = localStorage.getItem('editorFont') || 'Google Sans Code';
-        const fontSelect = document.getElementById('font-select');
-        if (fontSelect) {
-            fontSelect.value = savedFont;
+        // --- Font Dropdown ---
+        const fontDropdown = document.getElementById('font-dropdown');
+        if (fontDropdown) {
+            const selectedFontName = document.getElementById('selected-font-name');
+            const fontItems = fontDropdown.querySelectorAll('.dropdown-menu li');
+            const savedFont = localStorage.getItem('editorFont') || 'Google Sans Code';
+
+            // Set initial text and selected item
+            if(selectedFontName) {
+                selectedFontName.textContent = savedFont;
+            }
+            fontItems.forEach(item => {
+                item.classList.toggle('selected', item.dataset.font === savedFont);
+            });
         }
     }
 
     // Function to load content based on target ID
     function loadContent(targetId) {
-        // Clear current content
         contentContainer.innerHTML = '';
-        
-        // Find the corresponding content template
         const template = contentTemplates.querySelector(`#${targetId}-content`);
-        
         if (template) {
-            // Clone the template content and append it
             const clonedContent = template.cloneNode(true);
-            // Remove the ID from the clone to avoid duplicates
             clonedContent.removeAttribute('id');
             contentContainer.appendChild(clonedContent);
 
-            // If we just loaded the customisation content, apply its settings
             if (targetId === 'customisation') {
                 applyCustomisationSettings();
+                setupCustomDropdown(); // New function call
             }
         } else {
-            // Handle case where content is not found
             contentContainer.innerHTML = '<p>Content not found.</p>';
         }
     }
@@ -93,31 +91,55 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // --- Event Delegation for Customisation Settings ---
+    function setupCustomDropdown() {
+        const fontDropdown = document.getElementById('font-dropdown');
+        if (!fontDropdown) return;
+
+        const toggleButton = document.getElementById('font-dropdown-toggle');
+        const dropdownMenu = document.getElementById('font-dropdown-menu');
+        const selectedFontName = document.getElementById('selected-font-name');
+
+        toggleButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            fontDropdown.classList.toggle('open');
+        });
+
+        dropdownMenu.addEventListener('click', (e) => {
+            const target = e.target;
+            if (target.tagName === 'LI') {
+                const newFont = target.dataset.font;
+                selectedFontName.textContent = newFont;
+                localStorage.setItem('editorFont', newFont);
+
+                // Update selected class
+                dropdownMenu.querySelectorAll('li').forEach(item => item.classList.remove('selected'));
+                target.classList.add('selected');
+
+                fontDropdown.classList.remove('open');
+            }
+        });
+    }
+
+    // --- Event Delegation for Settings ---
     contentContainer.addEventListener('click', (e) => {
         // Theme switcher logic
         const themeButton = e.target.closest('.theme-btn');
         if (themeButton) {
             const newTheme = themeButton.dataset.theme;
-
-            // Remove old theme, add new one
             document.body.classList.remove('light-theme', 'dark-theme');
             document.body.classList.add(newTheme);
-
-            // Save to local storage
             localStorage.setItem('theme', newTheme);
 
-            // Update active button UI
             document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
             themeButton.classList.add('active');
         }
     });
 
-    contentContainer.addEventListener('change', (e) => {
-        // Font selector logic
-        if (e.target.id === 'font-select') {
-            const selectedFont = e.target.value;
-            localStorage.setItem('editorFont', selectedFont);
+    // Close dropdown when clicking outside
+    window.addEventListener('click', (e) => {
+        const fontDropdown = document.getElementById('font-dropdown');
+        if (fontDropdown && !fontDropdown.contains(e.target)) {
+            fontDropdown.classList.remove('open');
         }
     });
 });

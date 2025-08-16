@@ -201,20 +201,85 @@ body.light-theme {
     flex-grow: 1;
 }
 
-.select-input {
-    width: 100%;
-    padding: 0.75rem;
-    border-radius: 4px;
-    border: 1px solid var(--border-color);
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
-    font-family: 'Nata Sans', sans-serif;
-    font-size: 1rem;
-    cursor: pointer;
+.theme-btn.active {
+    background-color: var(--accent-primary);
+    color: var(--bg-primary);
+    border-color: var(--accent-primary);
 }
 
-.select-input:focus {
+/* Custom Dropdown for Fonts */
+.custom-dropdown {
+    position: relative;
+    width: 100%;
+    max-width: 400px; /* Or whatever width you prefer */
+}
+
+.dropdown-toggle {
+    width: 100%;
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Nata Sans', sans-serif;
+    font-size: 1rem;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dropdown-toggle:hover {
+    background-color: var(--bg-secondary);
+}
+
+.dropdown-toggle:focus {
     outline: none;
     border-color: var(--accent-primary);
     box-shadow: 0 0 0 2px var(--accent-primary-translucent, rgba(137, 180, 250, 0.3));
+}
+
+.dropdown-toggle .fa-chevron-down {
+    transition: transform 0.2s ease;
+}
+
+.custom-dropdown.open .dropdown-toggle .fa-chevron-down {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    width: 100%;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    list-style: none;
+    margin-top: 0.25rem;
+    padding: 0.5rem 0;
+    z-index: 10;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.custom-dropdown.open .dropdown-menu {
+    display: block;
+}
+
+.dropdown-menu li {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    color: var(--text-primary);
+}
+
+.dropdown-menu li:hover {
+    background-color: var(--accent-primary);
+    color: var(--bg-primary);
+}
+
+.dropdown-menu li.selected {
+    background-color: var(--accent-primary-translucent, rgba(137, 180, 250, 0.2));
+    color: var(--accent-primary);
+    font-weight: 500;
 }

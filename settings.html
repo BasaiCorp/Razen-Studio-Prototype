@@ -106,14 +106,20 @@
             </div>
             <div class="setting-group">
                 <h3>Code Editor Font</h3>
-                <select id="font-select" class="select-input">
-                    <option value="Google Sans Code">Google Sans Code (Default)</option>
-                    <option value="JetBrains Mono">JetBrains Mono</option>
-                    <option value="Roboto Mono">Roboto Mono</option>
-                    <option value="Source Code Pro">Source Code Pro</option>
-                    <option value="IBM Plex Mono">IBM Plex Mono</option>
-                    <option value="Space Mono">Space Mono</option>
-                </select>
+                <div class="custom-dropdown" id="font-dropdown">
+                    <button class="dropdown-toggle" id="font-dropdown-toggle">
+                        <span id="selected-font-name">Google Sans Code</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <ul class="dropdown-menu" id="font-dropdown-menu">
+                        <li data-font="Google Sans Code">Google Sans Code</li>
+                        <li data-font="JetBrains Mono">JetBrains Mono</li>
+                        <li data-font="Roboto Mono">Roboto Mono</li>
+                        <li data-font="Source Code Pro">Source Code Pro</li>
+                        <li data-font="IBM Plex Mono">IBM Plex Mono</li>
+                        <li data-font="Space Mono">Space Mono</li>
+                    </ul>
+                </div>
             </div>
         </div>
 
