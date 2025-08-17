@@ -62,7 +62,7 @@ function registerRazenLanguage() {
         aliases: ['Razen', 'razen'],
     });
 
-    // Set language configuration for Razen
+    // FIXED: Removed < and > from bracket configuration to prevent comparison operator issues
     monaco.languages.setLanguageConfiguration('razen', {
         comments: {
             lineComment: '#',
@@ -71,6 +71,7 @@ function registerRazenLanguage() {
             ['{', '}'],
             ['[', ']'],
             ['(', ')'],
+            // Removed ['<', '>'] from here to prevent comparison operator conflicts
         ],
         autoClosingPairs: [
             { open: '{', close: '}' },
@@ -78,6 +79,7 @@ function registerRazenLanguage() {
             { open: '(', close: ')' },
             { open: '"', close: '"' },
             { open: "'", close: "'" },
+            // Context-specific auto-closing for < > will be handled in tokenizer
         ],
         surroundingPairs: [
             { open: '{', close: '}' },
@@ -88,7 +90,7 @@ function registerRazenLanguage() {
         ],
     });
 
-    // Set tokenizer for Razen
+    // FIXED: Contextual handling of < and > characters
     monaco.languages.setMonarchTokensProvider('razen', {
         keywords: [
             'var', 'const', 'if', 'else', 'while', 'for', 'is', 'when', 'not',
@@ -127,11 +129,11 @@ function registerRazenLanguage() {
                 // Namespace highlighting (e.g., math::sqrt)
                 [/\b([a-zA-Z_]\w*)\b(?=::)/, {
                     cases: {
-                        '@stdLibNames': 'entity.name.library', // Custom green for library name
+                        '@stdLibNames': 'entity.name.library',
                         '@default': 'identifier'
                     }
                 }],
-                [/::/, { token: 'metatag', next: '@library_function_call' }], // Yellow for ::
+                [/::/, { token: 'metatag', next: '@library_function_call' }],
 
                 [/\d*\.\d+([eE][-+]?\d+)?/, 'number.float'],
                 [/0[xX][0-9a-fA-F]+/, 'number.hex'],
@@ -156,6 +158,8 @@ function registerRazenLanguage() {
                 }],
 
                 [/[{}()\[\]]/, '@brackets'],
+                
+                // FIXED: Handle < and > contextually - default as operators
                 [/@symbols/, {
                     cases: {
                         '@operators': 'operator',
@@ -179,44 +183,59 @@ function registerRazenLanguage() {
                 [/}/, { token: 'delimiter.curly', next: '@pop' }],
                 { include: 'root' }
             ],
+            // FIXED: Only treat < > as brackets in type annotation context
             type_annotation: [
+                [/\s+/, ''],
                 [/[a-zA-Z_]\w*/, {
                     cases: {
                         '@typeKeywords': 'type.identifier',
                         '@default': 'identifier'
                     }
                 }],
-                [/</, { token: 'delimiter.angle', next: '@type_annotation' }],
-                [/>/, { token: 'delimiter.angle', next: '@pop' }]
+                [/</, { token: 'delimiter.angle', bracket: '@open', next: '@type_annotation' }],
+                [/>/, { token: 'delimiter.angle', bracket: '@close', next: '@pop' }],
+                [/,/, 'delimiter'],
+                [/\|/, 'operator'],
+                [/[^<>,\|\s]+/, 'identifier'],
+                ['', '', '@pop']
             ],
             show_arguments: [
-                [/\s*</, { token: 'delimiter.angle', next: '@show_annotation' }],
+                // FIXED: Only treat < as bracket in show context
+                [/\s*</, { token: 'delimiter.angle', bracket: '@open', next: '@show_annotation' }],
                 { include: 'root', next: '@pop' }
             ],
             show_annotation: [
+                [/\s+/, ''],
                 [/[a-zA-Z_]\w*/, {
                     cases: {
                         '@colorKeywords': 'metatag',
                         '@default': 'identifier'
                     }
                 }],
-                [/>/, { token: 'delimiter.angle', next: '@pop' }]
+                [/>/, { token: 'delimiter.angle', bracket: '@close', next: '@pop' }],
+                [/,/, 'delimiter'],
+                ['', '', '@pop']
             ],
             read_statement: [
-                [/\s*</, { token: 'delimiter.angle', next: '@read_annotation' }],
+                // FIXED: Only treat < as bracket in read context
+                [/\s*</, { token: 'delimiter.angle', bracket: '@open', next: '@read_annotation' }],
                 { include: 'root', next: '@pop' }
             ],
             read_annotation: [
+                [/\s+/, ''],
                 [/[a-zA-Z_]\w*/, {
                     cases: {
                         '@readTypeKeywords': 'type.identifier',
                         '@default': 'identifier'
                     }
                 }],
-                [/>/, { token: 'delimiter.angle', next: '@pop' }]
+                [/>/, { token: 'delimiter.angle', bracket: '@close', next: '@pop' }],
+                [/,/, 'delimiter'],
+                ['', '', '@pop']
             ],
             variable_declaration: [
-                [/\s*</, { token: 'delimiter.angle', next: '@type_annotation' }],
+                // FIXED: Only treat < as bracket in variable declaration context
+                [/\s*</, { token: 'delimiter.angle', bracket: '@open', next: '@type_annotation' }],
                 { include: 'root', next: '@pop' }
             ],
             use_statement: [
@@ -262,3 +281,4 @@ function registerRazenLanguage() {
         colors: { 'editor.background': '#ffffff' }
     });
 }
+
