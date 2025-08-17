@@ -101,6 +101,9 @@ function registerRazenLanguage() {
         typeKeywords: [
             'num', 'str', 'bool', 'map', 'list', 'arr', 'obj', 'tuple', 'int', 'float'
         ],
+        readTypeKeywords: [
+            'num', 'str', 'int', 'float'
+        ],
         colorKeywords: [
             'cyan', 'red', 'yellow', 'green', 'blue', 'magenta', 'white',
             'light_cyan', 'light_red', 'light_yellow', 'light_green', 'light_blue', 'light_magenta', 'light_white'
@@ -148,6 +151,7 @@ function registerRazenLanguage() {
                         'show': { token: 'keyword', next: '@show_arguments' },
                         'var': { token: 'keyword', next: '@variable_declaration' },
                         'const': { token: 'keyword', next: '@variable_declaration' },
+                        'read': { token: 'keyword', next: '@read_statement' },
                         '@keywords': 'keyword',
                         '@default': 'identifier'
                     }
@@ -199,6 +203,19 @@ function registerRazenLanguage() {
                 [/[a-zA-Z_]\w*/, {
                     cases: {
                         '@colorKeywords': 'metatag',
+                        '@default': 'identifier'
+                    }
+                }],
+                [/>/, { token: 'delimiter.angle', next: '@pop' }]
+            ],
+            read_statement: [
+                [/\s*</, { token: 'delimiter.angle', next: '@read_annotation' }],
+                { include: 'root', next: '@pop' }
+            ],
+            read_annotation: [
+                [/[a-zA-Z_]\w*/, {
+                    cases: {
+                        '@readTypeKeywords': 'type.identifier',
                         '@default': 'identifier'
                     }
                 }],
