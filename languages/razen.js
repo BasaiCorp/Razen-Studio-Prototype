@@ -157,10 +157,6 @@ function registerRazenLanguage() {
                     }
                 }],
 
-                // Angle brackets for type annotations
-                [/</, { token: 'delimiter.angle', next: '@type_annotation' }],
-                [/>/, 'delimiter.angle'],
-
                 [/[{}()\[\]]/, '@brackets'],
                 [/@symbols/, {
                     cases: {
