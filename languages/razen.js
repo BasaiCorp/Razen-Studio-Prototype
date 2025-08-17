@@ -96,7 +96,7 @@ function registerRazenLanguage() {
             'var', 'const', 'if', 'else', 'while', 'for', 'is', 'when', 'not',
             'append', 'remove', 'key', 'value', 'store', 'box', 'ref', 'show',
             'read', 'fun', 'async', 'await', 'class', 'return', 'continue', 'break', 'import',
-            'export', 'use', 'from', 'to', 'lib', 'true', 'false', 'null', 'struct', 'match'
+            'export', 'use', 'from', 'to', 'lib', 'true', 'false', 'null', 'struct', 'match', 'in'
         ],
         typeKeywords: [
             'num', 'str', 'bool', 'map', 'list', 'arr', 'obj', 'tuple', 'int', 'float'
@@ -124,7 +124,7 @@ function registerRazenLanguage() {
                 [/[ \t\r\n]+/, ''],
 
                 // f-string
-                [/f"/, { token: 'string.prefix', next: '@f_string' }],
+                [/f"/, { token: 'keyword', next: '@f_string' }],
 
                 // Namespace highlighting (e.g., math::sqrt)
                 [/\b([a-zA-Z_]\w*)\b(?=::)/, {
