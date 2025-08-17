@@ -145,12 +145,23 @@ function registerRazenLanguage() {
                 [/'/, 'string.invalid'],
 
                 // Keywords and identifiers
+                // Function calls
+                [/[a-zA-Z_]\w*(?=\s*\()/, {
+                    cases: {
+                        '@keywords': 'keyword',
+                        '@stdLibFunctions': 'entity.name.function',
+                        '@default': 'entity.name.function'
+                    }
+                }],
+
+                // Keywords and identifiers
                 [/[a-zA-Z_]\w*/, {
                     cases: {
                         'use': { token: 'keyword', next: '@use_statement' },
                         'show': { token: 'keyword', next: '@show_arguments' },
                         'var': { token: 'keyword', next: '@variable_declaration' },
                         'const': { token: 'keyword', next: '@variable_declaration' },
+                        'fun': { token: 'keyword', next: '@function_declaration' },
                         'read': { token: 'keyword', next: '@read_statement' },
                         '@keywords': 'keyword',
                         '@default': 'identifier'
@@ -234,8 +245,15 @@ function registerRazenLanguage() {
                 ['', '', '@pop']
             ],
             variable_declaration: [
+                [/\s+/, ''],
+                [/[a-zA-Z_]\w*/, { token: 'variable.name', next: '@pop' }],
                 // FIXED: Only treat < as bracket in variable declaration context
                 [/\s*</, { token: 'delimiter.angle', bracket: '@open', next: '@type_annotation' }],
+                { include: 'root', next: '@pop' }
+            ],
+            function_declaration: [
+                [/\s+/, ''],
+                [/[a-zA-Z_]\w*/, { token: 'entity.name.function', next: '@pop' }],
                 { include: 'root', next: '@pop' }
             ],
             use_statement: [
@@ -258,7 +276,7 @@ function registerRazenLanguage() {
             library_function_call: [
                 [/[a-zA-Z_]\w*/, {
                     cases: {
-                        '@stdLibFunctions': { token: 'type.identifier', next: '@pop' },
+                        '@stdLibFunctions': { token: 'entity.name.function', next: '@pop' },
                         '@default': { token: 'identifier', next: '@pop' }
                     }
                 }],
@@ -271,13 +289,19 @@ function registerRazenLanguage() {
         base: 'vs-dark', inherit: true,
         rules: [
             { token: 'comment', foreground: '608b4e' },
-            { token: 'entity.name.library', foreground: '98C379' }
+            { token: 'entity.name.library', foreground: '98C379' },
+            { token: 'variable.name', foreground: '82AAFF' },
+            { token: 'entity.name.function', foreground: 'FFCB6B' }
         ],
         colors: { 'editor.background': '#1e1e2e' }
     });
     monaco.editor.defineTheme('razen-light', {
         base: 'vs', inherit: true,
-        rules: [{ token: 'comment', foreground: '6a737d' }],
+        rules: [
+            { token: 'comment', foreground: '6a737d' },
+            { token: 'variable.name', foreground: '0000FF' },
+            { token: 'entity.name.function', foreground: 'B8860B' }
+        ],
         colors: { 'editor.background': '#ffffff' }
     });
 }
