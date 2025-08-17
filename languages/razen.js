@@ -164,7 +164,7 @@ function registerRazenLanguage() {
                         'fun': { token: 'keyword', next: '@function_declaration' },
                         'read': { token: 'keyword', next: '@read_statement' },
                         '@keywords': 'keyword',
-                        '@default': 'identifier'
+                        '@default': 'variable.name'
                     }
                 }],
 
