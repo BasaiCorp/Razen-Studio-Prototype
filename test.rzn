@@ -1,22 +1,39 @@
-# Razen Syntax Test File - V3
+# Razen Syntax Test File - V3 - Updated for @type syntax
 
 # Structs and Type Annotations
 struct userData {
-    name<str>,
-    age<num>
+    name @str,
+    age @int
 }
 
 # Variable and Constant Declarations
-var<num> x = 10
-const<str> app_name = "Razen Studio"
+var x @int = 10
+const app_name @str = "Razen Studio"
 var any_type_value = "Prathmesh"
+var p @userData = userData { name: "Prathmesh", age: 17 }
+
+# Lists and Maps
+list numbers @int = [1,2,3,4]
+map scores @str,@int = {
+    "Alice" -> 95,
+    "Bob"   -> 88
+}
+
+# Function with new type syntax
+fun average(nums @list@int) @float {
+    var total @int = 0
+    for n in nums {
+        total += n
+    }
+    return total / nums.length
+}
 
 # Library Usage
 use math
 use "discordRZN"
 
 # Namespace operator
-var<num> squared = math::sqrt(256)
+var squared @int = math::sqrt(256)
 
 # F-string and show<color>
 show<green> f"The square root of 256 is {squared}."
@@ -29,7 +46,7 @@ match squared {
 }
 
 # Standalone types should not be highlighted
-num str bool map list arr obj tuple
+num str bool map list arr obj tuple int float
 
 # A regular function call for comparison
 some_function()
