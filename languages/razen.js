@@ -287,7 +287,9 @@ function registerRazenLanguage() {
             { token: 'comment', foreground: '608b4e' },
             { token: 'entity.name.library', foreground: '98C379' },
             { token: 'variable.name', foreground: 'A6C1FF' },
-            { token: 'entity.name.function', foreground: 'FFF59D' }
+            { token: 'entity.name.function', foreground: 'FFF59D' },
+            { token: 'metatag', foreground: '98C379' },
+            { token: 'type.identifier', foreground: '98C379' }
         ],
         colors: { 'editor.background': '#1e1e2e' }
     });
@@ -296,7 +298,9 @@ function registerRazenLanguage() {
         rules: [
             { token: 'comment', foreground: '6a737d' },
             { token: 'variable.name', foreground: '42A5F5' },
-            { token: 'entity.name.function', foreground: 'FFD54F' }
+            { token: 'entity.name.function', foreground: 'FFD54F' },
+            { token: 'metatag', foreground: '228B22' },
+            { token: 'type.identifier', foreground: '228B22' }
         ],
         colors: { 'editor.background': '#ffffff' }
     });
