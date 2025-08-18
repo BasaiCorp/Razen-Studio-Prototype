@@ -286,7 +286,6 @@ function registerRazenLanguage() {
         rules: [
             { token: 'comment', foreground: '608b4e' },
             { token: 'entity.name.library', foreground: '98C379' },
-            { token: 'variable.name', foreground: 'A6C1FF' },
             { token: 'entity.name.function', foreground: 'FFF59D' },
             { token: 'metatag', foreground: '3CB371' },
             { token: 'type.identifier', foreground: '3CB371' }
@@ -297,7 +296,6 @@ function registerRazenLanguage() {
         base: 'vs', inherit: true,
         rules: [
             { token: 'comment', foreground: '6a737d' },
-            { token: 'variable.name', foreground: '42A5F5' },
             { token: 'entity.name.function', foreground: 'FFD54F' },
             { token: 'metatag', foreground: '2E8B57' },
             { token: 'type.identifier', foreground: '2E8B57' }
