@@ -167,7 +167,7 @@ function registerRazenLanguage() {
                         'fun': { token: 'keyword', next: '@function_declaration' },
                         'read': { token: 'keyword', next: '@read_statement' },
                         '@keywords': 'keyword',
-                        '@default': 'variable.name'
+                        '@default': 'identifier'
                     }
                 }],
 
@@ -243,7 +243,7 @@ function registerRazenLanguage() {
             ],
             variable_declaration: [
                 [/\s+/, ''],
-                [/[a-zA-Z_]\w*/, 'variable.name'],
+                [/[a-zA-Z_]\w*/, 'identifier'],
                 [/\s*@/, { token: 'metatag', next: '@type_annotation' }],
                 ['', '', '@pop']
             ],
@@ -303,4 +303,3 @@ function registerRazenLanguage() {
         colors: { 'editor.background': '#ffffff' }
     });
 }
-

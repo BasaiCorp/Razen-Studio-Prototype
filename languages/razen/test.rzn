@@ -1,4 +1,4 @@
-# Razen Syntax Test File - V3 - Updated for @type syntax
+# Razen-lang Syntax Test File - V3 - Updated for @type syntax
 
 # Structs and Type Annotations
 struct userData {
@@ -10,13 +10,13 @@ struct userData {
 var x @int = 10
 const app_name @str = "Razen Studio"
 var any_type_value = "Prathmesh"
-var p @userData = userData { name: "Prathmesh", age: 17 }
+var p @obj = userData { name: "Prathmesh", age: 17 }
 
 # Lists and Maps
-list numbers @int = [1,2,3,4]
-map scores @str,@int = {
-    "Alice" -> 95,
-    "Bob"   -> 88
+var numbers @list@int = [1,2,3,4]
+var scores @map(@str,@int) = {
+    "Alice": 95,
+    "Bob": 88
 }
 
 # Function with new type syntax
@@ -41,8 +41,8 @@ show<light_red> "This is a test message."
 
 # Control Flow
 match squared {
-    16: show "Correct!",
-    default: show "Incorrect."
+    16 => show "Correct!",
+    _ => show "Incorrect."
 }
 
 # Standalone types should not be highlighted
