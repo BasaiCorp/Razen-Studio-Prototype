@@ -226,6 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
         yml: { icon: 'fas fa-file-alt', colorClass: 'icon-yml', tooltip: 'YAML' },
         yaml: { icon: 'fas fa-file-alt', colorClass: 'icon-yaml', tooltip: 'YAML' },
         md: { icon: 'fab fa-markdown', colorClass: 'icon-md', tooltip: 'Markdown' },
+        mdx: { icon: 'fab fa-markdown', colorClass: 'icon-mdx', tooltip: 'MDX' },
         config: { icon: 'fas fa-cog', colorClass: 'icon-config', tooltip: 'Config' },
         ini: { icon: 'fas fa-cog', colorClass: 'icon-ini', tooltip: 'INI' },
         env: { icon: 'fas fa-cog', colorClass: 'icon-env', tooltip: 'Environment' },
@@ -393,89 +394,99 @@ document.addEventListener('DOMContentLoaded', () => {
         previewIframe.srcdoc = '';
     });
 
-    async function runCode() {
+    async function runCode(filePath) {
         if (!currentProject) {
             showPopup('Error', 'No project is currently open.', { showCancel: false });
             return;
         }
 
-        // Fallback to index.html if no file is active or the active one isn't HTML
-        let entryHtmlRelativePath;
-        if (activeFilePath && activeFilePath.toLowerCase().endsWith('.html')) {
-            const projectRootPath = (await fs.listProjects()).find(p => p.name === currentProject).path;
-            entryHtmlRelativePath = activeFilePath.replace(projectRootPath + '/', '');
-        } else {
-            // Check if index.html exists at the root
-            const projectContents = await fs.listProjectContents(currentProject);
-            const indexFile = projectContents.find(f => f.name === 'index.html' && f.type === 'file');
-            if (indexFile) {
-                const projectRootPath = (await fs.listProjects()).find(p => p.name === currentProject).path;
-                entryHtmlRelativePath = indexFile.path.replace(projectRootPath + '/', '');
-            } else {
-                showPopup('Error', 'Could not find an HTML file to preview. Please open an HTML file or create an index.html.', { showCancel: false });
-                return;
-            }
+        const path = filePath || activeFilePath;
+        if (!path) {
+            showPopup('Error', 'No file selected for preview.', { showCancel: false });
+            return;
         }
 
+        const lowerCasePath = path.toLowerCase();
+        const isMarkdown = lowerCasePath.endsWith('.md') || lowerCasePath.endsWith('.mdx');
+        const isHtml = lowerCasePath.endsWith('.html');
+
         try {
-            const entryHtmlContent = await fs.readFile(currentProject, entryHtmlRelativePath);
-            if (typeof entryHtmlContent !== 'string' || entryHtmlContent.startsWith('Error:')) {
-                showPopup('Error', `Could not read the HTML file: ${entryHtmlContent}`, { showCancel: false });
+            const projectRootPath = (await fs.listProjects()).find(p => p.name === currentProject).path;
+            const relativePath = path.replace(projectRootPath + '/', '');
+            const content = await fs.readFile(currentProject, relativePath);
+
+            if (typeof content !== 'string' || content.startsWith('Error:')) {
+                showPopup('Error', `Could not read file: ${content}`, { showCancel: false });
                 return;
             }
 
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(entryHtmlContent, 'text/html');
-            const basePath = entryHtmlRelativePath.includes('/') ? entryHtmlRelativePath.substring(0, entryHtmlRelativePath.lastIndexOf('/') + 1) : '';
+            let finalHtml;
 
-            const processPromises = [];
+            if (isMarkdown) {
+                const convertedHtml = marked.parse(content);
+                finalHtml = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Markdown Preview</title>
+                        <style>
+                            body { font-family: sans-serif; line-height: 1.6; padding: 20px; }
+                            .theme-dark { background-color: #1e1e1e; color: #d4d4d4; }
+                        </style>
+                    </head>
+                    <body class="${document.body.classList.contains('light-theme') ? '' : 'theme-dark'}">
+                        ${convertedHtml}
+                    </body>
+                    </html>
+                `;
+            } else if (isHtml) {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(content, 'text/html');
+                const basePath = relativePath.includes('/') ? relativePath.substring(0, relativePath.lastIndexOf('/') + 1) : '';
 
-            // Process CSS <link> tags
-            doc.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
-                const href = link.getAttribute('href');
-                if (href && !href.startsWith('http:') && !href.startsWith('https:') && !href.startsWith('//')) {
-                    const cssPath = new URL(href, `file:///${basePath}`).pathname.substring(1);
-                    const promise = fs.readFile(currentProject, cssPath).then(cssContent => {
-                        if (typeof cssContent === 'string' && !cssContent.startsWith('Error:')) {
-                            const style = doc.createElement('style');
-                            style.textContent = cssContent;
-                            link.replaceWith(style);
-                        } else {
-                            console.warn(`Could not load CSS file: ${cssPath}`);
-                        }
-                    });
-                    processPromises.push(promise);
-                }
-            });
+                const processPromises = [];
 
-            // Process <script> tags with src
-            doc.querySelectorAll('script[src]').forEach(script => {
-                const src = script.getAttribute('src');
-                if (src && !src.startsWith('http:') && !src.startsWith('https:') && !src.startsWith('//')) {
-                    const jsPath = new URL(src, `file:///${basePath}`).pathname.substring(1);
-                    const promise = fs.readFile(currentProject, jsPath).then(jsContent => {
-                        if (typeof jsContent === 'string' && !jsContent.startsWith('Error:')) {
-                            const newScript = doc.createElement('script');
-                            newScript.textContent = jsContent;
-                            // Copy other attributes like type, defer, etc.
-                            for (const attr of script.attributes) {
-                                if (attr.name !== 'src') {
-                                    newScript.setAttribute(attr.name, attr.value);
-                                }
+                doc.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
+                    const href = link.getAttribute('href');
+                    if (href && !href.startsWith('http:') && !href.startsWith('https:')) {
+                        const cssPath = new URL(href, `file:///${basePath}`).pathname.substring(1);
+                        processPromises.push(fs.readFile(currentProject, cssPath).then(cssContent => {
+                            if (typeof cssContent === 'string' && !cssContent.startsWith('Error:')) {
+                                const style = doc.createElement('style');
+                                style.textContent = cssContent;
+                                link.replaceWith(style);
                             }
-                            script.parentNode.replaceChild(newScript, script);
-                        } else {
-                            console.warn(`Could not load JS file: ${jsPath}`);
-                        }
-                    });
-                    processPromises.push(promise);
+                        }));
+                    }
+                });
+
+                doc.querySelectorAll('script[src]').forEach(script => {
+                    const src = script.getAttribute('src');
+                    if (src && !src.startsWith('http:') && !src.startsWith('https:')) {
+                        const jsPath = new URL(src, `file:///${basePath}`).pathname.substring(1);
+                        processPromises.push(fs.readFile(currentProject, jsPath).then(jsContent => {
+                            if (typeof jsContent === 'string' && !jsContent.startsWith('Error:')) {
+                                const newScript = doc.createElement('script');
+                                newScript.textContent = jsContent;
+                                script.parentNode.replaceChild(newScript, script);
+                            }
+                        }));
+                    }
+                });
+
+                await Promise.all(processPromises);
+                finalHtml = '<!DOCTYPE html>' + doc.documentElement.outerHTML;
+            } else {
+                // Try to find index.html if the current file is not previewable
+                const projectContents = await fs.listProjectContents(currentProject);
+                const indexFile = projectContents.find(f => f.name === 'index.html' && f.type === 'file');
+                if(indexFile) {
+                    runCode(indexFile.path); // Recurse with index.html
+                } else {
+                    showPopup('Error', 'Could not find a file to preview. Please open an HTML or Markdown file.', { showCancel: false });
                 }
-            });
-
-            await Promise.all(processPromises);
-
-            // Serialize the document back to a string, ensuring correct doctype
-            const finalHtml = '<!DOCTYPE html>' + doc.documentElement.outerHTML;
+                return;
+            }
 
             previewIframe.srcdoc = finalHtml;
             previewModal.style.display = 'flex';
@@ -540,7 +551,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Enable/disable preview
         const previewItem = document.getElementById('context-menu-preview');
-        previewItem.classList.toggle('disabled', !path.toLowerCase().endsWith('.html'));
+        const isPreviewable = path.toLowerCase().endsWith('.html') || path.toLowerCase().endsWith('.md') || path.toLowerCase().endsWith('.mdx');
+        previewItem.classList.toggle('disabled', !isPreviewable);
 
         menu.style.display = 'block';
         menu.style.left = `${event.pageX}px`;
@@ -603,7 +615,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
 
             case 'preview':
-                if (path.toLowerCase().endsWith('.html')) {
+                if (path.toLowerCase().endsWith('.html') || path.toLowerCase().endsWith('.md') || path.toLowerCase().endsWith('.mdx')) {
                     runCode(path);
                 }
                 break;
