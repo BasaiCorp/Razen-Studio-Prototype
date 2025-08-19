@@ -302,6 +302,7 @@ header h1 {
 .file-tree-item .icon-sql { color: #336791; }
 .file-tree-item .icon-json { color: #000000; }
 .file-tree-item .icon-md { color: #000000; }
+.file-tree-item .icon-mdx { color: #000000; }
 .file-tree-item .icon-vue { color: #4FC08D; }
 .file-tree-item .icon-jsx { color: #61DAFB; }
 .file-tree-item .icon-tsx { color: #61DAFB; }
