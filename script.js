@@ -388,7 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
         monaco.editor.setTheme(isLightTheme ? 'razen-light' : 'razen-dark');
     }
 
-    runBtn.addEventListener('click', runCode);
+    runBtn.addEventListener('click', () => runCode());
     previewModalCloseBtn.addEventListener('click', () => {
         previewModal.style.display = 'none';
         previewIframe.srcdoc = '';
