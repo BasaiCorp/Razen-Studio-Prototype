@@ -144,9 +144,6 @@ function registerRazenLanguage() {
                 [/(')(@escapes)(')/, ['string.char', 'string.escape', 'string.char']],
                 [/'/, 'string.invalid'],
 
-                // Type Annotation
-                [/@/, { token: 'metatag', next: '@type_annotation' }],
-
                 // Keywords and identifiers
                 // Function calls
                 [/[a-zA-Z_]\w*(?=\s*\()/, {
@@ -205,9 +202,21 @@ function registerRazenLanguage() {
                         '@default': 'identifier'
                     }
                 }],
-                [/@/, 'metatag'],
+                [/</, { token: 'delimiter.angle', bracket: '@open', next: '@generic_parameters' }],
                 [/,/, 'delimiter'],
                 ['', '', '@pop']
+            ],
+            generic_parameters: [
+                [/>/, { token: 'delimiter.angle', bracket: '@close', next: '@pop' }],
+                [/[a-zA-Z_]\w*/, {
+                     cases: {
+                        '@typeKeywords': 'type.identifier',
+                        '@default': 'identifier'
+                    }
+                }],
+                [/,/, 'delimiter'],
+                [/</, { token: 'delimiter.angle', bracket: '@open', next: '@generic_parameters' }],
+                [/\s+/, '']
             ],
             show_arguments: [
                 // FIXED: Only treat < as bracket in show context
@@ -227,7 +236,7 @@ function registerRazenLanguage() {
                 ['', '', '@pop']
             ],
             read_statement: [
-                [/\s*@/, { token: 'metatag', next: '@read_annotation' }],
+                [/\s*:/, { token: 'metatag', next: '@read_annotation' }],
                 { include: 'root', next: '@pop' }
             ],
             read_annotation: [
@@ -242,15 +251,25 @@ function registerRazenLanguage() {
                 ['', '', '@pop']
             ],
             variable_declaration: [
-                [/\s+/, ''],
-                [/[a-zA-Z_]\w*/, 'identifier'],
-                [/\s*@/, { token: 'metatag', next: '@type_annotation' }],
+                [/[a-zA-Z_]\w*(?=\s*:)/, 'identifier'],
+                [/:/, {token: 'operator', next: '@type_annotation'}],
+                [/[a-zA-Z_]\w*/, 'identifier', '@pop'],
                 ['', '', '@pop']
             ],
+            parameter_list: [
+                [/\(/, {token: '@brackets', next: '@push'}],
+                [/\)/, {token: '@brackets', next: '@pop'}],
+                [/[a-zA-Z_]\w*(?=\s*:)/, 'identifier'],
+                [/:/, {token: 'operator', next: '@type_annotation'}],
+                [/[a-zA-Z_]\w*/, 'identifier'],
+                [/,/, 'delimiter'],
+                [/\s+/, '']
+            ],
             function_declaration: [
-                [/\s+/, ''],
-                [/[a-zA-Z_]\w*/, { token: 'entity.name.function', next: '@pop' }],
-                { include: 'root', next: '@pop' }
+                [/[a-zA-Z_]\w*/, 'entity.name.function'],
+                [/\(/, {token: '@brackets', next: '@parameter_list'}],
+                [/:/, {token: 'operator', next: '@type_annotation'}],
+                ['', '', '@pop']
             ],
             use_statement: [
                 [/\s+/, ''],
