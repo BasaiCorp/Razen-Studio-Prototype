@@ -2,26 +2,26 @@
 
 # Structs and Type Annotations
 struct userData {
-    name @str,
-    age @int
+    name: str,
+    age: int
 }
 
 # Variable and Constant Declarations
-var x @int = 10
-const app_name @str = "Razen Studio"
+var x: int = 10
+const app_name: str = "Razen Studio"
 var any_type_value = "Prathmesh"
-var p @obj = userData { name: "Prathmesh", age: 17 }
+var p: obj = userData { name: "Prathmesh", age: 17 }
 
 # Lists and Maps
-var numbers @list@int = [1,2,3,4]
-var scores @map(@str,@int) = {
+var numbers: list<int> = [1,2,3,4]
+var scores: map<str,int> = {
     "Alice": 95,
     "Bob": 88
 }
 
 # Function with new type syntax
-fun average(nums @list@int) @float {
-    var total @int = 0
+fun average(nums: list<int>): float {
+    var total: int = 0
     for n in nums {
         total += n
     }
@@ -33,7 +33,7 @@ use math
 use "discordRZN"
 
 # Namespace operator
-var squared @int = math::sqrt(256)
+var squared: int = math::sqrt(256)
 
 # F-string and show<color>
 show<green> f"The square root of 256 is {squared}."
@@ -41,7 +41,7 @@ show<light_red> "This is a test message."
 
 # Control Flow
 match squared {
-    16 => show "Correct!",
+    16 => show "Correct!"
     _ => show "Incorrect."
 }
 
