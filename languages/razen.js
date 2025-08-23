@@ -144,6 +144,9 @@ function registerRazenLanguage() {
                 [/(')(@escapes)(')/, ['string.char', 'string.escape', 'string.char']],
                 [/'/, 'string.invalid'],
 
+                // Handle identifiers followed by a colon for type annotations
+                [/[a-zA-Z_]\w*(?=\s*:)/, 'identifier', '@handle_type_annotation_colon'],
+
                 // Keywords and identifiers
                 // Function calls
                 [/[a-zA-Z_]\w*(?=\s*\()/, {
@@ -159,8 +162,6 @@ function registerRazenLanguage() {
                     cases: {
                         'use': { token: 'keyword', next: '@use_statement' },
                         'show': { token: 'keyword', next: '@show_arguments' },
-                        'var': { token: 'keyword', next: '@variable_declaration' },
-                        'const': { token: 'keyword', next: '@variable_declaration' },
                         'fun': { token: 'keyword', next: '@function_declaration' },
                         'read': { token: 'keyword', next: '@read_statement' },
                         '@keywords': 'keyword',
@@ -170,7 +171,6 @@ function registerRazenLanguage() {
 
                 [/[{}()\[\]]/, '@brackets'],
                 
-                // FIXED: Handle < and > contextually - default as operators
                 [/@symbols/, {
                     cases: {
                         '@operators': 'operator',
@@ -194,6 +194,11 @@ function registerRazenLanguage() {
                 [/}/, { token: 'delimiter.curly', next: '@pop' }],
                 { include: 'root' }
             ],
+            // New state to handle the colon after an identifier
+            handle_type_annotation_colon: [
+                [/:/, { token: 'operator', next: '@type_annotation' }],
+                ['', '', '@pop'] // Fallback, pop to parent state
+            ],
             type_annotation: [
                 [/\s+/, ''],
                 [/[a-zA-Z_]\w*/, {
@@ -204,7 +209,7 @@ function registerRazenLanguage() {
                 }],
                 [/</, { token: 'delimiter.angle', bracket: '@open', next: '@generic_parameters' }],
                 [/,/, 'delimiter'],
-                ['', '', '@pop']
+                ['', '', '@pop'] // Pop after the type annotation is processed
             ],
             generic_parameters: [
                 [/>/, { token: 'delimiter.angle', bracket: '@close', next: '@pop' }],
@@ -219,7 +224,6 @@ function registerRazenLanguage() {
                 [/\s+/, '']
             ],
             show_arguments: [
-                // FIXED: Only treat < as bracket in show context
                 [/\s*</, { token: 'delimiter.angle', bracket: '@open', next: '@show_annotation' }],
                 { include: 'root', next: '@pop' }
             ],
@@ -250,17 +254,10 @@ function registerRazenLanguage() {
                 }],
                 ['', '', '@pop']
             ],
-            variable_declaration: [
-                [/[a-zA-Z_]\w*(?=\s*:)/, 'identifier'],
-                [/:/, {token: 'operator', next: '@type_annotation'}],
-                [/[a-zA-Z_]\w*/, 'identifier', '@pop'],
-                ['', '', '@pop']
-            ],
             parameter_list: [
                 [/\(/, {token: '@brackets', next: '@push'}],
                 [/\)/, {token: '@brackets', next: '@pop'}],
-                [/[a-zA-Z_]\w*(?=\s*:)/, 'identifier'],
-                [/:/, {token: 'operator', next: '@type_annotation'}],
+                [/[a-zA-Z_]\w*(?=\s*:)/, 'identifier', '@handle_type_annotation_colon'],
                 [/[a-zA-Z_]\w*/, 'identifier'],
                 [/,/, 'delimiter'],
                 [/\s+/, '']
