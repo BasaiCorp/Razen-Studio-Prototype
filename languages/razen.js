@@ -1,5 +1,4 @@
 function registerRazenLanguage() {
-    // --- Razen Language Standard Library Definitions ---
     const razenStdLibs = {
         'array': ['push', 'pop', 'shift', 'unshift', 'slice', 'splice', 'concat', 'join', 'index_of', 'last_index_of', 'includes', 'reverse', 'sort', 'map', 'filter', 'reduce', 'every', 'some', 'find', 'find_index', 'fill', 'length'],
         'string': ['upper', 'lower', 'capitalize', 'substring', 'replace', 'replace_all', 'trim', 'trim_start', 'trim_end', 'starts_with', 'ends_with', 'includes', 'split', 'repeat', 'pad_start', 'pad_end', 'char_at', 'code_point_at', 'from_char_code', 'length'],
@@ -52,17 +51,16 @@ function registerRazenLanguage() {
         'physics': ['apply_force', 'apply_torque', 'velocity', 'acceleration', 'mass', 'collision', 'gravity', 'friction', 'momentum', 'energy'],
         'ai': ['predict', 'train', 'evaluate', 'load_model', 'save_model', 'preprocess', 'tokenize', 'embed', 'classify', 'cluster', 'generate_text']
     };
+
     const stdLibNames = Object.keys(razenStdLibs);
     const stdLibFunctions = [].concat(...Object.values(razenStdLibs));
 
-    // Register the Razen language
     monaco.languages.register({
         id: 'razen',
         extensions: ['.rzn'],
         aliases: ['Razen', 'razen'],
     });
 
-    // FIXED: Removed < and > from bracket configuration to prevent comparison operator issues
     monaco.languages.setLanguageConfiguration('razen', {
         comments: {
             lineComment: '#',
@@ -71,7 +69,6 @@ function registerRazenLanguage() {
             ['{', '}'],
             ['[', ']'],
             ['(', ')'],
-            // Removed ['<', '>'] from here to prevent comparison operator conflicts
         ],
         autoClosingPairs: [
             { open: '{', close: '}' },
@@ -79,7 +76,6 @@ function registerRazenLanguage() {
             { open: '(', close: ')' },
             { open: '"', close: '"' },
             { open: "'", close: "'" },
-            // Context-specific auto-closing for < > will be handled in tokenizer
         ],
         surroundingPairs: [
             { open: '{', close: '}' },
@@ -90,7 +86,6 @@ function registerRazenLanguage() {
         ],
     });
 
-    // FIXED: Contextual handling of < and > characters
     monaco.languages.setMonarchTokensProvider('razen', {
         keywords: [
             'var', 'const', 'if', 'else', 'while', 'for', 'is', 'when', 'not',
@@ -138,16 +133,16 @@ function registerRazenLanguage() {
                 [/\d*\.\d+([eE][-+]?\d+)?/, 'number.float'],
                 [/0[xX][0-9a-fA-F]+/, 'number.hex'],
                 [/\d+/, 'number'],
+
                 [/"([^"\\]|\\.)*$/, 'string.invalid'],
                 [/"/, { token: 'string.quote', bracket: '@open', next: '@string' }],
                 [/'[^\\']'/, 'string.char'],
                 [/(')(@escapes)(')/, ['string.char', 'string.escape', 'string.char']],
                 [/'/, 'string.invalid'],
 
-                // Handle identifiers followed by a colon for type annotations
+                // Type annotations
                 [/[a-zA-Z_]\w*(?=\s*:)/, 'identifier', '@handle_type_annotation_colon'],
 
-                // Keywords and identifiers
                 // Function calls
                 [/[a-zA-Z_]\w*(?=\s*\()/, {
                     cases: {
@@ -194,10 +189,9 @@ function registerRazenLanguage() {
                 [/}/, { token: 'delimiter.curly', next: '@pop' }],
                 { include: 'root' }
             ],
-            // New state to handle the colon after an identifier
             handle_type_annotation_colon: [
                 [/:/, { token: 'operator', next: '@type_annotation' }],
-                ['', '', '@pop'] // Fallback, pop to parent state
+                ['', '', '@pop']
             ],
             type_annotation: [
                 [/\s+/, ''],
@@ -209,7 +203,7 @@ function registerRazenLanguage() {
                 }],
                 [/</, { token: 'delimiter.angle', bracket: '@open', next: '@generic_parameters' }],
                 [/,/, 'delimiter'],
-                ['', '', '@pop'] // Pop after the type annotation is processed
+                ['', '', '@pop']
             ],
             generic_parameters: [
                 [/>/, { token: 'delimiter.angle', bracket: '@close', next: '@pop' }],
@@ -298,24 +292,44 @@ function registerRazenLanguage() {
     });
 
     monaco.editor.defineTheme('razen-dark', {
-        base: 'vs-dark', inherit: true,
+        base: 'vs-dark',
+        inherit: true,
         rules: [
             { token: 'comment', foreground: '608b4e' },
             { token: 'entity.name.library', foreground: '98C379' },
             { token: 'entity.name.function', foreground: 'FFF59D' },
             { token: 'metatag', foreground: '3CB371' },
-            { token: 'type.identifier', foreground: '3CB371' }
+            { token: 'type.identifier', foreground: '3CB371' },
+            { token: 'string', foreground: 'CE9178' },
+            { token: 'keyword', foreground: 'C586C0' },
+            { token: 'operator', foreground: 'D4D4D4' },
+            { token: 'number', foreground: 'B5CEA8' },
+            { token: 'delimiter', foreground: 'D4D4D4' },
         ],
-        colors: { 'editor.background': '#1e1e2e' }
+        colors: {
+            'editor.background': '#1e1e2e',
+            'editor.foreground': '#d4d4d4'
+        }
     });
+
     monaco.editor.defineTheme('razen-light', {
-        base: 'vs', inherit: true,
+        base: 'vs',
+        inherit: true,
         rules: [
             { token: 'comment', foreground: '6a737d' },
+            { token: 'entity.name.library', foreground: '2e8b57' },
             { token: 'entity.name.function', foreground: 'FFD54F' },
             { token: 'metatag', foreground: '2E8B57' },
-            { token: 'type.identifier', foreground: '2E8B57' }
+            { token: 'type.identifier', foreground: '2E8B57' },
+            { token: 'string', foreground: 'a31515' },
+            { token: 'keyword', foreground: '0000ff' },
+            { token: 'operator', foreground: '000000' },
+            { token: 'number', foreground: '098658' },
+            { token: 'delimiter', foreground: '000000' },
         ],
-        colors: { 'editor.background': '#ffffff' }
+        colors: {
+            'editor.background': '#ffffff',
+            'editor.foreground': '#000000'
+        }
     });
 }
