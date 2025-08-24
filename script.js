@@ -661,7 +661,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Monaco Editor Initialization ---
     require.config({ paths: { vs: 'monaco/package/min/vs' } });
     require(['vs/editor/editor.main'], function () {
-        const { MonacoLanguageClient, CloseAction, ErrorAction, MonacoServices } = monaco_languageclient;
+        const { MonacoLanguageClient, CloseAction, ErrorAction, MonacoServices } = monacoLanguageclient;
+        const { BrowserMessageReader, BrowserMessageWriter } = vscodeJsonrpc;
 
         const languageId = 'razen';
         registerRazenLanguage();
@@ -673,8 +674,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const worker = new Worker('languages/razen/razen-worker.js', { type: 'module' });
 
         const channel = new MessageChannel();
-        const reader = new monaco_languageclient.BrowserMessageReader(channel.port1);
-        const writer = new monaco_languageclient.BrowserMessageWriter(channel.port1);
+        const reader = new BrowserMessageReader(channel.port1);
+        const writer = new BrowserMessageWriter(channel.port1);
         worker.postMessage({ port: channel.port2 }, [channel.port2]);
 
         const languageClient = createLanguageClient({ reader, writer });
