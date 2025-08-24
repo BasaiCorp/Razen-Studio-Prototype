@@ -1,0 +1,138 @@
+{
+  "name": "razen-language",
+  "displayName": "Razen Language",
+  "description": "Syntax highlighting and support for Razen programming language",
+  "icon": "icons/razen-icon.png",
+  "version": "0.4.1",
+  "publisher": "razen-lang",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "main": "./src/extension.js",
+  "activationEvents": [
+    "onLanguage:razen",
+    "onCommand:razen.insertTemplate",
+    "onCommand:razen.runFile",
+    "onCommand:razen.debugFile",
+    "onCommand:razen.testFile"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "razen",
+        "aliases": ["Razen", "razen"],
+        "extensions": [".rzn"],
+        "configuration": "./language-configuration/language-configuration.json",
+        "icon": {
+          "light": "./icons/razen-icon.png",
+          "dark": "./icons/razen-icon.png"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "razen",
+        "scopeName": "source.razen",
+        "path": "./syntaxes/razen.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "razen",
+        "path": "./snippets/razen.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "razen.insertTemplate",
+        "title": "Razen: Insert Template"
+      },
+      {
+        "command": "razen.runFile",
+        "title": "Razen: Run File",
+        "icon": {
+          "light": "./icons/run-light.svg",
+          "dark": "./icons/run-dark.svg"
+        }
+      },
+      {
+        "command": "razen.debugFile",
+        "title": "Razen: Debug File",
+        "icon": {
+          "light": "./icons/debug-light.svg",
+          "dark": "./icons/debug-dark.svg"
+        }
+      },
+      {
+        "command": "razen.testFile",
+        "title": "Razen: Run Tests",
+        "icon": {
+          "light": "./icons/test-light.svg",
+          "dark": "./icons/test-dark.svg"
+        }
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "razen.runFile",
+          "when": "resourceLangId == razen",
+          "group": "navigation@1"
+        },
+        {
+          "command": "razen.debugFile",
+          "when": "resourceLangId == razen",
+          "group": "navigation@2"
+        },
+        {
+          "command": "razen.testFile",
+          "when": "resourceLangId == razen",
+          "group": "navigation@3"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "razen.runFile",
+          "when": "resourceExtname == .rzn",
+          "group": "navigation@1"
+        },
+        {
+          "command": "razen.debugFile",
+          "when": "resourceExtname == .rzn",
+          "group": "navigation@2"
+        },
+        {
+          "command": "razen.testFile",
+          "when": "resourceExtname == .rzn",
+          "group": "navigation@3"
+        }
+      ]
+    }
+  },
+  "keywords": [
+    "razen",
+    "programming language",
+    "syntax highlighting",
+    "autocomplete",
+    "intellisense",
+    "snippets",
+    "rzn"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BasaiCorp/Razen-Lang"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Prathmesh Barot",
+    "email": "prathmeshbarot2009@gmail.com"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^7.0.0",
+    "vscode-languageserver": "^7.0.0",
+    "vscode-languageserver-textdocument": "^1.0.4"
+  }
+}

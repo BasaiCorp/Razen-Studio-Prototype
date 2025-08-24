@@ -1,0 +1,331 @@
+{
+  "name": "Razen",
+  "scopeName": "source.razen",
+  "fileTypes": ["rzn"],
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#document-structure"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#functions"
+    },
+    {
+      "include": "#variables"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#operators"
+    },
+    {
+      "include": "#colored-output"
+    },
+    {
+      "name": "meta.namespace-call.razen",
+      "begin": "\\b([a-zA-Z_][a-zA-Z0-9_]*)(::)([a-zA-Z_][a-zA-Z0-9_]*)\\s*(\\()",
+      "beginCaptures": {
+        "1": { "name": "entity.name.function.definition.razen" },
+        "2": { "name": "keyword.operator.accessor.razen" },
+        "3": { "name": "entity.name.function.library.razen" },
+        "4": { "name": "punctuation.definition.parameters.begin.razen" }
+      },
+      "end": "\\)",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.parameters.end.razen" }
+      },
+      "patterns": [
+        { "include": "#expression" }
+      ]
+    },
+    {
+      "include": "#libraries"
+    },
+    {
+      "include": "#enums"
+    },
+    {
+      "include": "#const-declarations"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.razen",
+          "match": "#.*$"
+        },
+        {
+          "name": "comment.block.razen",
+          "begin": "/\\*",
+          "end": "\\*/",
+          "captures": {
+            "0": { "name": "punctuation.definition.comment.razen" }
+          }
+        }
+      ]
+    },
+    "document-structure": {
+      "patterns": [
+        {
+          "name": "keyword.control.document.razen",
+          "match": "\\b(type)\\s+(web|script|cli)\\b",
+          "captures": {
+            "1": { "name": "storage.type.document.razen" },
+            "2": { "name": "constant.language.document-type.razen" }
+          }
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.razen",
+          "match": "\\b(if|else|elif|while|for|return|break|continue|fun|when|not|and|or|try|catch|throw|finally|in|use|export|as|from|import|class|api|call|get|post|await|connect|to|debug|assert|trace|type|exit|load)\\b"
+        },
+        {
+          "name": "keyword.declaration.razen",
+          "match": "\\b(num|str|bool|var|const|len|list|arr|append|remove|map|key|value|store|box|ref|is)\\b"
+        },
+        {
+          "name": "storage.type.razen",
+          "match": "\\b(enum)\\b"
+        },
+
+        {
+          "name": "keyword.compiler.razen",
+          "match": "\\b(token|lexer|parser|ast|node|visitor|symbol|scope|typesys|ir|codegen|optimize|target|grammar|rule|attribute)\\b"
+        },
+        {
+          "name": "keyword.type.razen",
+          "match": "\\b(inline|final|volatile)\\b"
+        },
+        {
+          "name": "constant.language.razen",
+          "match": "\\b(true|false|null)\\b"
+        }
+      ]
+    },
+    "functions": {
+      "patterns": [
+        {
+          "name": "entity.name.function.razen",
+          "match": "\\b(plus|minus|times|by|mod|power|round|sqrt|abs|size|join|big|small|split|replace|trim|find|count|add|take|clear|sort|reverse|keys|values|contains|remove|get|time|date|timestamp|sleep|say|ask|write|read_file|exists|is_file|is_dir|create_dir|read_file|write_file|list_dir|metadata|absolute_path|copy|move|extension|file_stem|parent_dir|join_path|change_dir|current_dir|temp_file|temp_dir)\\b"
+        },
+        {
+          "name": "entity.name.function.definition.razen",
+          "match": "\\b(fun)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(",
+          "captures": {
+            "1": { "name": "keyword.control.function.razen" },
+            "2": { "name": "entity.name.function.razen" }
+          }
+        },
+        {
+          "name": "meta.function-call.razen",
+          "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(",
+          "captures": {
+            "1": { "name": "entity.name.function.razen" }
+          }
+        },
+        {
+          "name": "meta.library-call.razen",
+          "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\[(.*?)\\]\\s*\\(",
+          "captures": {
+            "1": { "name": "entity.name.class.razen" },
+            "2": { "name": "entity.name.function.razen" }
+          }
+        }
+      ]
+    },
+    "variables": {
+      "patterns": [
+        {
+          "name": "storage.type.razen",
+          "match": "\\b(num|str|bool|var|const|power|is|len|split|trim|replace|find|list|arr|append|remove|size|clear|map|key|value|get|set|contains|keys|values|store|box|ref|show|read|write|read_file)\\b"
+        },
+        {
+          "name": "variable.declaration.razen",
+          "match": "\\b(num|str|bool|var|const)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\b",
+          "captures": {
+            "1": { "name": "storage.type.razen" },
+            "2": { "name": "variable.other.definition.razen" }
+          }
+        },
+        {
+          "name": "keyword.control.import.razen",
+          "match": "\\b(lib)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*;",
+          "captures": {
+            "1": { "name": "keyword.control.import.razen" },
+            "2": { "name": "entity.name.class.razen" }
+          }
+        },
+        {
+          "name": "variable.other.razen",
+          "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.razen",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.razen",
+              "match": "\\\\([\\\\\"\\'nrtbf]|u[0-9a-fA-F]{4})"
+            },
+            {
+              "name": "variable.interpolation.razen",
+              "match": "\\$\\{([^\\}]*)\\}",
+              "captures": {
+                "1": { "patterns": [{ "include": "$self" }] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.razen",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.razen",
+              "match": "\\\\([\\\\\"\\'nrtbf]|u[0-9a-fA-F]{4})"
+            }
+          ]
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.decimal.razen",
+          "match": "\\b([0-9]+\\.[0-9]+)\\b"
+        },
+        {
+          "name": "constant.numeric.integer.razen",
+          "match": "\\b([0-9]+)\\b"
+        },
+        {
+          "name": "constant.numeric.hex.razen",
+          "match": "\\b0x[0-9a-fA-F]+\\b"
+        },
+        {
+          "name": "constant.numeric.binary.razen",
+          "match": "\\b0b[01]+\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.arithmetic.razen",
+          "match": "\\+|\\-|\\*|\\/|%|\\*\\*|\\/\\/"
+        },
+        {
+          "name": "keyword.operator.assignment.razen",
+          "match": "\\=|\\+=|\\-=|\\*=|\\/=|\\%="
+        },
+        {
+          "name": "keyword.operator.comparison.razen",
+          "match": "\\==|\\!=|\\>|\\<|\\>=|\\<="
+        },
+        {
+          "name": "keyword.operator.logical.razen",
+          "match": "\\&\\&|\\|\\||\\!"
+        },
+        {
+          "name": "keyword.operator.accessor.razen",
+          "match": "\\."
+        },
+        {
+          "name": "keyword.operator.namespace.razen",
+          "match": "::"
+        },
+        {
+          "name": "keyword.operator.bitwise.razen",
+          "match": "\\^|&|\\||~|<<|>>"
+        },
+        {
+          "name": "keyword.operator.other.razen",
+          "match": "\\?|:|=>"
+        }
+      ]
+    },
+    "colored-output": {
+      "patterns": [
+        {
+          "name": "meta.colored-output.razen",
+          "match": "\\b(show)\\s*\\((red|green|blue|yellow|magenta|cyan|white|bright_red|bright_green|bright_blue|bright_yellow|bright_magenta|bright_cyan|bright_white)\\)\\s*",
+          "captures": {
+            "1": { "name": "storage.type.razen" },
+            "2": { "name": "support.constant.color.razen" }
+          }
+        }
+      ]
+    },
+    "libraries": {
+      "patterns": [
+        {
+          "name": "entity.name.class.library.razen",
+          "match": "\\b(ArrLib|arrlib|StrLib|strlib|MathLib|mathlib|TimeLib|timelib|Random|random|File|file|Filesystem|filesystem|ApiLib|apilib|Json|json|Bolt|bolt|Seed|seed|MemoryLib|memorylib|BinaryLib|binarylib|BitwiseLib|bitwiselib|SystemLib|systemlib|ProcessLib|processlib|ThreadLib|threadlib|CompilerLib|compilerlib|LexerLib|lexerlib|ParserLib|parserlib|AstLib|astlib|SymbolLib|symbollib|TypeLib|typelib|IrLib|irlib|CodegenLib|codegenlib|OptimizeLib|optimizelib|Color|color|Crypto|crypto|Regex|regex|Uuid|uuid|Os|os|Validation|validation|System|system|BoxLib|boxlib|LogLib|loglib|HtLib|htlib|Audio|audio|Image|image|Date|date|NetLib|netlib)\\b"
+        },
+        {
+          "name": "entity.name.function.library.razen",
+          "match": "\\b(abs|add|add_child|add_days|add_months|add_offset|add_symbol|add_years|addressof|alloc|analyze|and|append|apply|args|absolute_path|bool_tos|buffer_copy|buffer_read_string|buffer_write_string|bytes_to_string|call|ceil|change_dir|check_type|choice|close|coin|compile|contains|copy|cos|count_bits|cpu_count|create|create_api|create_buffer|create_dir|create_generator|create_grammar|create_instruction|create_lexer|create_node|create_parser|create_pass|create_pipeline|create_symbol_table|create_type_system|create_visitor|crop|current|current_dir|current_time|darken|day|debuglog|decrypt|define_node_type|define_rule|define_symbol|define_target|define_token|define_type|delete|deref|diff_days|divide|days_in_month|email|emit_code|encrypt|ends_with|env|environ|errorlog|exec|execute|execute_api|exists|exp|extension|file_stem|filter|float|floor|form_data|format|free|free_buffer|from_binary|from_hex|generate|generate_assembly|generate_ir|get|get_ansi_color|get_bit|getcwd|getenv|getpid|hash|hex_to_rgb|hostname|infolog|int|infer_type|is_box|is_client_error|is_dir|is_file|is_leap_year|is_running|is_server_error|is_success|is_valid|join|join_path|kill|length|left_shift|lighten|list_dir|load|log|lookup_symbol|lower|map|map_seed|match|max|metadata|min|min_length|modulo|month|move|multiply|mutex_create|mutex_destroy|mutex_lock|mutex_unlock|name|node_to_string|noise_map|not|now|open|optimize|optimize_ir|or|parallel|parent_dir|parse|parse_json|patch|path_exists|pause|phone|ping|platform|play|pop|post|power|push|put|putmethod|read|read_byte|read_bytes|read_file|read_stderr|read_stdout|realpath|record|remove|repeat|replace|required|resize|rgb_to_hex|right_shift|round|run|save|search|seek|set_bit|setenv|shuffle|signal|sin|sleep|split|sqrt|starts_with|stats|stop|string_to_bytes|stringify|subtract|substring|system_name|tan|tell|temp_dir|temp_file|thread_count|thread_id|threads|to_binary|to_hex|to_json|to_string|tokenize|traverse|trim|unique|unsigned_right_shift|upper|uptime|url_decode|url_encode|username|wait|warnlog|weekday|weekday_name|write|write_byte|write_bytes|write_file|write_stdin|xor|year)\\b"
+        }
+      ]
+    },
+    "enums": {
+      "patterns": [
+        {
+          "name": "entity.name.type.enum.razen",
+          "match": "\\b(enum)\\s+([A-Za-z_][A-Za-z0-9_]*)\\s*\\{",
+          "captures": {
+            "1": { "name": "storage.type.enum.razen" },
+            "2": { "name": "entity.name.type.enum.razen" }
+          }
+        },
+        {
+          "name": "constant.other.enum.razen",
+          "match": "\\b([A-Z][A-Z0-9_]*)\\s*(?:=\\s*([0-9]+))?\\s*(?:,|$)",
+          "captures": {
+            "1": { "name": "constant.other.enum.razen" },
+            "2": { "name": "constant.numeric.integer.razen" }
+          }
+        },
+        {
+          "name": "meta.enum-access.razen",
+          "match": "\\b([A-Za-z_][A-Za-z0-9_]*)\\s*\\[\\s*([A-Z][A-Z0-9_]*)\\s*\\]",
+          "captures": {
+            "1": { "name": "entity.name.type.enum.razen" },
+            "2": { "name": "constant.other.enum.razen" }
+          }
+        }
+      ]
+    },
+    "const-declarations": {
+      "patterns": [
+        {
+          "name": "meta.const-declaration.razen",
+          "match": "\\b(const)\\s+([A-Za-z_][A-Za-z0-9_]*)\\s*=",
+          "captures": {
+            "1": { "name": "storage.type.const.razen" },
+            "2": { "name": "variable.other.constant.razen" }
+          }
+        }
+      ]
+    }
+  }
+}
