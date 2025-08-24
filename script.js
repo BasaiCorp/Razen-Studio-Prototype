@@ -661,13 +661,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Monaco Editor Initialization ---
     require.config({ paths: { vs: 'monaco/package/min/vs' } });
     require(['vs/editor/editor.main'], function () {
+        const { MonacoLanguageClient, CloseAction, ErrorAction, MonacoServices } = monaco_languageclient;
+
+        const languageId = 'razen';
         registerRazenLanguage();
+
+        // Instantiate Monaco Language Client Services
+        MonacoServices.install();
+
+        // Create the web worker
+        const worker = new Worker('languages/razen/razen-worker.js', { type: 'module' });
+
+        const channel = new MessageChannel();
+        const reader = new monaco_languageclient.BrowserMessageReader(channel.port1);
+        const writer = new monaco_languageclient.BrowserMessageWriter(channel.port1);
+        worker.postMessage({ port: channel.port2 }, [channel.port2]);
+
+        const languageClient = createLanguageClient({ reader, writer });
+        languageClient.start();
 
         const savedFont = localStorage.getItem('editorFont') || 'Google Sans Code';
 
         editor = monaco.editor.create(document.getElementById('editor'), {
             value: `// Welcome to Razen Studio\n// Open a file from the sidebar to start editing.`,
-            language: 'plaintext',
+            language: languageId, // Use the language ID
             theme: document.body.classList.contains('light-theme') ? 'razen-light' : 'razen-dark',
             fontFamily: savedFont,
             automaticLayout: true,
@@ -677,6 +694,24 @@ document.addEventListener('DOMContentLoaded', () => {
             folding: true,
             bracketPairColorization: { enabled: true },
         });
+
+        function createLanguageClient(transports) {
+            return new MonacoLanguageClient({
+                name: 'Razen Language Client',
+                clientOptions: {
+                    documentSelector: [languageId],
+                    errorHandler: {
+                        error: () => ({ action: ErrorAction.Continue }),
+                        closed: () => ({ action: CloseAction.DoNotRestart })
+                    }
+                },
+                connectionProvider: {
+                    get: () => {
+                        return Promise.resolve(transports);
+                    }
+                }
+            });
+        }
 
         editor.onDidChangeModelContent(async () => {
             if (activeFilePath && currentProject) {
