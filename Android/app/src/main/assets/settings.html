@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Mozilla+Text:wght@200..700&family=Nata+Sans:wght@100..900&family=Outfit:wght@100..900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Rubik:ital,wght@0,300..900;1,300..900&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="icons/css/all.css" />
 </head>
 <body>
     <div class="container">
@@ -17,7 +17,7 @@
         <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <h3>Settings</h3> <!-- Changed title -->
-                <button id="sidebar-close-btn" class="btn"><i class="fas fa-times"></i></button>
+                <button id="sidebar-close-btn" class="btn close-btn"><i class="fas fa-times"></i></button>
             </div>
             <!-- Settings Navigation moved to Sidebar -->
             <nav class="settings-sidebar-nav">
@@ -32,8 +32,8 @@
             <!-- Version Info Section - Same as index.html -->
             <div class="sidebar-version">
                 <div class="sv">
-                    <p class="version-text">Beta-3 v1.2.0</p>
-                    <p class="update-text">UX Enhancements!</p>
+                    <p class="version-text">Beta-2 v1.2.1</p>
+                    <p class="update-text">Razen Update!</p>
                 </div>
                 <!-- Action Buttons -->
                 <div class="sidebar-actions">
@@ -142,14 +142,26 @@ greeter.greet()
 
         <div id="version-content">
             <h2>Version</h2>
-            <p>Current Version: <strong>Beta-3 v1.2.0</strong></p>
-            <p>VersionName: <code>v1.2.0-beta.3</code></p>
-            <p>VersionCode: <code>1020003</code></p>
+            <p>Current Version: <strong>Beta-2 v1.2.1</strong></p>
+            <p>VersionName: <code>v1.2.1-beta.2</code></p>
+            <p>VersionCode: <code>1020102</code></p>
             <p>Status: <span class="status-beta">Beta</span></p>
         </div>
 
         <div id="changelogs-content">
             <h2>Changelogs</h2>
+            <ul>
+                <h3>v1.2.1-beta.2 -- Razen Language Support!</h3>
+                <li>Updated: Added more good Tazen Lang Support in Syntax Highlights!</li>
+            </ul>
+            <ul>
+                <h3>v1.2.1-beta.1 -- Fonts Update & Razen Language Support!</h3>
+                <li>Added: Fonts Switcher with live preview for fonts in the settings page.</li>
+                <li>Fixed: Project Path overflow from card.</li>
+                <li>Improved: Added 6 fonts with Google Sans Code as default font.</li>
+                <li>Fixed: Overall UX is much better than before.</li>
+                <li>Added: Razen Lang Support - now provides proper syntax highlighting.</li>
+            </ul>
             <ul>
                 <h3>v1.2.0-beta.3 -- UX Enhancements!</h3>
                 <li>Fixed UX and keyboard syncing issue in the toolbar.</li>
@@ -183,6 +195,7 @@ greeter.greet()
                 <li>Integrated basic syntax highlighting</li>
             </ul>
         </div>
+
 
         <div id="license-content">
             <h2>License</h2>
