@@ -63,7 +63,8 @@ function registerRazenLanguage() {
 
     monaco.languages.setLanguageConfiguration('razen', {
         comments: {
-            lineComment: '#',
+            lineComment: '//',
+            blockComment: ['/*', '*/']
         },
         brackets: [
             ['{', '}'],
@@ -88,13 +89,13 @@ function registerRazenLanguage() {
 
     monaco.languages.setMonarchTokensProvider('razen', {
         keywords: [
-            'var', 'const', 'if', 'else', 'while', 'for', 'is', 'when', 'not',
-            'append', 'remove', 'key', 'value', 'store', 'box', 'ref', 'show',
-            'read', 'fun', 'async', 'await', 'class', 'return', 'continue', 'break', 'import',
-            'export', 'use', 'from', 'to', 'lib', 'true', 'false', 'null', 'struct', 'match', 'in'
+            'as', 'break', 'catch', 'close', 'const', 'continue', 'elif', 'else', 'enum', 'false',
+            'for', 'from', 'fun', 'if', 'in', 'input', 'match', 'mod', 'null', 'open', 'print',
+            'println', 'pub', 'read', 'return', 'sizeof', 'struct', 'throw', 'true', 'try',
+            'typeof', 'use', 'var', 'while', 'write'
         ],
         typeKeywords: [
-            'num', 'str', 'bool', 'map', 'list', 'arr', 'obj', 'tuple', 'int', 'float'
+            'int', 'str', 'bool', 'char', 'array', 'map', 'any'
         ],
         readTypeKeywords: [
             'num', 'str', 'int', 'float'
@@ -104,9 +105,8 @@ function registerRazenLanguage() {
             'light_cyan', 'light_red', 'light_yellow', 'light_green', 'light_blue', 'light_magenta', 'light_white'
         ],
         operators: [
-            '=', '>', '<', '!', '~', '?', ':', '==', '<=', '>=', '!=',
-            '&&', '||', '++', '--', '+', '-', '*', '/', '&', '|', '^', '%',
-            '->', '=>'
+            '+', '-', '*', '/', '%', '**', '=', '+=', '-=', '*=', '/=', '%=', '==', '!=', '>', '>=', '<', '<=',
+            '&&', '||', '!', '&', '|', '^', '~', '<<', '>>', '++', '--', '?', '??', '..', '...', '->', '=>', ':'
         ],
         stdLibNames: stdLibNames,
         stdLibFunctions: stdLibFunctions,
@@ -115,7 +115,8 @@ function registerRazenLanguage() {
 
         tokenizer: {
             root: [
-                [/#.*$/, 'comment'],
+                [/\/\/.*$/, 'comment'],
+                [/\/\*/, 'comment', '@comment'],
                 [/[ \t\r\n]+/, ''],
 
                 // f-string
@@ -132,8 +133,12 @@ function registerRazenLanguage() {
 
                 [/\d*\.\d+([eE][-+]?\d+)?/, 'number.float'],
                 [/0[xX][0-9a-fA-F]+/, 'number.hex'],
+                [/0[bB][01]+/, 'number.binary'],
+                [/0[oO][0-7]+/, 'number.octal'],
                 [/\d+/, 'number'],
 
+                [/r"/, { token: 'string.quote', next: '@raw_string' }],
+                [/"""/, { token: 'string.quote', next: '@multiline_string' }],
                 [/"([^"\\]|\\.)*$/, 'string.invalid'],
                 [/"/, { token: 'string.quote', bracket: '@open', next: '@string' }],
                 [/'[^\\']'/, 'string.char'],
@@ -151,6 +156,8 @@ function registerRazenLanguage() {
                         '@default': 'entity.name.function'
                     }
                 }],
+
+                [/@\w*/, 'annotation'],
 
                 // Keywords and identifiers
                 [/[a-zA-Z_]\w*/, {
@@ -174,6 +181,11 @@ function registerRazenLanguage() {
                 }],
                 [/[;,.]/, 'delimiter'],
             ],
+            comment: [
+                [/[^/*]+/, 'comment'],
+                [/\*\//, 'comment', '@pop'],
+                [/[/*]/, 'comment']
+            ],
             string: [
                 [/[^\\"]+/, 'string'],
                 [/@escapes/, 'string.escape'],
@@ -188,6 +200,14 @@ function registerRazenLanguage() {
             f_string_expression: [
                 [/}/, { token: 'delimiter.curly', next: '@pop' }],
                 { include: 'root' }
+            ],
+            raw_string: [
+                [/[^"]+/, 'string'],
+                [/"/, { token: 'string.quote', next: '@pop' }]
+            ],
+            multiline_string: [
+                [/[^"]+/, 'string'],
+                [/"""/, { token: 'string.quote', next: '@pop' }]
             ],
             handle_type_annotation_colon: [
                 [/:/, { token: 'operator', next: '@type_annotation' }],
@@ -295,6 +315,7 @@ function registerRazenLanguage() {
         base: 'vs-dark',
         inherit: true,
         rules: [
+            { token: 'annotation', foreground: '3CB371' },
             { token: 'comment', foreground: '608b4e' },
             { token: 'entity.name.library', foreground: '98C379' },
             { token: 'entity.name.function', foreground: 'FFF59D' },
@@ -316,6 +337,7 @@ function registerRazenLanguage() {
         base: 'vs',
         inherit: true,
         rules: [
+            { token: 'annotation', foreground: '2E8B57' },
             { token: 'comment', foreground: '6a737d' },
             { token: 'entity.name.library', foreground: '2e8b57' },
             { token: 'entity.name.function', foreground: 'FFD54F' },
